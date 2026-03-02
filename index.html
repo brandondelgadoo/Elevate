@@ -1,30 +1,107 @@
 <!doctype html>
 <html lang="en">
+
 <head>
-  <title>Elevated</title>
+  <title>Elevated | Community Skill Sharing</title>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  
-  <!-- Main Stylesheet -->
+
+  <!-- SEO Meta -->
+  <meta name="description"
+    content="Elevated is a community skill-sharing platform where people teach and learn from each other.">
+
+  <!-- Styles -->
   <link rel="stylesheet" href="styles.css">
 </head>
 
 <body>
 
-  <header>
-    <h1>Elevated</h1>
-  </header>
+  <!-- ================= NAVIGATION ================= -->
+  <div class="navbar">
+    
+    <h1 class="logo">Elevated 🌎</h1>
 
-  <main>
-    <!-- Main content will go here -->
-  </main>
+    <nav>
+      <ul class="nav-links">
+        <li><a href="#">Explore</a></li>
+        <li><a href="#">Teach</a></li>
+        <li><a href="#">About</a></li>
+        <li><a href="#" class="btn-primary">Login</a></li>
+      </ul>
+    </nav>
 
+  </div>
+
+
+  <!-- ================= HERO SECTION ================= -->
+  <div class="hero-container">
+    <h2>Learn Something New. Teach What You Know.</h2>
+    <p>Connect with your community through real skills and real experiences.</p>
+    <button class="btn-primary">Get Started</button>
+  </div>
+
+
+  <!-- ================= SEARCH & FILTER ================= -->
+  <div class="search-container">
+    <input type="text" placeholder="Search skills..." id="searchInput">
+    <select id="categoryFilter">
+      <option value="">All Categories</option>
+      <option value="tech">Technology</option>
+      <option value="fitness">Fitness</option>
+      <option value="music">Music</option>
+      <option value="art">Art</option>
+    </select>
+    <button id="searchBtn">Search</button>
+  </div>
+
+
+  <!-- ================= SKILL LISTINGS ================= -->
+  <div class="listings-container">
+    <h3>Featured Skills</h3>
+
+    <div class="card-grid" id="skillsContainer">
+      <!-- Skill cards will be inserted here dynamically with JS later -->
+
+      <!-- Example Static Card -->
+      <div class="skill-card">
+        <h4>Intro to Web Development</h4>
+        <p>Learn HTML, CSS, and JavaScript fundamentals.</p>
+        <span class="category-tag">Technology</span>
+      </div>
+
+    </div>
+  </div>
+
+
+  <!-- ================= CREATE SKILL MODAL ================= -->
+  <div class="create-skill" id="createSkillSection">
+    <h3>Share a Skill</h3>
+    <form id="createSkillForm">
+      <input type="text" placeholder="Skill Title" required>
+      <textarea placeholder="Skill Description" required></textarea>
+      <select required>
+        <option value="">Select Category</option>
+        <option value="tech">Technology</option>
+        <option value="fitness">Fitness</option>
+        <option value="music">Music</option>
+        <option value="art">Art</option>
+      </select>
+      <button type="submit" class="btn-primary">Post Skill</button>
+    </form>
+  </div>
+
+
+  <!-- ================= FOOTER ================= -->
   <footer>
-    <p>&copy; 2026 Elevated</p>
+    <div class="footer-container">
+      <p>&copy; 2026 Elevated. All rights reserved.</p>
+    </div>
   </footer>
 
-  <!-- Main JavaScript File -->
+
+  <!-- ================= JAVASCRIPT ================= -->
   <script src="app.js" defer></script>
 
 </body>
+
 </html>
