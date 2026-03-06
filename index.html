@@ -12,91 +12,202 @@
 
   <!-- Styles -->
   <link rel="stylesheet" href="styles.css">
+
+  <!-- Inline Dark Theme -->
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background-color: #0a1628;
+      color: #ffffff;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      min-height: 100vh;
+    }
+
+    /* Navbar */
+    .navbar {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 18px 40px; background-color: #0d1b2a;
+      border-bottom: 1px solid #1b2d45; position: sticky; top: 0; z-index: 100;
+    }
+    .logo { font-size: 1.5rem; color: #fff; font-weight: 700; }
+    .nav-links { list-style: none; display: flex; gap: 28px; align-items: center; }
+    .nav-links a { text-decoration: none; color: #ffffff; font-size: 0.95rem; transition: color .2s; }
+    .nav-links a:hover { color: #f0f8ff; }
+
+    /* Buttons */
+    .btn-primary {
+      background-color: #6c63ff; color: #fff; border: none;
+      padding: 10px 22px; border-radius: 8px; font-size: 0.9rem;
+      font-weight: 600; cursor: pointer; text-decoration: none;
+      transition: background-color .2s, transform .1s;
+    }
+    .btn-primary:hover { background-color: #574fd6; transform: translateY(-1px); }
+
+    /* Hero */
+    .hero-container {
+      text-align: center; padding: 90px 20px;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+      border-bottom: 1px solid #2a2a2a;
+    }
+    .hero-container h2 { font-size: 2.6rem; color: #fff; margin-bottom: 16px; line-height: 1.3; }
+    .hero-container p { font-size: 1.1rem; color: #a0a0b0; margin-bottom: 32px; }
+
+    /* Search */
+    .search-container {
+      display: flex; justify-content: center; gap: 12px;
+      padding: 32px 20px; background-color: #111; border-bottom: 1px solid #2a2a2a; flex-wrap: wrap;
+    }
+    .search-container input, .search-container select {
+      background-color: #1e1e1e; color: #e0e0e0; border: 1px solid #333;
+      border-radius: 8px; padding: 10px 16px; font-size: 0.95rem;
+      outline: none; min-width: 200px; transition: border-color .2s;
+    }
+    .search-container input::placeholder { color: #666; }
+    .search-container input:focus, .search-container select:focus { border-color: #6c63ff; }
+    .search-container select option { background-color: #1e1e1e; }
+    #searchBtn {
+      background-color: #6c63ff; color: #fff; border: none;
+      padding: 10px 24px; border-radius: 8px; font-size: 0.95rem;
+      font-weight: 600; cursor: pointer; transition: background-color .2s;
+    }
+    #searchBtn:hover { background-color: #574fd6; }
+
+    /* Listings */
+    .listings-container { max-width: 1100px; margin: 0 auto; padding: 48px 24px; }
+    .listings-container h3 { font-size: 1.5rem; color: #fff; margin-bottom: 28px; font-weight: 600; }
+    .card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
+
+    .skill-card {
+      background-color: #1a1a1a; border: 1px solid #2a2a2a;
+      border-radius: 12px; padding: 24px; transition: border-color .2s, transform .2s;
+    }
+    .skill-card:hover { border-color: #6c63ff; transform: translateY(-3px); }
+    .skill-card h4 { font-size: 1.05rem; color: #fff; margin-bottom: 10px; }
+    .skill-card p { font-size: 0.9rem; color: #888; margin-bottom: 14px; line-height: 1.5; }
+    .category-tag {
+      background-color: #2a2a3e; color: #9d96ff; font-size: 0.78rem;
+      font-weight: 600; padding: 4px 12px; border-radius: 20px; display: inline-block;
+    }
+
+    /* Create Skill */
+    .create-skill { max-width: 600px; margin: 0 auto; padding: 48px 24px; }
+    .create-skill h3 { font-size: 1.5rem; color: #fff; margin-bottom: 24px; font-weight: 600; }
+    #createSkillForm {
+      display: flex; flex-direction: column; gap: 14px;
+      background-color: #1a1a1a; border: 1px solid #2a2a2a;
+      border-radius: 12px; padding: 28px;
+    }
+    #createSkillForm input, #createSkillForm textarea, #createSkillForm select {
+      background-color: #111; color: #e0e0e0; border: 1px solid #333;
+      border-radius: 8px; padding: 10px 14px; font-size: 0.95rem;
+      outline: none; font-family: inherit; transition: border-color .2s;
+    }
+    #createSkillForm input::placeholder, #createSkillForm textarea::placeholder { color: #555; }
+    #createSkillForm input:focus, #createSkillForm textarea:focus, #createSkillForm select:focus { border-color: #6c63ff; }
+    #createSkillForm textarea { resize: vertical; min-height: 100px; }
+    #createSkillForm select option { background-color: #111; }
+
+    /* Cloud Text */
+    .cloud-text {
+      font-size: 4rem;
+      font-weight: 900;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: #ffffff;
+      text-shadow:
+        0 0 10px rgba(255, 255, 255, 0.3),
+        0 0 20px rgba(108, 99, 255, 0.2),
+        3px 3px 0 #3a3a6e,
+        6px 6px 0 #2a2a4e;
+      paint-order: stroke fill;
+      -webkit-text-stroke: 1.5px rgba(108, 99, 255, 0.5);
+      filter: url(#cloud-filter);
+      margin-bottom: 20px;
+      line-height: 1.2;
+      display: inline-block;
+    }
+    .cloud-text span {
+      display: inline-block;
+      animation: float 3s ease-in-out infinite;
+    }
+    .cloud-text span:nth-child(2) { animation-delay: 0.1s; }
+    .cloud-text span:nth-child(3) { animation-delay: 0.2s; }
+    .cloud-text span:nth-child(4) { animation-delay: 0.3s; }
+    .cloud-text span:nth-child(5) { animation-delay: 0.4s; }
+    .cloud-text span:nth-child(6) { animation-delay: 0.5s; }
+    .cloud-text span:nth-child(7) { animation-delay: 0.6s; }
+    .cloud-text span:nth-child(8) { animation-delay: 0.7s; }
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-6px); }
+    }
+
+    /* Footer */
+    footer {
+      background-color: #070f1a; border-top: 1px solid #1b2d45;
+      padding: 24px 40px; text-align: center; color: #4a6fa5; font-size: 0.85rem;
+    }
+
+    /* Hero Background Title */
+    .hero-bg {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      background: linear-gradient(180deg, #0d1b2a 0%, #1b2d45 50%, #162447 100%);
+      position: relative;
+      overflow: hidden;
+    }
+    .hero-bg::before {
+      content: '';
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      width: 600px; height: 600px;
+      background: radial-gradient(circle, rgba(30,60,114,0.3) 0%, transparent 70%);
+      border-radius: 50%;
+      pointer-events: none;
+    }
+    .hero-title {
+      font-size: 7rem;
+      font-weight: 900;
+      letter-spacing: 18px;
+      text-transform: uppercase;
+      color: #ffffff;
+      text-align: center;
+      position: relative;
+      z-index: 1;
+      background: linear-gradient(180deg, #ffffff 0%, #f0f8ff 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      text-shadow: none;
+      line-height: 1;
+      margin-bottom: 20px;
+    }
+    .hero-subtitle {
+      font-size: 1.2rem;
+      letter-spacing: 6px;
+      text-transform: uppercase;
+      color: #ffffff;
+      position: relative;
+      z-index: 1;
+      font-weight: 400;
+    }
+    @media (max-width: 768px) {
+      .hero-title { font-size: 3.5rem; letter-spacing: 10px; }
+      .hero-subtitle { font-size: 0.9rem; letter-spacing: 4px; }
+    }
+  </style>
 </head>
 
 <body>
 
-  <!-- ================= NAVIGATION ================= -->
-  <div class="navbar">
-    
-    <h1 class="logo">Elevated 🌎</h1>
-
-    <nav>
-      <ul class="nav-links">
-        <li><a href="#">Explore</a></li>
-        <li><a href="#">Teach</a></li>
-        <li><a href="#">About</a></li>
-        <li><a href="#" class="btn-primary">Login</a></li>
-      </ul>
-    </nav>
-
+  <!-- ================= HERO / TITLE BACKGROUND ================= -->
+  <div class="hero-bg">
   </div>
-
-
-  <!-- ================= HERO SECTION ================= -->
-  <div class="hero-container">
-    <h2>Learn Something New. Teach What You Know.</h2>
-    <p>Connect with your community through real skills and real experiences.</p>
-    <button class="btn-primary">Get Started</button>
-  </div>
-
-
-  <!-- ================= SEARCH & FILTER ================= -->
-  <div class="search-container">
-    <input type="text" placeholder="Search skills..." id="searchInput">
-    <select id="categoryFilter">
-      <option value="">All Categories</option>
-      <option value="tech">Technology</option>
-      <option value="fitness">Fitness</option>
-      <option value="music">Music</option>
-      <option value="art">Art</option>
-    </select>
-    <button id="searchBtn">Search</button>
-  </div>
-
-
-  <!-- ================= SKILL LISTINGS ================= -->
-  <div class="listings-container">
-    <h3>Featured Skills</h3>
-
-    <div class="card-grid" id="skillsContainer">
-      <!-- Skill cards will be inserted here dynamically with JS later -->
-
-      <!-- Example Static Card -->
-      <div class="skill-card">
-        <h4>Intro to Web Development</h4>
-        <p>Learn HTML, CSS, and JavaScript fundamentals.</p>
-        <span class="category-tag">Technology</span>
-      </div>
-
-    </div>
-  </div>
-
-
-  <!-- ================= CREATE SKILL MODAL ================= -->
-  <div class="create-skill" id="createSkillSection">
-    <h3>Share a Skill</h3>
-    <form id="createSkillForm">
-      <input type="text" placeholder="Skill Title" required>
-      <textarea placeholder="Skill Description" required></textarea>
-      <select required>
-        <option value="">Select Category</option>
-        <option value="tech">Technology</option>
-        <option value="fitness">Fitness</option>
-        <option value="music">Music</option>
-        <option value="art">Art</option>
-      </select>
-      <button type="submit" class="btn-primary">Post Skill</button>
-    </form>
-  </div>
-
-
-  <!-- ================= FOOTER ================= -->
-  <footer>
-    <div class="footer-container">
-      <p>&copy; 2026 Elevated. All rights reserved.</p>
-    </div>
-  </footer>
 
 
   <!-- ================= JAVASCRIPT ================= -->
