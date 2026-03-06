@@ -4,7 +4,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   navbarMount.innerHTML = `
     <div class="navbar">
-      <h1 class="logo">Elevate</h1>
+      <h1 class="logo"><a href="index.html">Elevate 🌎</a></h1>
       <nav>
         <ul class="nav-links">
           <li><a href="about.html">About</a></li>
