@@ -30,7 +30,15 @@ document.addEventListener("DOMContentLoaded", () => {
           </label>
           <label class="teach-form-field" for="skill-category">
             <span>Category</span>
-            <input type="text" id="skill-category" name="category" placeholder="Communication" required>
+            <select id="skill-category" name="category" required>
+              <option value="">Select a category</option>
+              <option value="Communication">Communication</option>
+              <option value="Technology">Technology</option>
+              <option value="Business">Business</option>
+              <option value="Design">Design</option>
+              <option value="Health and Wellness">Health and Wellness</option>
+              <option value="Personal Development">Personal Development</option>
+            </select>
             <span class="teach-form-message" id="category-error"></span>
           </label>
           <label class="teach-form-field" for="skill-description">
@@ -64,12 +72,20 @@ document.addEventListener("DOMContentLoaded", () => {
         event.preventDefault();
         const title = document.getElementById("skill-title").value.trim();
         const instructor = document.getElementById("skill-instructor").value.trim();
-        const category = document.getElementById("skill-category").value.trim();
+        const category = document.getElementById("skill-category").value;
         const description = document.getElementById("skill-description").value.trim();
         const titleError = document.getElementById("title-error");
         const instructorError = document.getElementById("instructor-error");
         const categoryError = document.getElementById("category-error");
         const descriptionError = document.getElementById("description-error");
+        const allowedCategories = [
+          "Communication",
+          "Technology",
+          "Business",
+          "Design",
+          "Health and Wellness",
+          "Personal Development"
+        ];
 
         titleError.textContent = "";
         instructorError.textContent = "";
@@ -95,7 +111,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
         // Basic validation checks for category field with error messages
         if (!category) {
-          categoryError.textContent = "Please enter a category.";
+          categoryError.textContent = "Please select a category.";
+          hasErrors = true;
+        } else if (!allowedCategories.includes(category)) {
+          categoryError.textContent = "Please choose one of the available categories.";
           hasErrors = true;
         }
 
