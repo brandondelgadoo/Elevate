@@ -54,15 +54,33 @@ document.addEventListener("DOMContentLoaded", () => {
     // After rendering the section, grab the elements we need for the form and test button
     const toggleButton = document.getElementById("teach-test-toggle");
     const teachForm = document.getElementById("teach-form");
+    const formMessage = document.getElementById("teach-form-message");
     const postAnotherButton = document.getElementById("post-another-skill");
 
-    if (teachForm) {
+    if (teachForm && formMessage) {
       teachForm.addEventListener("submit", (event) => {
         event.preventDefault();
-        const title = document.getElementById("skill-title").value;
-        const instructor = document.getElementById("skill-instructor").value;
-        const category = document.getElementById("skill-category").value;
-        const description = document.getElementById("skill-description").value;
+        const title = document.getElementById("skill-title").value.trim();
+        const instructor = document.getElementById("skill-instructor").value.trim();
+        const category = document.getElementById("skill-category").value.trim();
+        const description = document.getElementById("skill-description").value.trim();
+
+        formMessage.textContent = "";
+
+        if (!title || !instructor || !category || !description) {
+          formMessage.textContent = "Please complete every field before posting your skill.";
+          return;
+        }
+
+        if (title.length < 5) {
+          formMessage.textContent = "Please enter a title that is at least 5 characters long.";
+          return;
+        }
+
+        if (description.length < 20) {
+          formMessage.textContent = "Please enter a description that is at least 20 characters long.";
+          return;
+        }
 
         console.log("New skill posted:", { title, instructor, category, description });
 
