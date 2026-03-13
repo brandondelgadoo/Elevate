@@ -21,25 +21,28 @@ document.addEventListener("DOMContentLoaded", () => {
           <label class="teach-form-field" for="skill-title">
             <span>Title</span>
             <input type="text" id="skill-title" name="title" placeholder="Intro to Public Speaking" required>
+            <span class="teach-form-message" id="title-error"></span>
           </label>
           <label class="teach-form-field" for="skill-instructor">
             <span>Instructor / Offered By</span>
             <input type="text" id="skill-instructor" name="instructor" placeholder="Brandon Delgado" required>
+            <span class="teach-form-message" id="instructor-error"></span>
           </label>
           <label class="teach-form-field" for="skill-category">
             <span>Category</span>
             <input type="text" id="skill-category" name="category" placeholder="Communication" required>
+            <span class="teach-form-message" id="category-error"></span>
           </label>
           <label class="teach-form-field" for="skill-description">
             <span>Description</span>
             <textarea id="skill-description" name="description" rows="5" placeholder="Write a short summary of what learners will get from this skill." required></textarea>
+            <span class="teach-form-message" id="description-error"></span>
           </label>
           <div class="teach-form-actions">
             <button type="submit" class="cta-button">Post Skill</button>
             <button type="button" class="cta-button" id="teach-test-toggle">Test Logout</button>
           </div>
         </form>
-        <p class="teach-form-message" id="teach-form-message"></p>
       `;
     } else {
       // Logged-out version of the section
@@ -54,34 +57,63 @@ document.addEventListener("DOMContentLoaded", () => {
     // After rendering the section, grab the elements we need for the form and test button
     const toggleButton = document.getElementById("teach-test-toggle");
     const teachForm = document.getElementById("teach-form");
-    const formMessage = document.getElementById("teach-form-message");
     const postAnotherButton = document.getElementById("post-another-skill");
 
-    if (teachForm && formMessage) {
+    if (teachForm) {
       teachForm.addEventListener("submit", (event) => {
         event.preventDefault();
         const title = document.getElementById("skill-title").value.trim();
         const instructor = document.getElementById("skill-instructor").value.trim();
         const category = document.getElementById("skill-category").value.trim();
         const description = document.getElementById("skill-description").value.trim();
+        const titleError = document.getElementById("title-error");
+        const instructorError = document.getElementById("instructor-error");
+        const categoryError = document.getElementById("category-error");
+        const descriptionError = document.getElementById("description-error");
 
-        formMessage.textContent = "";
+        titleError.textContent = "";
+        instructorError.textContent = "";
+        categoryError.textContent = "";
+        descriptionError.textContent = "";
 
-        if (!title || !instructor || !category || !description) {
-          formMessage.textContent = "Please complete every field before posting your skill.";
+        let hasErrors = false;
+
+        // Basic validation checks for title field with error messages
+        if (!title) {
+          titleError.textContent = "Please enter a title.";
+          hasErrors = true;
+        } else if (title.length < 5) {
+          titleError.textContent = "Title must be at least 5 characters long.";
+          hasErrors = true;
+        }
+
+        // Basic validation checks for instructor field with error messages
+        if (!instructor) {
+          instructorError.textContent = "Please enter the instructor name.";
+          hasErrors = true;
+        }
+
+        // Basic validation checks for category field with error messages
+        if (!category) {
+          categoryError.textContent = "Please enter a category.";
+          hasErrors = true;
+        }
+
+        // Basic validation checks for description field with error messages
+        if (!description) {
+          descriptionError.textContent = "Please enter a description.";
+          hasErrors = true;
+        } else if (description.length < 20) {
+          descriptionError.textContent = "Description must be at least 20 characters long.";
+          hasErrors = true;
+        }
+
+        // If there are any validation errors, we stop here and show the messages. Otherwise, we proceed to "post" the skill.
+        if (hasErrors) {
           return;
         }
 
-        if (title.length < 5) {
-          formMessage.textContent = "Please enter a title that is at least 5 characters long.";
-          return;
-        }
-
-        if (description.length < 20) {
-          formMessage.textContent = "Please enter a description that is at least 20 characters long.";
-          return;
-        }
-
+        // For this demo, we just log the new skill to the console and show a success message. In a real app, this is where you'd send the data to your backend server.
         console.log("New skill posted:", { title, instructor, category, description });
 
         teachContent.innerHTML = `
