@@ -54,24 +54,78 @@ document.addEventListener("DOMContentLoaded", () => {
     // After rendering the section, grab the elements we need for the form and test button
     const toggleButton = document.getElementById("teach-test-toggle");
     const teachForm = document.getElementById("teach-form");
-    const formMessage = document.getElementById("teach-form-message");
+    const postAnotherButton = document.getElementById("post-another-skill");
 
-    // If the button is missing, there is nothing else to do
-    if (!toggleButton) return;
-
-    if (teachForm && formMessage) {
+    if (teachForm) {
       teachForm.addEventListener("submit", (event) => {
         event.preventDefault();
-        formMessage.textContent = "Your skill has been posted.";
-        teachForm.reset();
+        const title = document.getElementById("skill-title").value;
+        const instructor = document.getElementById("skill-instructor").value;
+        const category = document.getElementById("skill-category").value;
+        const description = document.getElementById("skill-description").value;
+
+        console.log("New skill posted:", { title, instructor, category, description });
+
+        teachContent.innerHTML = `
+          <h1>Thank you for sharing your skill!</h1>
+          <p>Your skill has been posted successfully. We appreciate your contribution to the Elevate community.</p>
+          <div class="teach-form-actions">
+            <button type="button" class="cta-button" id="post-another-skill">Post Another Skill</button>
+            <a href="explore.html" class="cta-button">Explore Skills</a>
+            <button type="button" class="cta-button" id="teach-test-toggle">Test Logout</button>
+          </div>
+
+          <div class="teach-posted-skill">
+            <div id="posted-skill-title">
+              Title: ${title}
+            </div>
+            <div id="posted-skill-instructor">
+              Instructor: ${instructor}
+            </div>
+            <div id="posted-skill-category">
+              Category: ${category}
+            </div>
+            <div id="posted-skill-description">
+              Description: ${description}
+            </div>
+          </div>
+        `;
+
+        renderTeachContentListeners();
       });
     }
 
-    // Flip the fake login state and render the section again when the button is clicked
-    toggleButton.addEventListener("click", () => {
-      isLoggedIn = !isLoggedIn;
-      renderTeachContent();
-    });
+    if (postAnotherButton) {
+      postAnotherButton.addEventListener("click", () => {
+        renderTeachContent();
+      });
+    }
+
+    if (toggleButton) {
+      // Flip the fake login state and render the section again when the button is clicked
+      toggleButton.addEventListener("click", () => {
+        isLoggedIn = !isLoggedIn;
+        renderTeachContent();
+      });
+    }
+  }
+
+  function renderTeachContentListeners() {
+    const toggleButton = document.getElementById("teach-test-toggle");
+    const postAnotherButton = document.getElementById("post-another-skill");
+
+    if (postAnotherButton) {
+      postAnotherButton.addEventListener("click", () => {
+        renderTeachContent();
+      });
+    }
+
+    if (toggleButton) {
+      toggleButton.addEventListener("click", () => {
+        isLoggedIn = !isLoggedIn;
+        renderTeachContent();
+      });
+    }
   }
 
   // Show the default logged-out version when the page first loads
