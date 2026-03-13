@@ -50,6 +50,7 @@ document.addEventListener("DOMContentLoaded", () => {
             <button type="submit" class="cta-button">Post Skill</button>
             <button type="button" class="cta-button" id="teach-test-toggle">Test Logout</button>
           </div>
+          <p class="teach-form-message" id="teach-form-error"></p>
         </form>
       `;
     } else {
@@ -78,6 +79,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const instructorError = document.getElementById("instructor-error");
         const categoryError = document.getElementById("category-error");
         const descriptionError = document.getElementById("description-error");
+        const formError = document.getElementById("teach-form-error");
         const allowedCategories = [
           "Communication",
           "Technology",
@@ -91,6 +93,7 @@ document.addEventListener("DOMContentLoaded", () => {
         instructorError.textContent = "";
         categoryError.textContent = "";
         descriptionError.textContent = "";
+        formError.textContent = "";
 
         let hasErrors = false;
 
@@ -132,35 +135,41 @@ document.addEventListener("DOMContentLoaded", () => {
           return;
         }
 
-        // For this demo, we just log the new skill to the console and show a success message. In a real app, this is where you'd send the data to your backend server.
-        console.log("New skill posted:", { title, instructor, category, description });
+        try {
+          // For this demo, we just log the new skill to the console and show a success message.
+          // In a real app, this is where you'd send the data to your backend server.
+          console.log("New skill posted:", { title, instructor, category, description });
 
-        teachContent.innerHTML = `
-          <h1>Thank you for sharing your skill!</h1>
-          <p>Your skill has been posted successfully. We appreciate your contribution to the Elevate community.</p>
-          <div class="teach-form-actions">
-            <button type="button" class="cta-button" id="post-another-skill">Post Another Skill</button>
-            <a href="explore.html" class="cta-button">Explore Skills</a>
-            <button type="button" class="cta-button" id="teach-test-toggle">Test Logout</button>
-          </div>
+          teachContent.innerHTML = `
+            <h1>Thank you for sharing your skill!</h1>
+            <p>Your skill has been posted successfully. We appreciate your contribution to the Elevate community.</p>
+            <div class="teach-form-actions">
+              <button type="button" class="cta-button" id="post-another-skill">Post Another Skill</button>
+              <a href="explore.html" class="cta-button">Explore Skills</a>
+              <button type="button" class="cta-button" id="teach-test-toggle">Test Logout</button>
+            </div>
 
-          <div class="teach-posted-skill">
-            <div id="posted-skill-title">
-              Title: ${title}
+            <div class="teach-posted-skill">
+              <div id="posted-skill-title">
+                Title: ${title}
+              </div>
+              <div id="posted-skill-instructor">
+                Instructor: ${instructor}
+              </div>
+              <div id="posted-skill-category">
+                Category: ${category}
+              </div>
+              <div id="posted-skill-description">
+                Description: ${description}
+              </div>
             </div>
-            <div id="posted-skill-instructor">
-              Instructor: ${instructor}
-            </div>
-            <div id="posted-skill-category">
-              Category: ${category}
-            </div>
-            <div id="posted-skill-description">
-              Description: ${description}
-            </div>
-          </div>
-        `;
+          `;
 
-        renderTeachContentListeners();
+          renderTeachContentListeners();
+        } catch (error) {
+          console.error("There was a problem posting the skill.", error);
+          formError.textContent = "We couldn't post your skill right now. Please try again.";
+        }
       });
     }
 
