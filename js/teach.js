@@ -10,6 +10,8 @@ document.addEventListener("DOMContentLoaded", () => {
   // This starts as logged out and only changes when the test button is clicked
   let isLoggedIn = false;
 
+  // const submissionDelayMs = 2000; // Simulated delay for form submission to mimic real-world network latency and processing time
+
   // Rebuild the teach page content whenever the login state changes
   function renderTeachContent() {
     if (isLoggedIn) {
@@ -70,7 +72,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (teachForm) {
       teachForm.addEventListener("submit", (event) => {
+      // teachForm.addEventListener("submit", async (event) => { // Use this version of the event listener if you want to simulate a delay for form submission to mimic real-world network latency and processing time
         event.preventDefault();
+        const submitButton = teachForm.querySelector('button[type="submit"]');
         const title = document.getElementById("skill-title").value.trim();
         const instructor = document.getElementById("skill-instructor").value.trim();
         const category = document.getElementById("skill-category").value;
@@ -94,6 +98,11 @@ document.addEventListener("DOMContentLoaded", () => {
         categoryError.textContent = "";
         descriptionError.textContent = "";
         formError.textContent = "";
+
+        if (submitButton) {
+          submitButton.disabled = true;
+          submitButton.textContent = "Posting...";
+        }
 
         let hasErrors = false;
 
@@ -132,6 +141,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
         // If there are any validation errors, we stop here and show the messages. Otherwise, we proceed to "post" the skill.
         if (hasErrors) {
+          if (submitButton) {
+            submitButton.disabled = false;
+            submitButton.textContent = "Post Skill";
+          }
           return;
         }
 
@@ -169,6 +182,11 @@ document.addEventListener("DOMContentLoaded", () => {
         } catch (error) {
           console.error("There was a problem posting the skill.", error);
           formError.textContent = "We couldn't post your skill right now. Please try again.";
+
+          if (submitButton) {
+            submitButton.disabled = false;
+            submitButton.textContent = "Post Skill";
+          }
         }
       });
     }
