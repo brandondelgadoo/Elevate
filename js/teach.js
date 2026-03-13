@@ -9,9 +9,15 @@ document.addEventListener("DOMContentLoaded", () => {
   // Temporary placeholder for auth state which will be replaced with real authentication logic in the future
   // This starts as logged out and only changes when the test button is clicked
   let isLoggedIn = false;
+  
+  let skillDraft = {
+    title: "",
+    instructor: "",
+    category: "",
+    description: ""
+  };
 
-  // const submissionDelayMs = 2000; // Simulated delay for form submission to mimic real-world network latency and processing time
-
+  // const submissionDelayMs = 2000; // Use this variable to adjust the simulated delay for form submission to mimic real-world network latency and processing time
   // Rebuild the teach page content whenever the login state changes
   function renderTeachContent() {
     if (isLoggedIn) {
@@ -22,30 +28,30 @@ document.addEventListener("DOMContentLoaded", () => {
         <form class="teach-form" id="teach-form">
           <label class="teach-form-field" for="skill-title">
             <span>Title</span>
-            <input type="text" id="skill-title" name="title" placeholder="Intro to Public Speaking" required>
+            <input type="text" id="skill-title" name="title" placeholder="Intro to Public Speaking" value="${skillDraft.title}" required>
             <span class="teach-form-message" id="title-error"></span>
           </label>
           <label class="teach-form-field" for="skill-instructor">
             <span>Instructor / Offered By</span>
-            <input type="text" id="skill-instructor" name="instructor" placeholder="Brandon Delgado" required>
+            <input type="text" id="skill-instructor" name="instructor" placeholder="Brandon Delgado" value="${skillDraft.instructor}" required>
             <span class="teach-form-message" id="instructor-error"></span>
           </label>
           <label class="teach-form-field" for="skill-category">
             <span>Category</span>
             <select id="skill-category" name="category" required>
-              <option value="">Select a category</option>
-              <option value="Communication">Communication</option>
-              <option value="Technology">Technology</option>
-              <option value="Business">Business</option>
-              <option value="Design">Design</option>
-              <option value="Health and Wellness">Health and Wellness</option>
-              <option value="Personal Development">Personal Development</option>
+              <option value="" ${skillDraft.category === "" ? "selected" : ""}>Select a category</option>
+              <option value="Communication" ${skillDraft.category === "Communication" ? "selected" : ""}>Communication</option>
+              <option value="Technology" ${skillDraft.category === "Technology" ? "selected" : ""}>Technology</option>
+              <option value="Business" ${skillDraft.category === "Business" ? "selected" : ""}>Business</option>
+              <option value="Design" ${skillDraft.category === "Design" ? "selected" : ""}>Design</option>
+              <option value="Health and Wellness" ${skillDraft.category === "Health and Wellness" ? "selected" : ""}>Health and Wellness</option>
+              <option value="Personal Development" ${skillDraft.category === "Personal Development" ? "selected" : ""}>Personal Development</option>
             </select>
             <span class="teach-form-message" id="category-error"></span>
           </label>
           <label class="teach-form-field" for="skill-description">
             <span>Description</span>
-            <textarea id="skill-description" name="description" rows="5" placeholder="Write a short summary of what learners will get from this skill." required></textarea>
+            <textarea id="skill-description" name="description" rows="5" placeholder="Write a short summary of what learners will get from this skill." required>${skillDraft.description}</textarea>
             <span class="teach-form-message" id="description-error"></span>
           </label>
           <div class="teach-form-actions">
@@ -71,6 +77,18 @@ document.addEventListener("DOMContentLoaded", () => {
     const postAnotherButton = document.getElementById("post-another-skill");
 
     if (teachForm) {
+      const syncDraft = () => {
+        skillDraft = {
+          title: document.getElementById("skill-title").value,
+          instructor: document.getElementById("skill-instructor").value,
+          category: document.getElementById("skill-category").value,
+          description: document.getElementById("skill-description").value
+        };
+      };
+
+      teachForm.addEventListener("input", syncDraft);
+      teachForm.addEventListener("change", syncDraft);
+
       teachForm.addEventListener("submit", (event) => {
       // teachForm.addEventListener("submit", async (event) => { // Use this version of the event listener if you want to simulate a delay for form submission to mimic real-world network latency and processing time
         event.preventDefault();
@@ -92,6 +110,8 @@ document.addEventListener("DOMContentLoaded", () => {
           "Health and Wellness",
           "Personal Development"
         ];
+
+        skillDraft = { title, instructor, category, description };
 
         titleError.textContent = "";
         instructorError.textContent = "";
@@ -151,7 +171,17 @@ document.addEventListener("DOMContentLoaded", () => {
         try {
           // For this demo, we just log the new skill to the console and show a success message.
           // In a real app, this is where you'd send the data to your backend server.
+
+          // await new Promise((resolve) => setTimeout(resolve, submissionDelayMs)); // Use this line if you want to simulate a delay for form submission to mimic real-world network latency and processing time
+
           console.log("New skill posted:", { title, instructor, category, description });
+
+          skillDraft = {
+            title: "",
+            instructor: "",
+            category: "",
+            description: ""
+          };
 
           teachContent.innerHTML = `
             <h1>Thank you for sharing your skill!</h1>
