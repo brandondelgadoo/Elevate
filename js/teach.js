@@ -16,9 +16,30 @@ document.addEventListener("DOMContentLoaded", () => {
       // Logged-in version of the section
       teachContent.innerHTML = `
         <h1>Welcome back</h1>
-        <p>You're logged in and ready to continue building your teaching profile and upcoming sessions.</p>
-        <a href="explore.html" class="cta-button">Continue</a>
-        <button type="button" class="cta-button" id="teach-test-toggle">Test Logout</button>
+        <p>You're logged in and ready to offer a new skill to the Elevate community.</p>
+        <form class="teach-form" id="teach-form">
+          <label class="teach-form-field" for="skill-title">
+            <span>Title</span>
+            <input type="text" id="skill-title" name="title" placeholder="Intro to Public Speaking" required>
+          </label>
+          <label class="teach-form-field" for="skill-instructor">
+            <span>Instructor / Offered By</span>
+            <input type="text" id="skill-instructor" name="instructor" placeholder="Brandon Delgado" required>
+          </label>
+          <label class="teach-form-field" for="skill-category">
+            <span>Category</span>
+            <input type="text" id="skill-category" name="category" placeholder="Communication" required>
+          </label>
+          <label class="teach-form-field" for="skill-description">
+            <span>Description</span>
+            <textarea id="skill-description" name="description" rows="5" placeholder="Write a short summary of what learners will get from this skill." required></textarea>
+          </label>
+          <div class="teach-form-actions">
+            <button type="submit" class="cta-button">Post Skill</button>
+            <button type="button" class="cta-button" id="teach-test-toggle">Test Logout</button>
+          </div>
+        </form>
+        <p class="teach-form-message" id="teach-form-message"></p>
       `;
     } else {
       // Logged-out version of the section
@@ -30,11 +51,21 @@ document.addEventListener("DOMContentLoaded", () => {
       `;
     }
 
-    // After replacing the HTML, we grab the new button so we can attach a click event
+    // After rendering the section, grab the elements we need for the form and test button
     const toggleButton = document.getElementById("teach-test-toggle");
+    const teachForm = document.getElementById("teach-form");
+    const formMessage = document.getElementById("teach-form-message");
 
     // If the button is missing, there is nothing else to do
     if (!toggleButton) return;
+
+    if (teachForm && formMessage) {
+      teachForm.addEventListener("submit", (event) => {
+        event.preventDefault();
+        formMessage.textContent = "Your skill has been posted.";
+        teachForm.reset();
+      });
+    }
 
     // Flip the fake login state and render the section again when the button is clicked
     toggleButton.addEventListener("click", () => {
