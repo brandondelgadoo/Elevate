@@ -1,218 +1,293 @@
 <!doctype html>
 <html lang="en">
-
 <head>
   <title>Elevated | Community Skill Sharing</title>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-
   <!-- SEO Meta -->
   <meta name="description"
     content="Elevated is a community skill-sharing platform where people teach and learn from each other.">
-
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=Instrument+Serif&display=swap" rel="stylesheet">
   <!-- Styles -->
   <link rel="stylesheet" href="styles.css">
-
-  <!-- Inline Dark Theme -->
-  <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-
-    body {
-      background-color: #0a1628;
-      color: #ffffff;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      min-height: 100vh;
-    }
-
-    /* Navbar */
-    .navbar {
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 18px 40px; background-color: #0d1b2a;
-      border-bottom: 1px solid #1b2d45; position: sticky; top: 0; z-index: 100;
-    }
-    .logo { font-size: 1.5rem; color: #fff; font-weight: 700; }
-    .nav-links { list-style: none; display: flex; gap: 28px; align-items: center; }
-    .nav-links a { text-decoration: none; color: #ffffff; font-size: 0.95rem; transition: color .2s; }
-    .nav-links a:hover { color: #f0f8ff; }
-
-    /* Buttons */
-    .btn-primary {
-      background-color: #6c63ff; color: #fff; border: none;
-      padding: 10px 22px; border-radius: 8px; font-size: 0.9rem;
-      font-weight: 600; cursor: pointer; text-decoration: none;
-      transition: background-color .2s, transform .1s;
-    }
-    .btn-primary:hover { background-color: #574fd6; transform: translateY(-1px); }
-
-    /* Hero */
-    .hero-container {
-      text-align: center; padding: 90px 20px;
-      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
-      border-bottom: 1px solid #2a2a2a;
-    }
-    .hero-container h2 { font-size: 2.6rem; color: #fff; margin-bottom: 16px; line-height: 1.3; }
-    .hero-container p { font-size: 1.1rem; color: #a0a0b0; margin-bottom: 32px; }
-
-    /* Search */
-    .search-container {
-      display: flex; justify-content: center; gap: 12px;
-      padding: 32px 20px; background-color: #111; border-bottom: 1px solid #2a2a2a; flex-wrap: wrap;
-    }
-    .search-container input, .search-container select {
-      background-color: #1e1e1e; color: #e0e0e0; border: 1px solid #333;
-      border-radius: 8px; padding: 10px 16px; font-size: 0.95rem;
-      outline: none; min-width: 200px; transition: border-color .2s;
-    }
-    .search-container input::placeholder { color: #666; }
-    .search-container input:focus, .search-container select:focus { border-color: #6c63ff; }
-    .search-container select option { background-color: #1e1e1e; }
-    #searchBtn {
-      background-color: #6c63ff; color: #fff; border: none;
-      padding: 10px 24px; border-radius: 8px; font-size: 0.95rem;
-      font-weight: 600; cursor: pointer; transition: background-color .2s;
-    }
-    #searchBtn:hover { background-color: #574fd6; }
-
-    /* Listings */
-    .listings-container { max-width: 1100px; margin: 0 auto; padding: 48px 24px; }
-    .listings-container h3 { font-size: 1.5rem; color: #fff; margin-bottom: 28px; font-weight: 600; }
-    .card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
-
-    .skill-card {
-      background-color: #1a1a1a; border: 1px solid #2a2a2a;
-      border-radius: 12px; padding: 24px; transition: border-color .2s, transform .2s;
-    }
-    .skill-card:hover { border-color: #6c63ff; transform: translateY(-3px); }
-    .skill-card h4 { font-size: 1.05rem; color: #fff; margin-bottom: 10px; }
-    .skill-card p { font-size: 0.9rem; color: #888; margin-bottom: 14px; line-height: 1.5; }
-    .category-tag {
-      background-color: #2a2a3e; color: #9d96ff; font-size: 0.78rem;
-      font-weight: 600; padding: 4px 12px; border-radius: 20px; display: inline-block;
-    }
-
-    /* Create Skill */
-    .create-skill { max-width: 600px; margin: 0 auto; padding: 48px 24px; }
-    .create-skill h3 { font-size: 1.5rem; color: #fff; margin-bottom: 24px; font-weight: 600; }
-    #createSkillForm {
-      display: flex; flex-direction: column; gap: 14px;
-      background-color: #1a1a1a; border: 1px solid #2a2a2a;
-      border-radius: 12px; padding: 28px;
-    }
-    #createSkillForm input, #createSkillForm textarea, #createSkillForm select {
-      background-color: #111; color: #e0e0e0; border: 1px solid #333;
-      border-radius: 8px; padding: 10px 14px; font-size: 0.95rem;
-      outline: none; font-family: inherit; transition: border-color .2s;
-    }
-    #createSkillForm input::placeholder, #createSkillForm textarea::placeholder { color: #555; }
-    #createSkillForm input:focus, #createSkillForm textarea:focus, #createSkillForm select:focus { border-color: #6c63ff; }
-    #createSkillForm textarea { resize: vertical; min-height: 100px; }
-    #createSkillForm select option { background-color: #111; }
-
-    /* Cloud Text */
-    .cloud-text {
-      font-size: 4rem;
-      font-weight: 900;
-      letter-spacing: 2px;
-      text-transform: uppercase;
-      color: #ffffff;
-      text-shadow:
-        0 0 10px rgba(255, 255, 255, 0.3),
-        0 0 20px rgba(108, 99, 255, 0.2),
-        3px 3px 0 #3a3a6e,
-        6px 6px 0 #2a2a4e;
-      paint-order: stroke fill;
-      -webkit-text-stroke: 1.5px rgba(108, 99, 255, 0.5);
-      filter: url(#cloud-filter);
-      margin-bottom: 20px;
-      line-height: 1.2;
-      display: inline-block;
-    }
-    .cloud-text span {
-      display: inline-block;
-      animation: float 3s ease-in-out infinite;
-    }
-    .cloud-text span:nth-child(2) { animation-delay: 0.1s; }
-    .cloud-text span:nth-child(3) { animation-delay: 0.2s; }
-    .cloud-text span:nth-child(4) { animation-delay: 0.3s; }
-    .cloud-text span:nth-child(5) { animation-delay: 0.4s; }
-    .cloud-text span:nth-child(6) { animation-delay: 0.5s; }
-    .cloud-text span:nth-child(7) { animation-delay: 0.6s; }
-    .cloud-text span:nth-child(8) { animation-delay: 0.7s; }
-    @keyframes float {
-      0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-6px); }
-    }
-
-    /* Footer */
-    footer {
-      background-color: #070f1a; border-top: 1px solid #1b2d45;
-      padding: 24px 40px; text-align: center; color: #4a6fa5; font-size: 0.85rem;
-    }
-
-    /* Hero Background Title */
-    .hero-bg {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      min-height: 100vh;
-      background: linear-gradient(180deg, #0d1b2a 0%, #1b2d45 50%, #162447 100%);
-      position: relative;
-      overflow: hidden;
-    }
-    .hero-bg::before {
-      content: '';
-      position: absolute;
-      top: 50%; left: 50%;
-      transform: translate(-50%, -50%);
-      width: 600px; height: 600px;
-      background: radial-gradient(circle, rgba(30,60,114,0.3) 0%, transparent 70%);
-      border-radius: 50%;
-      pointer-events: none;
-    }
-    .hero-title {
-      font-size: 7rem;
-      font-weight: 900;
-      letter-spacing: 18px;
-      text-transform: uppercase;
-      color: #ffffff;
-      text-align: center;
-      position: relative;
-      z-index: 1;
-      background: linear-gradient(180deg, #ffffff 0%, #f0f8ff 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-      text-shadow: none;
-      line-height: 1;
-      margin-bottom: 20px;
-    }
-    .hero-subtitle {
-      font-size: 1.2rem;
-      letter-spacing: 6px;
-      text-transform: uppercase;
-      color: #ffffff;
-      position: relative;
-      z-index: 1;
-      font-weight: 400;
-    }
-    @media (max-width: 768px) {
-      .hero-title { font-size: 3.5rem; letter-spacing: 10px; }
-      .hero-subtitle { font-size: 0.9rem; letter-spacing: 4px; }
-    }
-  </style>
 </head>
-
 <body>
 
-  <!-- ================= HERO / TITLE BACKGROUND ================= -->
-  <div class="hero-bg">
+  <!-- ================= HERO SECTION (with embedded navbar) ================= -->
+  <section class="hero">
+    <!-- Background gradient -->
+    <div class="hero-bg">
+      <svg fill="none" preserveAspectRatio="none" viewBox="0 0 800 680">
+        <path d="M800 0H0V680H800V0Z" fill="url(#hg)" />
+        <defs>
+          <linearGradient gradientUnits="userSpaceOnUse" id="hg" x1="400" x2="400" y1="0" y2="680">
+            <stop offset="0.3125" stop-color="#020817" />
+            <stop offset="1" stop-color="#5F7AC7" />
+          </linearGradient>
+        </defs>
+      </svg>
+    </div>
+
+    <!-- Aurora glow effects -->
+    <div class="aurora-wrap">
+      <div class="aurora-inner">
+        <svg fill="none" preserveAspectRatio="none" viewBox="0 0 1510 1390">
+          <g filter="url(#af)" opacity="0.4">
+            <circle cx="410" cy="410" r="250" fill="url(#ar1)" />
+            <circle cx="1050" cy="930" r="300" fill="url(#ar2)" />
+            <circle cx="780" cy="690" r="175" fill="url(#ar3)" />
+          </g>
+          <defs>
+            <filter id="af" x="0" y="0" width="1510" height="1390" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+              <feGaussianBlur stdDeviation="80" />
+            </filter>
+            <radialGradient id="ar1" cx="410" cy="410" r="250" gradientUnits="userSpaceOnUse">
+              <stop stop-color="#5EEAD4" /><stop offset="1" stop-color="#5EEAD4" stop-opacity="0" />
+            </radialGradient>
+            <radialGradient id="ar2" cx="1050" cy="930" r="300" gradientUnits="userSpaceOnUse">
+              <stop stop-color="#818CF8" /><stop offset="1" stop-color="#818CF8" stop-opacity="0" />
+            </radialGradient>
+            <radialGradient id="ar3" cx="780" cy="690" r="175" gradientUnits="userSpaceOnUse">
+              <stop stop-color="#F472B6" /><stop offset="1" stop-color="#F472B6" stop-opacity="0" />
+            </radialGradient>
+          </defs>
+        </svg>
+      </div>
+    </div>
+
+    <!-- ================= NAVIGATION ================= -->
+    <div class="navbar">
+      <div class="container">
+        <div class="navbar-inner">
+          <div class="navbar-logo" onclick="navigateTo('home')">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="#5EEAD4" stroke="#5EEAD4" stroke-width="0">
+              <path d="M13 2L3 14h9l-1 10 10-12h-9l1-10z" />
+            </svg>
+            <h1 class="logo">Elevated &#127758;</h1>
+          </div>
+          <nav>
+            <ul class="nav-links">
+              <li><a href="#" class="navbar-link active" data-page="home" onclick="navigateTo('home')">Explore</a></li>
+              <li>
+                <a href="#" class="navbar-link" data-page="post" onclick="navigateTo('post')">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10" /><path d="M8 12h8" /><path d="M12 8v8" />
+                  </svg>
+                  Teach
+                </a>
+              </li>
+              <li><a href="#about" class="navbar-link">About</a></li>
+              <li>
+                <a href="#" class="btn-primary">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" /><circle cx="12" cy="7" r="4" />
+                  </svg>
+                  Login
+                </a>
+              </li>
+            </ul>
+          </nav>
+          <button class="mobile-menu-btn" onclick="toggleMobileMenu()">
+            <svg width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Mobile menu overlay -->
+    <div class="mobile-menu" id="mobileMenu">
+      <a href="#" onclick="navigateTo('home')">Explore</a>
+      <a href="#" onclick="navigateTo('post')">Teach</a>
+      <a href="#about">About</a>
+      <a href="#" class="btn-primary">Login</a>
+    </div>
+
+    <!-- Hero content -->
+    <div class="hero-container">
+      <div class="eyebrow">
+        <div class="eyebrow-line eyebrow-line-left"></div>
+        <span class="eyebrow-text">Community</span>
+        <div class="eyebrow-line eyebrow-line-right"></div>
+      </div>
+      <h2>Learn Something New. Teach What You Know.</h2>
+      <p>Connect with your community through real skills and real experiences.</p>
+      <button class="btn-primary btn-hero" onclick="document.getElementById('searchInput').focus()">Get Started</button>
+    </div>
+  </section>
+
+  <!-- ================= HOME PAGE ================= -->
+  <div id="page-home">
+
+    <!-- ================= SEARCH & FILTER ================= -->
+    <div class="search-container">
+      <div class="glass-card">
+        <div class="search-row">
+          <div class="search-field">
+            <span class="search-icon">
+              <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+                <circle cx="6.5" cy="6.5" r="5.5" stroke="#6B6660" stroke-width="2" />
+                <path d="M11 11L15 15" stroke="#6B6660" stroke-width="2" stroke-linecap="round" />
+              </svg>
+            </span>
+            <input type="text" class="search-input" placeholder="Search skills, topics, anything..." id="searchInput">
+          </div>
+          <button id="searchBtn" class="search-submit">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+              <path d="M4 10H14" stroke="#0A0A0F" stroke-linecap="round" stroke-width="2.5" />
+              <path d="M9 5L14 10L9 15" stroke="#0A0A0F" stroke-linecap="round" stroke-width="2.5" />
+            </svg>
+          </button>
+        </div>
+        <div>
+          <p class="cat-label">Categories</p>
+          <div class="cat-pills" id="categoryPills">
+            <!-- Category pills rendered by JS -->
+          </div>
+        </div>
+      </div>
+      <div class="kbd-hints">
+        <span>Press</span><span class="kbd">/</span><span>to focus</span>
+        <span class="kbd-sep">&middot;</span>
+        <span class="kbd">&#x21B5;</span><span>to search</span>
+      </div>
+    </div>
+
+    <!-- ================= SKILL LISTINGS ================= -->
+    <div class="listings-container">
+      <div class="container">
+        <div class="skills-header">
+          <div>
+            <h3>Featured Skills</h3>
+            <p>Explore top-rated skills and start learning today.</p>
+          </div>
+          <span class="skills-count" id="skillsCount">6 Skills found</span>
+        </div>
+        <div class="card-grid" id="skillsContainer">
+          <!-- Skill cards inserted dynamically by JS -->
+        </div>
+        <!-- Empty state -->
+        <div class="empty-state" id="emptyState" style="display:none;">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8" /><path d="M21 21l-4.35-4.35" />
+          </svg>
+          <h3>No skills found</h3>
+          <p>We couldn't find any skills matching your search. Try changing your filters or keyword.</p>
+          <button class="clear-btn" onclick="clearFilters()">Clear all filters</button>
+        </div>
+      </div>
+    </div>
   </div>
 
+  <!-- ================= POST SKILL PAGE ================= -->
+  <div id="page-post" style="display:none;">
+    <div class="form-page">
+      <div class="form-page-inner">
+        <button class="back-btn" onclick="navigateTo('home')">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M19 12H5" /><path d="M12 19l-7-7 7-7" />
+          </svg>
+          Back to Explore
+        </button>
+
+        <div class="form-card">
+          <div class="form-header">
+            <h3>Share a Skill</h3>
+            <p>Share your expertise with the community. Fill out the form below to create a new listing.</p>
+          </div>
+          <form id="createSkillForm" class="form-body">
+            <div class="form-group">
+              <label class="form-label" for="skillTitle">Skill Title <span class="opt">(Optional)</span></label>
+              <input type="text" id="skillTitle" class="form-input" placeholder="e.g. Advanced TypeScript Mentorship">
+            </div>
+
+            <div class="form-row">
+              <div>
+                <label class="form-label" for="skillCategory">Category <span class="opt">(Optional)</span></label>
+                <select id="skillCategory" class="form-select">
+                  <option value="Design">Design</option>
+                  <option value="Technology" selected>Technology</option>
+                  <option value="Music">Music</option>
+                  <option value="Language">Language</option>
+                  <option value="Fitness">Fitness</option>
+                  <option value="Art">Art</option>
+                </select>
+              </div>
+              <div>
+                <label class="form-label" for="skillPrice">Price / Hour <span class="opt">(Optional)</span></label>
+                <input type="text" id="skillPrice" class="form-input" placeholder="e.g. $45/hr">
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="skillAuthor">Instructor Name <span class="opt">(Optional)</span></label>
+              <input type="text" id="skillAuthor" class="form-input" placeholder="Your Full Name">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="skillImage">Cover Image URL <span class="opt">(Optional)</span></label>
+              <div class="img-field">
+                <span class="img-field-icon">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2" /><circle cx="8.5" cy="8.5" r="1.5" /><path d="M21 15l-5-5L5 21" />
+                  </svg>
+                </span>
+                <input type="url" id="skillImage" class="form-input" placeholder="https://example.com/image.jpg">
+              </div>
+              <p class="form-hint">Provide a URL to an image. If left blank, a placeholder will be used.</p>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="skillDesc">Description <span class="opt">(Optional)</span></label>
+              <textarea id="skillDesc" class="form-input" placeholder="Enter a brief description of the skill"></textarea>
+            </div>
+
+            <div class="form-submit-wrap">
+              <button type="submit" class="btn-primary form-submit">Post Skill</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= SUCCESS PAGE ================= -->
+  <div id="page-success" style="display:none;">
+    <div class="success-screen">
+      <div class="success-card">
+        <div class="success-icon">
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#5EEAD4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M22 11.08V12a10 10 0 11-5.93-9.14" /><path d="M22 4L12 14.01l-3-3" />
+          </svg>
+        </div>
+        <h2>Skill Posted!</h2>
+        <p>Your new skill has been successfully added. Redirecting to home...</p>
+        <div class="progress-bar">
+          <div class="progress-fill" id="progressFill"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= FOOTER ================= -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-inner">
+        <p class="footer-copy">&copy; 2026 Elevated. All rights reserved.</p>
+        <div class="footer-links">
+          <a href="#">Terms</a>
+          <a href="#">Privacy</a>
+          <a href="#">Contact</a>
+        </div>
+      </div>
+    </div>
+  </footer>
 
   <!-- ================= JAVASCRIPT ================= -->
   <script src="app.js" defer></script>
-
 </body>
-
 </html>
