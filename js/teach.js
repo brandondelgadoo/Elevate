@@ -28,17 +28,17 @@ document.addEventListener("DOMContentLoaded", () => {
         <form class="teach-form" id="teach-form">
           <label class="teach-form-field" for="skill-title">
             <span>Title</span>
-            <input type="text" id="skill-title" name="title" placeholder="Intro to Public Speaking" value="${skillDraft.title}" required>
+            <input type="text" id="skill-title" name="title" placeholder="Intro to Public Speaking" value="${skillDraft.title}">
             <span class="teach-form-message" id="title-error"></span>
           </label>
           <label class="teach-form-field" for="skill-instructor">
             <span>Instructor / Offered By</span>
-            <input type="text" id="skill-instructor" name="instructor" placeholder="Brandon Delgado" value="${skillDraft.instructor}" required>
+            <input type="text" id="skill-instructor" name="instructor" placeholder="Brandon Delgado" value="${skillDraft.instructor}">
             <span class="teach-form-message" id="instructor-error"></span>
           </label>
           <label class="teach-form-field" for="skill-category">
             <span>Category</span>
-            <select id="skill-category" name="category" required>
+            <select id="skill-category" name="category">
               <option value="" ${skillDraft.category === "" ? "selected" : ""}>Select a category</option>
               <option value="Communication" ${skillDraft.category === "Communication" ? "selected" : ""}>Communication</option>
               <option value="Technology" ${skillDraft.category === "Technology" ? "selected" : ""}>Technology</option>
@@ -51,7 +51,7 @@ document.addEventListener("DOMContentLoaded", () => {
           </label>
           <label class="teach-form-field" for="skill-description">
             <span>Description</span>
-            <textarea id="skill-description" name="description" rows="5" placeholder="Write a short summary of what learners will get from this skill." required>${skillDraft.description}</textarea>
+            <textarea id="skill-description" name="description" rows="5" placeholder="Write a short summary of what learners will get from this skill.">${skillDraft.description}</textarea>
             <span class="teach-form-message" id="description-error"></span>
           </label>
           <div class="teach-form-actions">
@@ -133,6 +133,9 @@ document.addEventListener("DOMContentLoaded", () => {
         } else if (title.length < 5) {
           titleError.textContent = "Title must be at least 5 characters long.";
           hasErrors = true;
+        } else if (title.length > 80) {
+          titleError.textContent = "Title must be 80 characters or fewer.";
+          hasErrors = true;
         }
 
         // Basic validation checks for instructor field with error messages
@@ -156,6 +159,9 @@ document.addEventListener("DOMContentLoaded", () => {
           hasErrors = true;
         } else if (description.length < 20) {
           descriptionError.textContent = "Description must be at least 20 characters long.";
+          hasErrors = true;
+        } else if (description.length > 500) {
+          descriptionError.textContent = "Description must be 500 characters or fewer.";
           hasErrors = true;
         }
 
