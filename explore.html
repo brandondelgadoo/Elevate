@@ -32,14 +32,25 @@
 
       <div class="explore-filter-area">
         <div class="explore-filter-group">
-          <label for="exploreCategoryFilter">Category</label>
-          <select id="exploreCategoryFilter">
-            <option value="">All Categories</option>
-            <option value="technology">Technology</option>
-            <option value="fitness">Fitness</option>
-            <option value="music">Music</option>
-            <option value="art">Art</option>
-          </select>
+          <span>Category</span>
+          <div class="explore-category-options" id="exploreCategoryFilter">
+            <label class="explore-category-option">
+              <input type="checkbox" value="tech">
+              <span>Technology</span>
+            </label>
+            <label class="explore-category-option">
+              <input type="checkbox" value="fitness">
+              <span>Fitness</span>
+            </label>
+            <label class="explore-category-option">
+              <input type="checkbox" value="music">
+              <span>Music</span>
+            </label>
+            <label class="explore-category-option">
+              <input type="checkbox" value="art">
+              <span>Art</span>
+            </label>
+          </div>
         </div>
 
         <div class="explore-filter-group">

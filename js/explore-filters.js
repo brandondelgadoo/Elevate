@@ -1,8 +1,9 @@
 document.addEventListener("DOMContentLoaded", () => {
   const searchButton = document.getElementById("exploreSearchButton");
   const searchInput = document.getElementById("exploreSearchInput");
+  const categoryFilter = document.getElementById("exploreCategoryFilter");
 
-  if (!searchButton || !searchInput) {
+  if (!searchButton || !searchInput || !categoryFilter) {
     return;
   }
 
@@ -24,26 +25,47 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  function applySearchFilter() {
+  function filterSkillPostsByCategories(skillPosts, selectedCategories) {
+    if (!selectedCategories.length) {
+      return skillPosts;
+    }
+
+    return skillPosts.filter((skillPost) => {
+      return selectedCategories.includes(skillPost.category);
+    });
+  }
+
+  function getSelectedCategories() {
+    return Array.from(
+      categoryFilter.querySelectorAll('input[type="checkbox"]:checked')
+    ).map((checkbox) => checkbox.value);
+  }
+
+  function applyExploreFilters() {
     if (!window.ExploreSkills) {
       return;
     }
 
     const allSkillPosts = window.ExploreSkills.getSkillPosts();
-    const filteredSkillPosts = filterSkillPostsBySearch(
+    const searchFilteredSkillPosts = filterSkillPostsBySearch(
       allSkillPosts,
       searchInput.value
     );
+    const fullyFilteredSkillPosts = filterSkillPostsByCategories(
+      searchFilteredSkillPosts,
+      getSelectedCategories()
+    );
 
-    window.ExploreSkills.renderSkillPosts(filteredSkillPosts);
+    window.ExploreSkills.renderSkillPosts(fullyFilteredSkillPosts);
   }
 
-  searchButton.addEventListener("click", applySearchFilter);
+  searchButton.addEventListener("click", applyExploreFilters);
+  categoryFilter.addEventListener("change", applyExploreFilters);
 
   searchInput.addEventListener("keydown", (event) => {
     if (event.key === "Enter") {
       event.preventDefault();
-      applySearchFilter();
+      applyExploreFilters();
     }
   });
 });
