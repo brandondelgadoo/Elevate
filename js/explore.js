@@ -63,12 +63,7 @@ document.addEventListener("DOMContentLoaded", () => {
     category.className = "skill-post-category";
     category.textContent = skillPost.category || "Uncategorized";
 
-    const description = document.createElement("p");
-    description.className = "skill-post-description";
-    description.textContent =
-      skillPost.description || "No description provided yet.";
-
-    card.append(title, instructor, category, description);
+    card.append(title, instructor, category);
     return card;
   }
 
