@@ -43,21 +43,68 @@
       </div>
 
     </div>
-  </div>
+   </div>
 
-
-  <!-- ================= FOOTER ================= -->
-  <footer>
-    <div class="footer-container">
-      <p>&copy; 2026 Elevate. All rights reserved.</p>
+    <!-- ================= SEARCH & FILTER ================= -->
+    <div class="search-container">
+      <input type="text" placeholder="Search skills..." id="searchInput" />
+      <select id="categoryFilter">
+        <option value="">All Categories</option>
+        <option value="tech">Technology</option>
+        <option value="fitness">Fitness</option>
+        <option value="music">Music</option>
+        <option value="art">Art</option>
+      </select>
+      <button id="searchBtn" type="button">Search</button>
     </div>
-  </footer>
 
+    <!-- ================= SKILL LISTINGS ================= -->
+    <div class="listings-container">
+      <h3>Featured Skills</h3>
 
-  <!-- ================= JAVASCRIPT ================= -->
-  <script src="js/navigation.js" defer></script>
-  <script src="js/app.js" defer></script>
+      <div class="card-grid" id="skillsContainer">
+        <!-- Skill cards will be inserted here dynamically with JS later -->
 
-</body>
+        <!-- Example Static Card -->
+        <!-- <div class="skill-card">
+        <h4>Intro to Web Development</h4>
+        <p>Learn HTML, CSS, and JavaScript fundamentals.</p>
+        <span class="category-tag">Technology</span>
+      </div> -->
+      </div>
+    </div>
 
+    <!-- ================= CREATE SKILL MODAL ================= -->
+    <div class="create-skill" id="createSkillSection">
+      <h3>Share a Skill</h3>
+      <form id="createSkillForm">
+        <input type="text" name="title" placeholder="Skill Title" required />
+        <textarea
+          type="text"
+          name="description"
+          placeholder="Skill Description"
+          required
+        ></textarea>
+        <select name="category" required>
+          <option value="">Select Category</option>
+          <option value="tech">Technology</option>
+          <option value="fitness">Fitness</option>
+          <option value="music">Music</option>
+          <option value="art">Art</option>
+        </select>
+        <button type="submit" class="btn-primary">Post Skill</button>
+      </form>
+    </div>
+
+    <!-- ================= FOOTER ================= -->
+    <footer>
+      <div class="footer-container">
+        <p>&copy; 2026 Elevate. All rights reserved.</p>
+      </div>
+    </footer>
+
+    <!-- ================= JAVASCRIPT ================= -->
+    <script src="js/navigation.js" defer></script>
+    <script src="js/app.js" defer></script>
+  </body>
 </html>
