@@ -145,8 +145,9 @@ function render(selectedCategory = "") {
     if (selectedCategory === "") return true;
     return skill.category === selectedCategory;
   });
+  const visibleSkills = filteredSkills.slice(0, 5);
 
-  filteredSkills.forEach((skill) => {
+  visibleSkills.forEach((skill) => {
     const card = document.createElement("div");
     card.className = "skill-card";
     card.dataset.id = skill.id;
