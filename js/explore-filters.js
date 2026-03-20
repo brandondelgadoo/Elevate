@@ -32,7 +32,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const allSkillPosts = window.ExploreSkills.getSkillPosts();
     const filteredSkillPosts = filterSkillPostsBySearch(
       allSkillPosts,
-      searchInput.value
+      searchInput.value,
     );
 
     window.ExploreSkills.renderSkillPosts(filteredSkillPosts);
