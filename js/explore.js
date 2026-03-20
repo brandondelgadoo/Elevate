@@ -1,19 +1,10 @@
 document.addEventListener("DOMContentLoaded", () => {
-  const searchButton = document.getElementById("exploreSearchButton");
-  const searchInput = document.getElementById("exploreSearchInput");
-  const categoryFilter = document.getElementById("exploreCategoryFilter");
-  const sortSelect = document.getElementById("exploreSort");
   const cardGrid = document.getElementById("cardGrid");
   const resultsCount = document.getElementById("exploreResultsCount");
+  const categoryFilter = document.getElementById("exploreCategoryFilter");
+  const sortSelect = document.getElementById("exploreSort");
 
-  if (
-    !searchButton ||
-    !searchInput ||
-    !categoryFilter ||
-    !sortSelect ||
-    !cardGrid ||
-    !resultsCount
-  ) {
+  if (!categoryFilter || !sortSelect || !cardGrid || !resultsCount) {
     return;
   }
 
@@ -33,9 +24,9 @@ document.addEventListener("DOMContentLoaded", () => {
     title.className = "skill-post-title";
     title.textContent = skillPost.title || "Untitled Skill";
 
-    const instructor = document.createElement("p");
-    instructor.className = "skill-post-meta";
-    instructor.textContent = "Taught by Elevate Community";
+    const createdBy = document.createElement("p");
+    createdBy.className = "skill-post-meta";
+    createdBy.textContent = `Created by ${skillPost.createdBy || "Elevate Community"}`;
 
     const category = document.createElement("span");
     category.className = "skill-post-category";
@@ -49,7 +40,7 @@ document.addEventListener("DOMContentLoaded", () => {
     description.textContent =
       skillPost.description || "No description provided yet.";
 
-    card.append(title, instructor, category, description);
+    card.append(title, createdBy, category, description);
     return card;
   }
 
@@ -80,6 +71,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const skillPosts = loadSkillPosts();
   renderSkillPosts(skillPosts);
+
+  window.ExploreSkills = {
+    getSkillPosts() {
+      return [...skillPosts];
+    },
+    renderSkillPosts
+  };
 
   // Search, filter, and sort behavior will be connected in later tasks.
 });
