@@ -93,25 +93,36 @@ const mockSkills = [
 
 skills.push(...mockSkills);
 
+window.ElevateSkills = {
+  getSkills() {
+    return [...skills];
+  },
+  formatCategory
+};
+
 // /* ---------------- FORM SUBMIT ---------------- */
-// createSkillForm.addEventListener("submit", (e) => {
-//   e.preventDefault();
+// if (createSkillForm) {
+//   createSkillForm.addEventListener("submit", (e) => {
+//     e.preventDefault();
 
-//   const title = createSkillForm.title.value.trim();
-//   const description = createSkillForm.description.value.trim();
-//   const category = createSkillForm.category.value;
+//     const title = createSkillForm.title.value.trim();
+//     const description = createSkillForm.description.value.trim();
+//     const category = createSkillForm.category.value;
 
-//   const skill = new Skill(title, description, category);
-//   skills.push(skill);
+//     const skill = new Skill(title, description, category);
+//     skills.push(skill);
 
-//   render(categoryFilter.value);
-//   createSkillForm.reset();
-// });
+//     render(categoryFilter ? categoryFilter.value : "");
+//     createSkillForm.reset();
+//   });
+// }
 
 /* ---------------- CATEGORY FILTER ---------------- */
-categoryFilter.addEventListener("change", () => {
-  render(categoryFilter.value);
-});
+if (categoryFilter) {
+  categoryFilter.addEventListener("change", () => {
+    render(categoryFilter.value);
+  });
+}
 
 /* ---------------- HELPER ---------------- */
 function formatCategory(category) {
@@ -124,6 +135,10 @@ function formatCategory(category) {
 
 /* ---------------- RENDER ---------------- */
 function render(selectedCategory = "") {
+  if (!skillsContainer) {
+    return;
+  }
+
   skillsContainer.innerHTML = "";
 
   const filteredSkills = skills.filter((skill) => {
@@ -147,4 +162,6 @@ function render(selectedCategory = "") {
 }
 
 /* ---------------- INITIAL RENDER ---------------- */
-render();
+if (skillsContainer) {
+  render();
+}

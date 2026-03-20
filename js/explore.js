@@ -3,7 +3,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const searchInput = document.getElementById("exploreSearchInput");
   const categoryFilter = document.getElementById("exploreCategoryFilter");
   const sortSelect = document.getElementById("exploreSort");
-  const skillsGrid = document.getElementById("skillsGrid");
+  const cardGrid = document.getElementById("cardGrid");
   const resultsCount = document.getElementById("exploreResultsCount");
 
   if (
@@ -11,45 +11,23 @@ document.addEventListener("DOMContentLoaded", () => {
     !searchInput ||
     !categoryFilter ||
     !sortSelect ||
-    !skillsGrid ||
+    !cardGrid ||
     !resultsCount
   ) {
     return;
   }
 
-  // Example postings just to simulate and test that the rendering of skills works fine
-
-  const localSkillPosts = [
-    {
-      title: "Intro to Public Speaking",
-      instructor: "Brandon Delgado",
-      category: "Communication",
-      description:
-        "Build confidence, structure your message, and practice speaking clearly in front of a group."
-    },
-    {
-      title: "Design Basics for Beginners",
-      instructor: "Ariana Flores",
-      category: "Design",
-      description:
-        "Learn core design principles like hierarchy, spacing, and color so your work feels intentional."
-    },
-    {
-      title: "Personal Budgeting 101",
-      instructor: "Marcus Reed",
-      category: "Business",
-      description:
-        "Create a simple monthly budget, track spending, and make smarter decisions with your money."
-    }
-  ];
-
   function loadSkillPosts() {
-    return localSkillPosts;
+    if (window.ElevateSkills && typeof window.ElevateSkills.getSkills === "function") {
+      return window.ElevateSkills.getSkills();
+    }
+
+    return [];
   }
 
   function createSkillCard(skillPost) {
-    const card = document.createElement("article");
-    card.className = "skill-post-card";
+    const card = document.createElement("div");
+    card.className = "skill-card";
 
     const title = document.createElement("h4");
     title.className = "skill-post-title";
@@ -57,18 +35,26 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const instructor = document.createElement("p");
     instructor.className = "skill-post-meta";
-    instructor.textContent = `Taught by ${skillPost.instructor || "Unknown instructor"}`;
+    instructor.textContent = "Taught by Elevate Community";
 
     const category = document.createElement("span");
     category.className = "skill-post-category";
-    category.textContent = skillPost.category || "Uncategorized";
+    category.textContent =
+      window.ElevateSkills && typeof window.ElevateSkills.formatCategory === "function"
+        ? window.ElevateSkills.formatCategory(skillPost.category)
+        : skillPost.category || "Uncategorized";
 
-    card.append(title, instructor, category);
+    const description = document.createElement("p");
+    description.className = "skill-post-description";
+    description.textContent =
+      skillPost.description || "No description provided yet.";
+
+    card.append(title, instructor, category, description);
     return card;
   }
 
   function renderSkillPosts(skillPosts) {
-    skillsGrid.innerHTML = "";
+    cardGrid.innerHTML = "";
 
     if (!skillPosts.length) {
       const emptyState = document.createElement("article");
@@ -78,13 +64,13 @@ document.addEventListener("DOMContentLoaded", () => {
         <p>No skills are ready to display right now.</p>
       `;
 
-      skillsGrid.appendChild(emptyState);
-      resultsCount.textContent = "There are no posts available 🫠";
+      cardGrid.appendChild(emptyState);
+      resultsCount.textContent = "No sessions available";
       return;
     }
 
     skillPosts.forEach((skillPost) => {
-      skillsGrid.appendChild(createSkillCard(skillPost));
+      cardGrid.appendChild(createSkillCard(skillPost));
     });
 
     resultsCount.textContent = `${skillPosts.length} skill post${
