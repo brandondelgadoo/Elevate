@@ -13,6 +13,57 @@
   <!-- ================= NAVIGATION ================= -->
   <div id="site-navbar"></div>
 
+  <!-- ================= EXPLORE PAGE ================= -->
+  <div class="explore-page">
+    <div class="explore-hero">
+      <p class="explore-eyebrow">Discover Community Skills</p>
+      <h2>Browse skill posts from people ready to teach what they know.</h2>
+      <p class="explore-subtitle">Use search, filters, and sorting later to narrow down the skills that fit what you want to learn.</p>
+    </div>
+
+    <div class="explore-toolbar" aria-label="Explore skill tools">
+      <div class="explore-search-area">
+        <label for="exploreSearchInput">Search skills</label>
+        <div class="explore-search-input-group">
+          <input type="text" id="exploreSearchInput" placeholder="Search by skill, topic, or teacher">
+          <button type="button" class="btn-primary" id="exploreSearchButton">Search</button>
+        </div>
+      </div>
+
+      <div class="explore-filter-area">
+        <div class="explore-filter-group">
+          <label for="exploreCategoryFilter">Category</label>
+          <select id="exploreCategoryFilter">
+            <option value="">All Categories</option>
+            <option value="technology">Technology</option>
+            <option value="fitness">Fitness</option>
+            <option value="music">Music</option>
+            <option value="art">Art</option>
+          </select>
+        </div>
+
+        <div class="explore-filter-group">
+          <label for="exploreSort">Sort by</label>
+          <select id="exploreSort">
+            <option value="recent">Most Recent</option>
+            <option value="popular">Most Popular</option>
+            <option value="title">Title A-Z</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div class="explore-results">
+      <div class="explore-results-header">
+        <h3>All Skill Posts</h3>
+        <p>Skill cards will appear here as the Explore page gets connected to post data.</p>
+      </div>
+
+      <div class="skills-grid" id="skillsGrid" aria-live="polite">
+        <!-- Skill cards will be rendered here in a later task. -->
+      </div>
+    </div>
+  </div>
 
   
   <!-- ================= FOOTER ================= -->
@@ -25,6 +76,7 @@
 
   <!-- ================= JAVASCRIPT ================= -->
   <script src="js/navigation.js" defer></script>
+  <script src="js/explore.js" defer></script>
 </body>
 
 </html>
