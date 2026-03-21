@@ -89,7 +89,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const allSkillPosts = window.ExploreSkills.getSkillPosts();
     const searchFilteredSkillPosts = filterSkillPostsBySearch(
       allSkillPosts,
-      searchInput.value
+      searchInput.value,
     );
     const fullyFilteredSkillPosts = filterSkillPostsByCategories(
       searchFilteredSkillPosts,
