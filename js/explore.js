@@ -48,7 +48,7 @@ document.addEventListener("DOMContentLoaded", () => {
     cardGrid.innerHTML = "";
 
     if (!skillPosts.length) {
-      const emptyState = document.createElement("article");
+      const emptyState = document.createElement("div");
       emptyState.className = "skill-post-card skill-post-card-empty";
       emptyState.innerHTML = `
         <h4>No sessions available</h4>

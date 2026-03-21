@@ -56,10 +56,19 @@
         <div class="explore-filter-group">
           <label for="exploreSort">Sort by</label>
           <select id="exploreSort">
-            <option value="recent">Most Recent</option>
-            <option value="popular">Most Popular</option>
-            <option value="title">Title A-Z</option>
+            <option value="id-desc">Newest First</option>
+            <option value="id-asc">Oldest First</option>
+            <option value="title-asc">Title A-Z</option>
+            <option value="title-desc">Title Z-A</option>
+            <option value="creator-asc">Instructor A-Z</option>
+            <option value="creator-desc">Instructor Z-A</option>
           </select>
+        </div>
+
+        <div class="explore-filter-group">
+          <button type="button" class="btn-primary" id="clearExploreFiltersButton">
+            Clear Filters
+          </button>
         </div>
       </div>
     </div>
