@@ -1,15 +1,20 @@
 <!doctype html>
 <html lang="en">
+
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Sign Up | Elevate</title>
   <link rel="stylesheet" href="css/styles.css">
 </head>
+
 <body>
 
+  <!-- ================= NAVIGATION ================= -->
   <div id="site-navbar"></div>
 
+
+  <!-- ================= SIGNUP FORM ================= -->
   <h1>Create Account</h1>
 
   <input type="email" id="email" placeholder="Email">
@@ -19,53 +24,19 @@
   <p id="msgBox"></p>
   <p>Already have an account? <a href="login.html">Log in</a></p>
 
+
+  <!-- ================= FOOTER ================= -->
   <footer>
     <div class="footer-container">
       <p>&copy; 2026 Elevate. All rights reserved.</p>
     </div>
   </footer>
 
+
+  <!-- ================= JAVASCRIPT ================= -->
   <script src="js/navigation.js" defer></script>
-
-  <script type="module">
-    import { auth, createUserWithEmailAndPassword } from "./firebase-config.js";
-
-    document.getElementById("signupBtn").addEventListener("click", async () => {
-      const email = document.getElementById("email").value.trim();
-      const password = document.getElementById("password").value;
-      const confirmPassword = document.getElementById("confirmPassword").value;
-      const msgBox = document.getElementById("msgBox");
-
-      if (!email || !password || !confirmPassword) {
-        msgBox.textContent = "Please fill in all fields.";
-        return;
-      }
-
-      if (password !== confirmPassword) {
-        msgBox.textContent = "Passwords do not match.";
-        return;
-      }
-
-      if (password.length < 6) {
-        msgBox.textContent = "Password must be at least 6 characters.";
-        return;
-      }
-
-      try {
-        await createUserWithEmailAndPassword(auth, email, password);
-        msgBox.textContent = "Account created! Redirecting...";
-        window.location.href = "index.html";
-      } catch (err) {
-        const errors = {
-          "auth/email-already-in-use": "That email is already registered.",
-          "auth/invalid-email": "Invalid email address.",
-          "auth/weak-password": "Password must be at least 6 characters.",
-          "auth/network-request-failed": "Network error. Try again.",
-        };
-        msgBox.textContent = errors[err.code] || "Something went wrong.";
-      }
-    });
-  </script>
+  <script src="js/signup.js" defer></script>
 
 </body>
+
 </html>
