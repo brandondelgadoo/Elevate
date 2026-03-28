@@ -6,6 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Login | Elevate</title>
   <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/auth-dialog.css">
 </head>
 
 <body>
@@ -21,8 +22,27 @@
   <input type="password" id="password" placeholder="Password">
   <button id="loginBtn">Sign In</button>
   <p id="msgBox"></p>
-  <p>Forgot password? <a href="#" id="forgotLink">Reset it</a></p>
+  <p>Forgot password? <a href="#" id="forgotPasswordLink">Reset it</a></p>
   <p>No account? <a href="signup.html">Sign up</a></p>
+
+
+  <!-- ================= FORGOT PASSWORD DIALOG ================= -->
+  <dialog id="forgotPasswordDialog" class="auth-dialog">
+    <div class="auth-dialog__panel">
+      <button type="button" id="dismissResetDialogBtn" class="auth-dialog__close"
+        aria-label="Close reset password dialog">x</button>
+    </div>
+    <div class="auth-dialog__content">
+      <h2>Reset Password</h2>
+      <p>Enter your email and we will send you a password reset link.</p>
+      <input type="email" id="resetEmail" placeholder="Email">
+      <p id="resetMsgBox" class="auth-dialog__message"></p>
+      <div class="auth-dialog__actions">
+        <button type="button" id="sendResetBtn" class="btn-primary">Send Reset Email</button>
+        <button type="button" id="closeResetDialogBtn">Close</button>
+      </div>
+    </div>
+  </dialog>
 
 
   <!-- ================= FOOTER ================= -->

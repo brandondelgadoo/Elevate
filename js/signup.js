@@ -1,5 +1,6 @@
 import { auth, createUserWithEmailAndPassword } from "../firebase-config.js";
 
+// ── Sign up ──
 document.getElementById("signupBtn").addEventListener("click", async () => {
     const email = document.getElementById("email").value.trim();
     const password = document.getElementById("password").value;
