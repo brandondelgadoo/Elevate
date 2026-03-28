@@ -1,4 +1,4 @@
-import { auth, createUserWithEmailAndPassword } from "../firebase-config.js";
+import { auth, createUserWithEmailAndPassword } from "../firebase/config.js";
 
 // ── Sign up ──
 document.getElementById("signupBtn").addEventListener("click", async () => {

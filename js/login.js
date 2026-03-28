@@ -2,7 +2,7 @@ import {
     auth,
     signInWithEmailAndPassword,
     sendPasswordResetEmail
-} from "../firebase-config.js";
+} from "../firebase/config.js";
 
 const forgotPasswordLink = document.getElementById("forgotPasswordLink");
 const forgotPasswordDialog = document.getElementById("forgotPasswordDialog");
