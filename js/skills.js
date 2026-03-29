@@ -1,102 +1,164 @@
+const STORAGE_KEY = "elevateCustomSkills";
 const skills = [];
+
 let nextId = 0;
 
-function Skill(title, description, category, createdBy = "Elevate Community") {
-  this.id = nextId++;
+function Skill(title, description, category, createdBy = "Elevate Community", id = null) {
+  this.id = id ?? nextId++;
   this.createdBy = createdBy;
   this.title = title;
   this.description = description;
   this.category = category;
 }
 
+function createSkill(title, description, category, createdBy = "Elevate Community") {
+  return new Skill(title, description, category, createdBy);
+}
+
+function formatCategory(category) {
+  if (category === "tech") return "Technology";
+  if (category === "fitness") return "Fitness";
+  if (category === "music") return "Music";
+  if (category === "art") return "Art";
+  return category;
+}
+
+function normalizeSkill(rawSkill) {
+  return new Skill(
+    rawSkill.title,
+    rawSkill.description,
+    rawSkill.category,
+    rawSkill.createdBy || "Elevate Community",
+    Number(rawSkill.id)
+  );
+}
+
+function loadCustomSkills() {
+  try {
+    const storedSkills = localStorage.getItem(STORAGE_KEY);
+
+    if (!storedSkills) {
+      return [];
+    }
+
+    const parsedSkills = JSON.parse(storedSkills);
+
+    if (!Array.isArray(parsedSkills)) {
+      return [];
+    }
+
+    return parsedSkills
+      .filter((skill) => {
+        return skill && skill.title && skill.description && skill.category;
+      })
+      .map(normalizeSkill);
+  } catch (error) {
+    console.error("Unable to load custom skills.", error);
+    return [];
+  }
+}
+
+function persistCustomSkills() {
+  const customSkills = skills.filter((skill) => skill.isCustom);
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(customSkills));
+}
+
+function addSkill({ title, description, category, createdBy = "Elevate Community" }) {
+  const newSkill = createSkill(title, description, category, createdBy);
+  newSkill.isCustom = true;
+  skills.push(newSkill);
+  persistCustomSkills();
+  return newSkill;
+}
+
+/* ---------------- DOM REFERENCES ---------------- */
 const skillsContainer = document.querySelector("#skillsContainer");
-// const createSkillForm = document.querySelector("#createSkillForm");
 const categoryFilter = document.querySelector("#categoryFilter");
 
 /* ---------------- MOCK DATA ---------------- */
 const mockSkills = [
-  new Skill(
+  createSkill(
     "Golf Coach",
     "Improve your swing, putting, and course strategy with personalized golf instruction.",
     "fitness",
     "Maya Thompson"
   ),
-  new Skill(
+  createSkill(
     "Rocket League Coach",
     "Learn rotations, mechanics, and decision-making to rank up in Rocket League.",
     "tech",
     "Jordan Lee"
   ),
-  new Skill(
+  createSkill(
     "Driving Teacher",
     "Practice safe driving, parking, highway skills, and road confidence.",
     "fitness"
   ),
-  new Skill(
+  createSkill(
     "Beginner Guitar Lessons",
     "Learn chords, rhythm, and simple songs on acoustic or electric guitar.",
     "music",
     "Sofia Ramirez"
   ),
-  new Skill(
+  createSkill(
     "Piano Lessons",
     "Understand basic piano technique, scales, and beginner-friendly songs.",
     "music",
     "Noah Bennett"
   ),
-  new Skill(
+  createSkill(
     "Intro to Python Programming",
     "Learn variables, loops, functions, and problem-solving with Python.",
     "tech",
     "Avery Chen"
   ),
-  new Skill(
+  createSkill(
     "JavaScript Tutor",
     "Get help understanding JavaScript fundamentals and building small projects.",
     "tech"
   ),
-  new Skill(
+  createSkill(
     "Photography Basics",
     "Learn composition, lighting, and camera settings for better photos.",
     "art",
     "Isabella Cruz"
   ),
-  new Skill(
+  createSkill(
     "Digital Art Mentor",
     "Explore sketching, coloring, and digital illustration techniques.",
     "art",
     "Kai Morgan"
   ),
-  new Skill(
+  createSkill(
     "Painting Instructor",
     "Practice painting techniques with acrylics and improve color blending skills.",
     "art",
     "Lila Patel"
   ),
-  new Skill(
+  createSkill(
     "Yoga Instructor",
     "Build flexibility, balance, and mindfulness through beginner yoga sessions.",
     "fitness",
     "Zoe Carter"
   ),
-  new Skill(
+  createSkill(
     "Personal Fitness Trainer",
     "Get help with beginner workouts, exercise form, and consistency.",
     "fitness",
     "Marcus Hill"
   ),
-  new Skill(
+  createSkill(
     "Singing Coach",
     "Work on breath control, pitch, and confidence for singing.",
     "music"
   ),
-  new Skill(
+  createSkill(
     "Music Production Basics",
     "Learn how to create beats, layer sounds, and use beginner DAW tools.",
     "music",
     "Ethan Brooks"
   ),
-  new Skill(
+  createSkill(
     "Graphic Design Basics",
     "Understand layout, color, and typography for strong visual design.",
     "art",
@@ -104,46 +166,33 @@ const mockSkills = [
   ),
 ];
 
-skills.push(...mockSkills);
+mockSkills.forEach((skill) => {
+  skill.isCustom = false;
+});
+
+const customSkills = loadCustomSkills();
+customSkills.forEach((skill) => {
+  skill.isCustom = true;
+});
+
+skills.push(...mockSkills, ...customSkills);
+
+nextId =
+  skills.reduce((highestId, skill) => Math.max(highestId, Number(skill.id) || 0), -1) + 1;
 
 window.ElevateSkills = {
   getSkills() {
     return [...skills];
   },
+  addSkill,
   formatCategory
 };
-
-// /* ---------------- FORM SUBMIT ---------------- */
-// if (createSkillForm) {
-//   createSkillForm.addEventListener("submit", (e) => {
-//     e.preventDefault();
-
-//     const title = createSkillForm.title.value.trim();
-//     const description = createSkillForm.description.value.trim();
-//     const category = createSkillForm.category.value;
-
-//     const skill = new Skill(title, description, category);
-//     skills.push(skill);
-
-//     render(categoryFilter ? categoryFilter.value : "");
-//     createSkillForm.reset();
-//   });
-// }
 
 /* ---------------- CATEGORY FILTER ---------------- */
 if (categoryFilter) {
   categoryFilter.addEventListener("change", () => {
     render(categoryFilter.value);
   });
-}
-
-/* ---------------- HELPER ---------------- */
-function formatCategory(category) {
-  if (category === "tech") return "Technology";
-  if (category === "fitness") return "Fitness";
-  if (category === "music") return "Music";
-  if (category === "art") return "Art";
-  return category;
 }
 
 /* ---------------- RENDER ---------------- */
@@ -158,6 +207,7 @@ function render(selectedCategory = "") {
     if (selectedCategory === "") return true;
     return skill.category === selectedCategory;
   });
+
   const visibleSkills = filteredSkills.slice(0, 5);
 
   visibleSkills.forEach((skill) => {

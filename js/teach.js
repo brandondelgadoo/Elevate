@@ -2,6 +2,12 @@
 document.addEventListener("DOMContentLoaded", () => {
   // This is the container in teach.html where we inject the content
   const teachContent = document.getElementById("teach-content");
+  const categoryOptions = [
+    { value: "tech", label: "Technology" },
+    { value: "fitness", label: "Fitness" },
+    { value: "music", label: "Music" },
+    { value: "art", label: "Art" }
+  ];
 
   // Stop the script if the container is missing so we avoid errors
   if (!teachContent) return;
@@ -40,12 +46,12 @@ document.addEventListener("DOMContentLoaded", () => {
             <span>Category</span>
             <select id="skill-category" name="category">
               <option value="" ${skillDraft.category === "" ? "selected" : ""}>Select a category</option>
-              <option value="Communication" ${skillDraft.category === "Communication" ? "selected" : ""}>Communication</option>
-              <option value="Technology" ${skillDraft.category === "Technology" ? "selected" : ""}>Technology</option>
-              <option value="Business" ${skillDraft.category === "Business" ? "selected" : ""}>Business</option>
-              <option value="Design" ${skillDraft.category === "Design" ? "selected" : ""}>Design</option>
-              <option value="Health and Wellness" ${skillDraft.category === "Health and Wellness" ? "selected" : ""}>Health and Wellness</option>
-              <option value="Personal Development" ${skillDraft.category === "Personal Development" ? "selected" : ""}>Personal Development</option>
+              ${categoryOptions
+                .map(({ value, label }) => {
+                  const isSelected = skillDraft.category === value ? "selected" : "";
+                  return `<option value="${value}" ${isSelected}>${label}</option>`;
+                })
+                .join("")}
             </select>
             <span class="teach-form-message" id="category-error"></span>
           </label>
@@ -103,12 +109,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const descriptionError = document.getElementById("description-error");
         const formError = document.getElementById("teach-form-error");
         const allowedCategories = [
-          "Communication",
-          "Technology",
-          "Business",
-          "Design",
-          "Health and Wellness",
-          "Personal Development"
+          ...categoryOptions.map(({ value }) => value)
         ];
 
         skillDraft = { title, instructor, category, description };
@@ -175,12 +176,19 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         try {
-          // For this demo, we just log the new skill to the console and show a success message.
-          // In a real app, this is where you'd send the data to your backend server.
+          if (
+            !window.ElevateSkills ||
+            typeof window.ElevateSkills.addSkill !== "function"
+          ) {
+            throw new Error("Shared skills store is unavailable.");
+          }
 
-          // await new Promise((resolve) => setTimeout(resolve, submissionDelayMs)); // Use this line if you want to simulate a delay for form submission to mimic real-world network latency and processing time
-
-          console.log("New skill posted:", { title, instructor, category, description });
+          window.ElevateSkills.addSkill({
+            title,
+            description,
+            category,
+            createdBy: instructor
+          });
 
           skillDraft = {
             title: "",
@@ -206,7 +214,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 Instructor: ${instructor}
               </div>
               <div id="posted-skill-category">
-                Category: ${category}
+                Category: ${window.ElevateSkills.formatCategory(category)}
               </div>
               <div id="posted-skill-description">
                 Description: ${description}
