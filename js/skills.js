@@ -12,6 +12,10 @@ function Skill(title, description, category, createdBy = "Elevate Community") {
 const skillsContainer = document.querySelector("#skillsContainer");
 // const createSkillForm = document.querySelector("#createSkillForm");
 const categoryFilter = document.querySelector("#categoryFilter");
+const dialog = document.getElementById("skillDialog");
+const dialogTitle = document.getElementById("dialogTitle");
+const dialogDescription = document.getElementById("dialogDescription");
+const closeDialog = document.getElementById("closeDialog");
 
 /* ---------------- MOCK DATA ---------------- */
 const mockSkills = [
@@ -178,4 +182,45 @@ function render(selectedCategory = "") {
 /* ---------------- INITIAL RENDER ---------------- */
 if (skillsContainer) {
   render();
+}
+
+if (
+  skillsContainer &&
+  dialog &&
+  dialogTitle &&
+  dialogDescription &&
+  closeDialog
+) {
+  skillsContainer.addEventListener("click", (event) => {
+    const card = event.target.closest(".skill-card");
+    if (!card) {
+      return;
+    }
+
+    const selectedSkill = skills.find((skill) => skill.id === Number(card.dataset.id));
+    if (!selectedSkill) {
+      return;
+    }
+
+    dialogTitle.textContent = selectedSkill.title;
+    dialogDescription.textContent = selectedSkill.description;
+    dialog.showModal();
+  });
+
+  closeDialog.addEventListener("click", () => {
+    dialog.close();
+  });
+
+  dialog.addEventListener("click", (event) => {
+    const rect = dialog.getBoundingClientRect();
+    const clickedInsideDialog =
+      event.clientX >= rect.left &&
+      event.clientX <= rect.right &&
+      event.clientY >= rect.top &&
+      event.clientY <= rect.bottom;
+
+    if (!clickedInsideDialog) {
+      dialog.close();
+    }
+  });
 }
