@@ -63,7 +63,7 @@ sendResetBtn.addEventListener("click", async () => {
 
     try {
         await sendPasswordResetEmail(auth, email);
-        resetMsgBox.textContent = "If an account exists for that email, a reset link has been sent. Check your inbox, then close this window when you're ready.";
+        resetMsgBox.textContent = "If an account exists for that email, a reset link has been sent. Check your inbox or spam folder if it is not there, then close this window when you're ready.";
     } catch (err) {
         const errors = {
             "auth/invalid-email": "Invalid email address.",
