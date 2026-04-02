@@ -4,15 +4,91 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Explore | Elevate</title>
+  <title>Elevate | Explore</title>
   <link rel="stylesheet" href="css/styles.css">
 </head>
 
 <body>
-
   <!-- ================= NAVIGATION ================= -->
   <div id="site-navbar"></div>
 
+  <!-- ================= EXPLORE PAGE ================= -->
+  <div class="explore-page">
+    <div class="explore-hero">
+      <p class="explore-eyebrow">Discover Community Skills</p>
+      <h2>Browse skill posts from people ready to teach what they know.</h2>
+      <p class="explore-subtitle">
+        Use search, filters, and sorting later to narrow down the skills that
+        fit what you want to learn.
+      </p>
+    </div>
+
+    <div class="explore-toolbar" aria-label="Explore skill tools">
+      <div class="explore-search-area">
+        <label for="exploreSearchInput">Search skills</label>
+        <div class="explore-search-input-group">
+          <input type="text" id="exploreSearchInput" placeholder="Search by skill, topic, or teacher" />
+          <button type="button" class="btn-primary" id="exploreSearchButton">
+            Search
+          </button>
+        </div>
+      </div>
+
+
+      <div class="explore-filter-area">
+        <div class="explore-filter-group">
+          <span>Category</span>
+          <div class="explore-category-options" id="exploreCategoryFilter">
+            <label class="explore-category-option">
+              <input type="checkbox" value="tech" />
+              <span>Technology</span>
+            </label>
+            <label class="explore-category-option">
+              <input type="checkbox" value="fitness" />
+              <span>Fitness</span>
+            </label>
+            <label class="explore-category-option">
+              <input type="checkbox" value="music" />
+              <span>Music</span>
+            </label>
+            <label class="explore-category-option">
+              <input type="checkbox" value="art" />
+              <span>Art</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="explore-filter-group">
+          <label for="exploreSort">Sort by</label>
+          <select id="exploreSort">
+            <option value="id-desc">Newest First</option>
+            <option value="id-asc">Oldest First</option>
+            <option value="title-asc">Title A-Z</option>
+            <option value="title-desc">Title Z-A</option>
+            <option value="creator-asc">Instructor A-Z</option>
+            <option value="creator-desc">Instructor Z-A</option>
+          </select>
+        </div>
+
+        <div class="explore-filter-group">
+          <button type="button" class="btn-primary" id="clearExploreFiltersButton">
+            Clear Filters
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="explore-results">
+      <div class="explore-results-header">
+        <h3>All Skill Posts</h3>
+        <p id="exploreResultsCount">Loading skill posts...</p>
+      </div>
+
+      <div class="card-grid" id="cardGrid" aria-live="polite">
+        <!-- Skill cards render here from the current post data source. -->
+      </div>
+    </div>
+  </div>
 
   <!-- ================= FOOTER ================= -->
   <footer>
@@ -21,10 +97,19 @@
     </div>
   </footer>
 
+  <!-- ================= DIALOG ================= -->
+
+  <dialog id="skillDialog">
+    <h2 id="dialogTitle"></h2>
+    <p id="dialogDescription"></p>
+    <button id="closeDialog">Close</button>
+  </dialog>
 
   <!-- ================= JAVASCRIPT ================= -->
   <script src="js/navigation.js" defer></script>
-  
+  <script src="js/skills.js" defer></script>
+  <script src="js/explore.js" defer></script>
+  <script src="js/explore-filters.js" defer></script>
 </body>
 
 </html>

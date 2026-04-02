@@ -1,3 +1,4 @@
+/* Styling for the Elevate logo to make it not have any default link styles */
 .logo a,
 .logo a:visited,
 .logo a:hover,
@@ -5,4 +6,32 @@
   color: inherit;
   text-decoration: none;
   cursor: default;
+}
+
+.card-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.skill-card {
+  margin: 1em;
+  padding: 0.5em;
+  border-radius: 10px;
+  border: solid grey 2px;
+  width: 100px;
+  height: 200px;
+  overflow: hidden;
+}
+
+.explore-category-options {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.explore-category-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
