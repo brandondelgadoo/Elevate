@@ -1,3 +1,5 @@
+import { getCurrentUser, waitForAuthReady } from "./auth-state.js";
+
 // Wait until the page's HTML has loaded before looking for elements
 document.addEventListener("DOMContentLoaded", () => {
   // This is the container in teach.html where we inject the content
@@ -12,9 +14,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // Stop the script if the container is missing so we avoid errors
   if (!teachContent) return;
 
-  // Temporary placeholder for auth state which will be replaced with real authentication logic in the future
-  // This starts as logged out and only changes when the test button is clicked
-  let isLoggedIn = false;
+  let isLoggedIn = Boolean(getCurrentUser());
   
   let skillDraft = {
     title: "",
@@ -62,7 +62,6 @@ document.addEventListener("DOMContentLoaded", () => {
           </label>
           <div class="teach-form-actions">
             <button type="submit" class="cta-button">Post Skill</button>
-            <button type="button" class="cta-button" id="teach-test-toggle">Test Logout</button>
           </div>
           <p class="teach-form-message" id="teach-form-error"></p>
         </form>
@@ -72,15 +71,14 @@ document.addEventListener("DOMContentLoaded", () => {
       teachContent.innerHTML = `
         <h1>Teach with Elevate</h1>
         <p>Join our community and share your knowledge with learners around the world. Whether you're an expert in a specific field or passionate about teaching, Elevate provides the platform and tools you need to create engaging sessions and reach a global audience.</p>
-        <a href="login.html" class="cta-button">Get Started</a>
-        <button type="button" class="cta-button" id="teach-test-toggle">Test Login</button>
+        <button type="button" class="cta-button" id="teachGetStartedButton">Get Started</button>
       `;
     }
 
     // After rendering the section, grab the elements we need for the form and test button
-    const toggleButton = document.getElementById("teach-test-toggle");
     const teachForm = document.getElementById("teach-form");
     const postAnotherButton = document.getElementById("post-another-skill");
+    const teachGetStartedButton = document.getElementById("teachGetStartedButton");
 
     if (teachForm) {
       const syncDraft = () => {
@@ -203,7 +201,6 @@ document.addEventListener("DOMContentLoaded", () => {
             <div class="teach-form-actions">
               <button type="button" class="cta-button" id="post-another-skill">Post Another Skill</button>
               <a href="explore.html" class="cta-button">Explore Skills</a>
-              <button type="button" class="cta-button" id="teach-test-toggle">Test Logout</button>
             </div>
 
             <div class="teach-posted-skill">
@@ -241,17 +238,21 @@ document.addEventListener("DOMContentLoaded", () => {
       });
     }
 
-    if (toggleButton) {
-      // Flip the fake login state and render the section again when the button is clicked
-      toggleButton.addEventListener("click", () => {
-        isLoggedIn = !isLoggedIn;
-        renderTeachContent();
+    if (teachGetStartedButton) {
+      teachGetStartedButton.addEventListener("click", async () => {
+        await waitForAuthReady();
+
+        if (getCurrentUser()) {
+          window.location.href = "explore.html";
+          return;
+        }
+
+        window.location.href = "login.html";
       });
     }
   }
 
   function renderTeachContentListeners() {
-    const toggleButton = document.getElementById("teach-test-toggle");
     const postAnotherButton = document.getElementById("post-another-skill");
 
     if (postAnotherButton) {
@@ -259,15 +260,13 @@ document.addEventListener("DOMContentLoaded", () => {
         renderTeachContent();
       });
     }
-
-    if (toggleButton) {
-      toggleButton.addEventListener("click", () => {
-        isLoggedIn = !isLoggedIn;
-        renderTeachContent();
-      });
-    }
   }
 
   // Show the default logged-out version when the page first loads
   renderTeachContent();
+
+  waitForAuthReady().then(() => {
+    isLoggedIn = Boolean(getCurrentUser());
+    renderTeachContent();
+  });
 });
