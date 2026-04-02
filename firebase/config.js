@@ -1,8 +1,12 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-app.js";
 import {
   getAuth,
+  browserLocalPersistence,
   createUserWithEmailAndPassword,
+  onAuthStateChanged,
+  setPersistence,
   signInWithEmailAndPassword,
+  signOut,
   sendPasswordResetEmail
 } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-auth.js";
 
@@ -20,7 +24,11 @@ const app = initializeApp(firebaseConfig);
 
 export const auth = getAuth(app);
 export {
+  browserLocalPersistence,
   createUserWithEmailAndPassword,
+  onAuthStateChanged,
+  setPersistence,
   signInWithEmailAndPassword,
+  signOut,
   sendPasswordResetEmail
 };
