@@ -25,7 +25,7 @@ document.getElementById("loginBtn").addEventListener("click", async () => {
   try {
     await signInWithEmailAndPassword(auth, email, password);
     msgBox.textContent = "Signed in! Redirecting...";
-    window.location.href = "index.html";
+    window.location.href = "explore.html";
   } catch (err) {
     const errors = {
       "auth/user-not-found": "No account found with that email.",

@@ -24,7 +24,7 @@ document.getElementById("signupBtn").addEventListener("click", async () => {
   try {
     await createUserWithEmailAndPassword(auth, email, password);
     msgBox.textContent = "Account created! Redirecting...";
-    window.location.href = "index.html";
+    window.location.href = "explore.html";
   } catch (err) {
     const errors = {
       "auth/email-already-in-use": "That email is already registered.",
