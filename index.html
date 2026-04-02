@@ -1,5 +1,6 @@
 <!doctype html>
 <html lang="en">
+
 <head>
   <title>Elevate | Community Skill Sharing</title>
   <meta charset="utf-8">
@@ -10,10 +11,13 @@
   <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=Instrument+Serif&display=swap" rel="stylesheet">
+  <link
+    href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=Instrument+Serif&display=swap"
+    rel="stylesheet">
   <!-- Styles -->
   <link rel="stylesheet" href="styles.css">
 </head>
+
 <body>
 
   <!-- ================= HERO SECTION (with embedded navbar) ================= -->
@@ -41,17 +45,21 @@
             <circle cx="780" cy="690" r="175" fill="url(#ar3)" />
           </g>
           <defs>
-            <filter id="af" x="0" y="0" width="1510" height="1390" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+            <filter id="af" x="0" y="0" width="1510" height="1390" filterUnits="userSpaceOnUse"
+              color-interpolation-filters="sRGB">
               <feGaussianBlur stdDeviation="80" />
             </filter>
             <radialGradient id="ar1" cx="410" cy="410" r="250" gradientUnits="userSpaceOnUse">
-              <stop stop-color="#5EEAD4" /><stop offset="1" stop-color="#5EEAD4" stop-opacity="0" />
+              <stop stop-color="#5EEAD4" />
+              <stop offset="1" stop-color="#5EEAD4" stop-opacity="0" />
             </radialGradient>
             <radialGradient id="ar2" cx="1050" cy="930" r="300" gradientUnits="userSpaceOnUse">
-              <stop stop-color="#818CF8" /><stop offset="1" stop-color="#818CF8" stop-opacity="0" />
+              <stop stop-color="#818CF8" />
+              <stop offset="1" stop-color="#818CF8" stop-opacity="0" />
             </radialGradient>
             <radialGradient id="ar3" cx="780" cy="690" r="175" gradientUnits="userSpaceOnUse">
-              <stop stop-color="#F472B6" /><stop offset="1" stop-color="#F472B6" stop-opacity="0" />
+              <stop stop-color="#F472B6" />
+              <stop offset="1" stop-color="#F472B6" stop-opacity="0" />
             </radialGradient>
           </defs>
         </svg>
@@ -63,9 +71,6 @@
       <div class="container">
         <div class="navbar-inner">
           <div class="navbar-logo" onclick="navigateTo('home')">
-            <svg width="28" height="28" viewBox="0 0 24 24" fill="#5EEAD4" stroke="#5EEAD4" stroke-width="0">
-              <path d="M13 2L3 14h9l-1 10 10-12h-9l1-10z" />
-            </svg>
             <h1 class="logo">Elevate &#127758;</h1>
           </div>
           <nav>
@@ -73,8 +78,11 @@
               <li><a href="#" class="navbar-link active" data-page="home" onclick="navigateTo('home')">Explore</a></li>
               <li>
                 <a href="#" class="navbar-link" data-page="post" onclick="navigateTo('post')">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <circle cx="12" cy="12" r="10" /><path d="M8 12h8" /><path d="M12 8v8" />
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10" />
+                    <path d="M8 12h8" />
+                    <path d="M12 8v8" />
                   </svg>
                   Teach
                 </a>
@@ -82,8 +90,10 @@
               <li><a href="#about" class="navbar-link">About</a></li>
               <li>
                 <a href="#" class="btn-primary">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" /><circle cx="12" cy="7" r="4" />
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" />
+                    <circle cx="12" cy="7" r="4" />
                   </svg>
                   Login
                 </a>
@@ -91,7 +101,8 @@
             </ul>
           </nav>
           <button class="mobile-menu-btn" onclick="toggleMobileMenu()">
-            <svg width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <svg width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
               <path d="M4 6h16M4 12h16M4 18h16" />
             </svg>
           </button>
@@ -172,8 +183,10 @@
         </div>
         <!-- Empty state -->
         <div class="empty-state" id="emptyState" style="display:none;">
-          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="11" cy="11" r="8" /><path d="M21 21l-4.35-4.35" />
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
+            stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8" />
+            <path d="M21 21l-4.35-4.35" />
           </svg>
           <h3>No skills found</h3>
           <p>We couldn't find any skills matching your search. Try changing your filters or keyword.</p>
@@ -188,8 +201,10 @@
     <div class="form-page">
       <div class="form-page-inner">
         <button class="back-btn" onclick="navigateTo('home')">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M19 12H5" /><path d="M12 19l-7-7 7-7" />
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M19 12H5" />
+            <path d="M12 19l-7-7 7-7" />
           </svg>
           Back to Explore
         </button>
@@ -232,8 +247,11 @@
               <label class="form-label" for="skillImage">Cover Image URL <span class="opt">(Optional)</span></label>
               <div class="img-field">
                 <span class="img-field-icon">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2" /><circle cx="8.5" cy="8.5" r="1.5" /><path d="M21 15l-5-5L5 21" />
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                    <circle cx="8.5" cy="8.5" r="1.5" />
+                    <path d="M21 15l-5-5L5 21" />
                   </svg>
                 </span>
                 <input type="url" id="skillImage" class="form-input" placeholder="https://example.com/image.jpg">
@@ -243,7 +261,8 @@
 
             <div class="form-group">
               <label class="form-label" for="skillDesc">Description <span class="opt">(Optional)</span></label>
-              <textarea id="skillDesc" class="form-input" placeholder="Enter a brief description of the skill"></textarea>
+              <textarea id="skillDesc" class="form-input"
+                placeholder="Enter a brief description of the skill"></textarea>
             </div>
 
             <div class="form-submit-wrap">
@@ -260,8 +279,10 @@
     <div class="success-screen">
       <div class="success-card">
         <div class="success-icon">
-          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#5EEAD4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M22 11.08V12a10 10 0 11-5.93-9.14" /><path d="M22 4L12 14.01l-3-3" />
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#5EEAD4" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M22 11.08V12a10 10 0 11-5.93-9.14" />
+            <path d="M22 4L12 14.01l-3-3" />
           </svg>
         </div>
         <h2>Skill Posted!</h2>
@@ -290,4 +311,5 @@
   <!-- ================= JAVASCRIPT ================= -->
   <script src="app.js" defer></script>
 </body>
+
 </html>
