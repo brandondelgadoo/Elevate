@@ -9,38 +9,43 @@
   <!-- SEO Meta -->
   <meta name="description"
     content="Elevate is a community skill-sharing platform where people teach and learn from each other." />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Instrument+Serif&display=swap"
+    rel="stylesheet">
 
   <!-- Styles -->
   <link rel="stylesheet" href="css/styles.css" />
 </head>
 
 <body>
+  <section class="hero-shell">
+    <!-- ================= NAVIGATION ================= -->
+    <div id="site-navbar"></div>
 
-  <!-- ================= NAVIGATION ================= -->
-  <div id="site-navbar"></div>
-
-  <!-- ================= HERO SECTION ================= -->
-  <div class="hero-container">
-    <h2>Learn Something New. Teach What You Know.</h2>
-    <p>
-      Connect with your community through real skills and real experiences.
-    </p>
-    <button class="btn-primary" id="getStartedButton" type="button">Get Started</button>
-  </div>
+    <!-- ================= HERO SECTION ================= -->
+    <div class="hero-container">
+      <div class="eyebrow">
+        <div class="eyebrow-line eyebrow-line-left"></div>
+        <span class="eyebrow-text">Community</span>
+        <div class="eyebrow-line eyebrow-line-right"></div>
+      </div>
+      <h2>Learn Something New. Teach What You Know.</h2>
+      <p>
+        Connect with your community through real skills and real experiences.
+      </p>
+      <button class="btn-primary" id="getStartedButton" type="button">Get Started</button>
+    </div>
+  </section>
 
   <!-- ================= FEATURED SKILL LISTINGS ================= -->
   <div class="featured-listings-container">
     <h3>Featured Skills</h3>
+    <p>Explore standout community skills and jump into learning faster.</p>
 
     <div class="card-grid" id="skillsContainer">
       <!-- Skill cards will be inserted here dynamically with JS later -->
-
-      <!-- Example Static Card -->
-      <div class="skill-card">
-        <h4>Intro to Web Development</h4>
-        <p>Learn HTML, CSS, and JavaScript fundamentals.</p>
-        <span class="category-tag">Technology</span>
-      </div>
     </div>
   </div>
 

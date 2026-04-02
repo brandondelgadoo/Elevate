@@ -5,6 +5,11 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Login | Elevate</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Instrument+Serif&display=swap"
+    rel="stylesheet">
   <link rel="stylesheet" href="css/styles.css">
   <link rel="stylesheet" href="css/auth-dialog.css">
 </head>
@@ -15,15 +20,25 @@
   <div id="site-navbar"></div>
 
 
-  <!-- ================= LOGIN FORM ================= -->
-  <h1>Login</h1>
+  <main class="auth-page-shell">
+    <section class="auth-card">
+      <p class="explore-eyebrow">Welcome Back</p>
+      <h1>Login</h1>
+      <p>Sign in to continue learning, teaching, and managing your community skills.</p>
 
-  <input type="email" id="email" placeholder="Email">
-  <input type="password" id="password" placeholder="Password">
-  <button id="loginBtn">Sign In</button>
-  <p id="msgBox"></p>
-  <p>Forgot password? <a href="#" id="forgotPasswordLink">Reset it</a></p>
-  <p>No account? <a href="signup.html">Sign up</a></p>
+      <form id="loginForm">
+        <input type="email" id="email" placeholder="Email">
+        <input type="password" id="password" placeholder="Password">
+        <button id="loginBtn" type="button">Sign In</button>
+        <p id="msgBox"></p>
+      </form>
+
+      <div class="auth-links">
+        <p>Forgot password? <a href="#" id="forgotPasswordLink">Reset it</a></p>
+        <p>No account? <a href="signup.html">Sign up</a></p>
+      </div>
+    </section>
+  </main>
 
 
   <!-- ================= FORGOT PASSWORD DIALOG ================= -->

@@ -5,6 +5,11 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Sign Up | Elevate</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Instrument+Serif&display=swap"
+    rel="stylesheet">
   <link rel="stylesheet" href="css/styles.css">
 </head>
 
@@ -14,15 +19,25 @@
   <div id="site-navbar"></div>
 
 
-  <!-- ================= SIGNUP FORM ================= -->
-  <h1>Create Account</h1>
+  <main class="auth-page-shell">
+    <section class="auth-card">
+      <p class="explore-eyebrow">Create Account</p>
+      <h1>Join Elevate</h1>
+      <p>Create your account to start exploring and sharing skills with the community.</p>
 
-  <input type="email" id="email" placeholder="Email">
-  <input type="password" id="password" placeholder="Password">
-  <input type="password" id="confirmPassword" placeholder="Confirm Password">
-  <button id="signupBtn">Sign Up</button>
-  <p id="msgBox"></p>
-  <p>Already have an account? <a href="login.html">Log in</a></p>
+      <form id="signupForm">
+        <input type="email" id="email" placeholder="Email">
+        <input type="password" id="password" placeholder="Password">
+        <input type="password" id="confirmPassword" placeholder="Confirm Password">
+        <button id="signupBtn" type="button">Sign Up</button>
+        <p id="msgBox"></p>
+      </form>
+
+      <div class="auth-links">
+        <p>Already have an account? <a href="login.html">Log in</a></p>
+      </div>
+    </section>
+  </main>
 
 
   <!-- ================= FOOTER ================= -->

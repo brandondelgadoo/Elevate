@@ -14,15 +14,17 @@ function renderNavbar(user) {
 
   navbarMount.innerHTML = `
     <div class="navbar">
-      <h1 class="logo"><a href="index.html">Elevate</a></h1>
-      <nav>
-        <ul class="nav-links">
-          <li><a href="about.html">About</a></li>
-          <li><a href="explore.html">Explore</a></li>
-          <li><a href="teach.html">Teach</a></li>
-          ${authLink}
-        </ul>
-      </nav>
+      <div class="navbar-inner">
+        <h1 class="logo"><a href="index.html">Elevate</a></h1>
+        <nav>
+          <ul class="nav-links">
+            <li><a href="about.html">About</a></li>
+            <li><a href="explore.html">Explore</a></li>
+            <li><a href="teach.html">Teach</a></li>
+            ${authLink}
+          </ul>
+        </nav>
+      </div>
     </div>
   `;
 
