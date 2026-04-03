@@ -1,7 +1,9 @@
 import {
   auth,
+  googleProvider,
   sendPasswordResetEmail,
-  signInWithEmailAndPassword
+  signInWithEmailAndPassword,
+  signInWithPopup
 } from "../firebase/config.js";
 
 const forgotPasswordLink = document.getElementById("forgotPasswordLink");
@@ -27,6 +29,8 @@ document.getElementById("loginBtn").addEventListener("click", async () => {
     msgBox.textContent = "Signed in! Redirecting...";
     window.location.href = "explore.html";
   } catch (err) {
+    console.error("Email/password login failed:", err.code, err.message);
+
     const errors = {
       "auth/user-not-found": "No account found with that email.",
       "auth/wrong-password": "Incorrect password.",
@@ -36,6 +40,30 @@ document.getElementById("loginBtn").addEventListener("click", async () => {
     };
 
     msgBox.textContent = errors[err.code] || "Something went wrong.";
+  }
+});
+
+document.getElementById("googleLoginBtn").addEventListener("click", async () => {
+  const msgBox = document.getElementById("msgBox");
+
+  try {
+    msgBox.textContent = "Connecting to Google...";
+    await signInWithPopup(auth, googleProvider);
+    msgBox.textContent = "Signed in with Google! Redirecting...";
+    window.location.href = "explore.html";
+  } catch (err) {
+    console.error("Google login failed:", err.code, err.message);
+
+    const errors = {
+      "auth/popup-closed-by-user": "Google sign-in was closed before finishing.",
+      "auth/cancelled-popup-request": "Google sign-in was cancelled.",
+      "auth/popup-blocked": "Your browser blocked the Google sign-in popup.",
+      "auth/operation-not-allowed": "Google sign-in is not enabled in Firebase Authentication.",
+      "auth/unauthorized-domain": "This domain is not authorized in your Firebase Authentication settings.",
+      "auth/network-request-failed": "Network error. Try again."
+    };
+
+    msgBox.textContent = errors[err.code] || "Unable to sign in with Google right now.";
   }
 });
 
