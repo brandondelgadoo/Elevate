@@ -172,6 +172,12 @@ dialog {
   color: rgba(255, 255, 255, 0.95);
 }
 
+.logo img {
+  height: 36px;
+  width: auto;
+  display: block;
+}
+
 .logo a,
 .logo a:visited,
 .logo a:hover,
@@ -287,6 +293,8 @@ dialog {
 }
 
 .hero-container h2 {
+  font-family: "Dosis", sans-serif;
+  font-weight: 600;
   font-size: clamp(3rem, 8vw, 5.5rem);
   color: #f5f9ff;
 }
@@ -395,6 +403,20 @@ dialog {
 .about-page-shell,
 .auth-page-shell {
   padding: 44px 0 68px;
+}
+
+.explore-banner {
+  width: 100%;
+  background: #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 16px;
+}
+
+.explore-banner-logo {
+  max-height: 80px;
+  width: auto;
 }
 
 .explore-hero {
@@ -638,6 +660,13 @@ footer {
   background: rgba(10, 10, 20, 0.62);
   color: var(--text-dim);
   text-align: center;
+}
+
+.footer-logo {
+  height: 1.2em;
+  width: auto;
+  vertical-align: middle;
+  display: inline;
 }
 
 @media (max-width: 900px) {
