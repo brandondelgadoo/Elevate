@@ -1,13 +1,16 @@
 import { auth, signOut } from "../firebase/config.js";
 import { getCurrentUser, waitForAuthReady } from "./auth-state.js";
+import { buildProfileDisplayName, getUserProfile } from "./user-profile.js";
 
 function renderNavbar(user) {
   const navbarMount = document.getElementById("site-navbar");
   if (!navbarMount) return;
+  const userProfile = user ? getUserProfile(user.uid) : null;
+  const navDisplayName = buildProfileDisplayName(user, userProfile);
 
   const authLink = user
     ? `
-      <li><span class="nav-user">Hi, ${user.email}</span></li>
+      <li><span class="nav-user">Hi, ${navDisplayName}</span></li>
       <li><button id="logoutBtn" type="button" class="btn-primary">Logout</button></li>
     `
     : `<li><a href="login.html" class="btn-primary">Login</a></li>`;

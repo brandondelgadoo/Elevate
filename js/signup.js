@@ -4,31 +4,171 @@ import {
   googleProvider,
   signInWithPopup
 } from "../firebase/config.js";
+import { isUsernameTaken, saveUserProfile } from "./user-profile.js";
 
-document.getElementById("signupBtn").addEventListener("click", async () => {
-  const email = document.getElementById("email").value.trim();
-  const password = document.getElementById("password").value;
-  const confirmPassword = document.getElementById("confirmPassword").value;
-  const msgBox = document.getElementById("msgBox");
+const allowedInterests = ["tech", "fitness", "music", "art"];
+const credentialsStep = document.getElementById("signupCredentialsStep");
+const profileStep = document.getElementById("signupProfileStep");
+const signupProfileHeading = document.getElementById("signupProfileHeading");
+const continueSignupBtn = document.getElementById("continueSignupBtn");
+const backToCredentialsBtn = document.getElementById("backToCredentialsBtn");
+const signupBtn = document.getElementById("signupBtn");
+const googleSignupBtn = document.getElementById("googleSignupBtn");
+const msgBox = document.getElementById("msgBox");
+let pendingGoogleUser = null;
 
-  if (!email || !password || !confirmPassword) {
-    msgBox.textContent = "Please fill in all fields.";
+function showCredentialsStep() {
+  credentialsStep.hidden = false;
+  profileStep.hidden = true;
+  msgBox.textContent = "";
+  pendingGoogleUser = null;
+}
+
+function showProfileStep(mode = "email") {
+  credentialsStep.hidden = mode === "google";
+  profileStep.hidden = false;
+  signupProfileHeading.textContent =
+    mode === "google" ? "Complete your profile" : "Tell us about yourself";
+  backToCredentialsBtn.hidden = mode === "google";
+  signupBtn.textContent = mode === "google" ? "Finish Sign Up" : "Create Account";
+  googleSignupBtn.disabled = mode === "google";
+  msgBox.textContent = "";
+}
+
+function getSelectedInterests() {
+  return Array.from(document.querySelectorAll('input[name="interests"]:checked'))
+    .map((input) => input.value)
+    .filter((value) => allowedInterests.includes(value));
+}
+
+function getSignupFormValues() {
+  return {
+    username: document.getElementById("username").value.trim(),
+    firstName: document.getElementById("firstName").value.trim(),
+    lastName: document.getElementById("lastName").value.trim(),
+    email: document.getElementById("email").value.trim(),
+    password: document.getElementById("password").value,
+    confirmPassword: document.getElementById("confirmPassword").value,
+    interests: getSelectedInterests()
+  };
+}
+
+function validateCredentialsStep(values, { emailRequired = true } = {}) {
+  if (!values.password || !values.confirmPassword) {
+    return "Please fill in all required fields.";
+  }
+
+  if (emailRequired && !values.email) {
+    return "Please fill in all required fields.";
+  }
+
+  if (emailRequired && !/\S+@\S+\.\S+/.test(values.email)) {
+    return "Please enter a valid email address.";
+  }
+
+  if (values.password !== values.confirmPassword) {
+    return "Passwords do not match.";
+  }
+
+  if (values.password.length < 6) {
+    return "Password must be at least 6 characters.";
+  }
+
+  return "";
+}
+
+function validateProfileStep(values) {
+  if (!values.username || !values.firstName || !values.lastName) {
+    return "Please fill in all required fields.";
+  }
+
+  if (!/^[a-zA-Z0-9_]{3,20}$/.test(values.username)) {
+    return "Username must be 3-20 characters and only use letters, numbers, or underscores.";
+  }
+
+  if (isUsernameTaken(values.username)) {
+    return "That username is already taken.";
+  }
+
+  if (!values.interests.length) {
+    return "Choose at least one category you're interested in.";
+  }
+
+  return "";
+}
+
+function buildProfileFromValues(user, values) {
+  return {
+    uid: user.uid,
+    email: user.email || values.email,
+    username: values.username.toLowerCase(),
+    firstName: values.firstName,
+    lastName: values.lastName,
+    interests: values.interests,
+    authProvider: user.providerData?.[0]?.providerId || "password"
+  };
+}
+
+continueSignupBtn.addEventListener("click", () => {
+  const formValues = getSignupFormValues();
+  const validationMessage = validateCredentialsStep(formValues);
+
+  if (validationMessage) {
+    msgBox.textContent = validationMessage;
     return;
   }
 
-  if (password !== confirmPassword) {
-    msgBox.textContent = "Passwords do not match.";
+  showProfileStep();
+});
+
+backToCredentialsBtn.addEventListener("click", () => {
+  showCredentialsStep();
+  googleSignupBtn.disabled = false;
+});
+
+signupBtn.addEventListener("click", async () => {
+  const formValues = getSignupFormValues();
+  const profileValidationMessage = validateProfileStep(formValues);
+
+  if (pendingGoogleUser) {
+    if (profileValidationMessage) {
+      msgBox.textContent = profileValidationMessage;
+      return;
+    }
+
+    try {
+      saveUserProfile(buildProfileFromValues(pendingGoogleUser, formValues));
+      msgBox.textContent = "Profile saved! Redirecting...";
+      window.location.href = "explore.html";
+    } catch (error) {
+      console.error("Unable to save Google signup profile.", error);
+      msgBox.textContent = "We couldn't finish setting up your profile right now.";
+    }
     return;
   }
 
-  if (password.length < 6) {
-    msgBox.textContent = "Password must be at least 6 characters.";
+  const credentialsValidationMessage = validateCredentialsStep(formValues);
+
+  if (credentialsValidationMessage) {
+    msgBox.textContent = credentialsValidationMessage;
+    showCredentialsStep();
+    return;
+  }
+
+  if (profileValidationMessage) {
+    msgBox.textContent = profileValidationMessage;
     return;
   }
 
   try {
-    await createUserWithEmailAndPassword(auth, email, password);
-    msgBox.textContent = "Account created! Redirecting...";
+    const userCredential = await createUserWithEmailAndPassword(
+      auth,
+      formValues.email,
+      formValues.password
+    );
+
+    saveUserProfile(buildProfileFromValues(userCredential.user, formValues));
+    msgBox.textContent = "Account created and profile saved! Redirecting...";
     window.location.href = "explore.html";
   } catch (err) {
     console.error("Email/password signup failed:", err.code, err.message);
@@ -44,14 +184,20 @@ document.getElementById("signupBtn").addEventListener("click", async () => {
   }
 });
 
-document.getElementById("googleSignupBtn").addEventListener("click", async () => {
-  const msgBox = document.getElementById("msgBox");
-
+googleSignupBtn.addEventListener("click", async () => {
   try {
     msgBox.textContent = "Connecting to Google...";
-    await signInWithPopup(auth, googleProvider);
-    msgBox.textContent = "Signed up with Google! Redirecting...";
-    window.location.href = "explore.html";
+    const userCredential = await signInWithPopup(auth, googleProvider);
+    pendingGoogleUser = userCredential.user;
+
+    const [firstName = "", ...restOfName] = (userCredential.user.displayName || "").trim().split(/\s+/);
+    const lastName = restOfName.join(" ");
+
+    document.getElementById("firstName").value ||= firstName;
+    document.getElementById("lastName").value ||= lastName;
+
+    showProfileStep("google");
+    msgBox.textContent = "One more step: finish setting up your profile.";
   } catch (err) {
     console.error("Google signup failed:", err.code, err.message);
 
@@ -64,6 +210,10 @@ document.getElementById("googleSignupBtn").addEventListener("click", async () =>
       "auth/network-request-failed": "Network error. Try again."
     };
 
+    pendingGoogleUser = null;
+    googleSignupBtn.disabled = false;
     msgBox.textContent = errors[err.code] || "Unable to sign up with Google right now.";
   }
 });
+
+showCredentialsStep();

@@ -17,10 +17,41 @@
   <!-- ================= SIGNUP FORM ================= -->
   <h1>Create Account</h1>
 
-  <input type="email" id="email" placeholder="Email">
-  <input type="password" id="password" placeholder="Password">
-  <input type="password" id="confirmPassword" placeholder="Confirm Password">
-  <button id="signupBtn">Sign Up</button>
+  <div id="signupCredentialsStep">
+    <input type="email" id="email" placeholder="Email">
+    <input type="password" id="password" placeholder="Password">
+    <input type="password" id="confirmPassword" placeholder="Confirm Password">
+    <button id="continueSignupBtn" type="button">Continue</button>
+  </div>
+
+  <div id="signupProfileStep" hidden>
+    <h2 id="signupProfileHeading">Tell us about yourself</h2>
+    <input type="text" id="username" placeholder="Username">
+    <input type="text" id="firstName" placeholder="First Name">
+    <input type="text" id="lastName" placeholder="Last Name">
+    <fieldset>
+      <legend>Categories you're interested in</legend>
+      <label>
+        <input type="checkbox" name="interests" value="tech">
+        Technology
+      </label>
+      <label>
+        <input type="checkbox" name="interests" value="fitness">
+        Fitness
+      </label>
+      <label>
+        <input type="checkbox" name="interests" value="music">
+        Music
+      </label>
+      <label>
+        <input type="checkbox" name="interests" value="art">
+        Art
+      </label>
+    </fieldset>
+    <button id="backToCredentialsBtn" type="button">Back</button>
+    <button id="signupBtn" type="button">Create Account</button>
+  </div>
+
   <div class="auth-divider">or</div>
   <button type="button" id="googleSignupBtn" class="google-auth-btn">
     <span class="google-auth-btn__icon">G</span>
