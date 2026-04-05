@@ -73,3 +73,8 @@
   font-size: 14px;
   font-weight: 700;
 }
+
+.nav-link-disabled {
+  color: #888;
+  cursor: not-allowed;
+}

@@ -51,6 +51,25 @@ export function getUserProfile(uid) {
   return profilesMap[uid] || null;
 }
 
+export function isUserProfileComplete(profile) {
+  if (!profile) {
+    return false;
+  }
+
+  const hasRequiredTextFields = [
+    profile.username,
+    profile.firstName,
+    profile.lastName,
+    profile.accountGoal,
+    profile.city
+  ].every((value) => typeof value === "string" && value.trim() !== "");
+
+  const hasValidInterests =
+    Array.isArray(profile.interests) && profile.interests.length > 0;
+
+  return hasRequiredTextFields && hasValidInterests;
+}
+
 export function isUsernameTaken(username, excludeUid = "") {
   if (!username) {
     return false;

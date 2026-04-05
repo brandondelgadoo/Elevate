@@ -4,7 +4,13 @@ import {
   googleProvider,
   signInWithPopup
 } from "../firebase/config.js";
-import { isUsernameTaken, saveUserProfile } from "./user-profile.js";
+import { getCurrentUser, waitForAuthReady } from "./auth-state.js";
+import {
+  getUserProfile,
+  isUsernameTaken,
+  isUserProfileComplete,
+  saveUserProfile
+} from "./user-profile.js";
 
 const allowedInterests = ["tech", "fitness", "music", "art"];
 const credentialsStep = document.getElementById("signupCredentialsStep");
@@ -16,23 +22,56 @@ const signupBtn = document.getElementById("signupBtn");
 const googleSignupBtn = document.getElementById("googleSignupBtn");
 const msgBox = document.getElementById("msgBox");
 let pendingGoogleUser = null;
+let profileCompletionMode = false;
 
 function showCredentialsStep() {
   credentialsStep.hidden = false;
   profileStep.hidden = true;
   msgBox.textContent = "";
   pendingGoogleUser = null;
+  profileCompletionMode = false;
+  continueSignupBtn.hidden = false;
+  googleSignupBtn.hidden = false;
+  googleSignupBtn.disabled = false;
 }
 
 function showProfileStep(mode = "email") {
-  credentialsStep.hidden = mode === "google";
+  credentialsStep.hidden = mode !== "email";
   profileStep.hidden = false;
   signupProfileHeading.textContent =
-    mode === "google" ? "Complete your profile" : "Tell us about yourself";
-  backToCredentialsBtn.hidden = mode === "google";
-  signupBtn.textContent = mode === "google" ? "Finish Sign Up" : "Create Account";
+    mode === "email" ? "Tell us about yourself" : "Complete your profile";
+  backToCredentialsBtn.hidden = mode !== "email";
+  signupBtn.textContent = mode === "email" ? "Create Account" : "Save Profile";
   googleSignupBtn.disabled = mode === "google";
   msgBox.textContent = "";
+}
+
+function populateProfileFields(user, profile = null) {
+  const [derivedFirstName = "", ...restOfName] = (user?.displayName || "").trim().split(/\s+/);
+  const derivedLastName = restOfName.join(" ");
+
+  document.getElementById("username").value = profile?.username || "";
+  document.getElementById("firstName").value = profile?.firstName || derivedFirstName;
+  document.getElementById("lastName").value = profile?.lastName || derivedLastName;
+  document.getElementById("accountGoal").value = profile?.accountGoal || "";
+  document.getElementById("city").value = profile?.city || "";
+  document.getElementById("bio").value = profile?.bio || "";
+
+  const selectedInterests = new Set(profile?.interests || []);
+  document.querySelectorAll('input[name="interests"]').forEach((input) => {
+    input.checked = selectedInterests.has(input.value);
+  });
+}
+
+function showAuthenticatedProfileCompletion(user, profile = null) {
+  pendingGoogleUser = user;
+  profileCompletionMode = true;
+  continueSignupBtn.hidden = true;
+  googleSignupBtn.hidden = true;
+  credentialsStep.hidden = true;
+  populateProfileFields(user, profile);
+  showProfileStep("complete");
+  msgBox.textContent = "Finish your Elevate profile to continue.";
 }
 
 function getSelectedInterests() {
@@ -80,7 +119,7 @@ function validateCredentialsStep(values, { emailRequired = true } = {}) {
   return "";
 }
 
-function validateProfileStep(values) {
+function validateProfileStep(values, excludeUid = "") {
   if (
     !values.username ||
     !values.firstName ||
@@ -95,7 +134,7 @@ function validateProfileStep(values) {
     return "Username must be 3-20 characters and only use letters, numbers, or underscores.";
   }
 
-  if (isUsernameTaken(values.username)) {
+  if (isUsernameTaken(values.username, excludeUid)) {
     return "That username is already taken.";
   }
 
@@ -152,9 +191,12 @@ backToCredentialsBtn.addEventListener("click", () => {
 
 signupBtn.addEventListener("click", async () => {
   const formValues = getSignupFormValues();
-  const profileValidationMessage = validateProfileStep(formValues);
+  const profileValidationMessage = validateProfileStep(
+    formValues,
+    pendingGoogleUser?.uid || ""
+  );
 
-  if (pendingGoogleUser) {
+  if (pendingGoogleUser && (profileCompletionMode || credentialsStep.hidden)) {
     if (profileValidationMessage) {
       msgBox.textContent = profileValidationMessage;
       return;
@@ -240,4 +282,20 @@ googleSignupBtn.addEventListener("click", async () => {
   }
 });
 
-showCredentialsStep();
+waitForAuthReady().then(() => {
+  const currentUser = getCurrentUser();
+
+  if (!currentUser) {
+    showCredentialsStep();
+    return;
+  }
+
+  const existingProfile = getUserProfile(currentUser.uid);
+
+  if (isUserProfileComplete(existingProfile)) {
+    window.location.href = "explore.html";
+    return;
+  }
+
+  showAuthenticatedProfileCompletion(currentUser, existingProfile);
+});

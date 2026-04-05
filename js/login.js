@@ -5,6 +5,7 @@ import {
   signInWithEmailAndPassword,
   signInWithPopup
 } from "../firebase/config.js";
+import { getUserProfile, isUserProfileComplete } from "./user-profile.js";
 
 const forgotPasswordLink = document.getElementById("forgotPasswordLink");
 const forgotPasswordDialog = document.getElementById("forgotPasswordDialog");
@@ -13,6 +14,11 @@ const resetMsgBox = document.getElementById("resetMsgBox");
 const sendResetBtn = document.getElementById("sendResetBtn");
 const closeResetDialogBtn = document.getElementById("closeResetDialogBtn");
 const dismissResetDialogBtn = document.getElementById("dismissResetDialogBtn");
+
+function getPostLoginRedirectPath(user) {
+  const profile = getUserProfile(user?.uid);
+  return isUserProfileComplete(profile) ? "explore.html" : "signup.html";
+}
 
 document.getElementById("loginBtn").addEventListener("click", async () => {
   const email = document.getElementById("email").value.trim();
@@ -25,9 +31,9 @@ document.getElementById("loginBtn").addEventListener("click", async () => {
   }
 
   try {
-    await signInWithEmailAndPassword(auth, email, password);
+    const userCredential = await signInWithEmailAndPassword(auth, email, password);
     msgBox.textContent = "Signed in! Redirecting...";
-    window.location.href = "explore.html";
+    window.location.href = getPostLoginRedirectPath(userCredential.user);
   } catch (err) {
     console.error("Email/password login failed:", err.code, err.message);
 
@@ -48,9 +54,9 @@ document.getElementById("googleLoginBtn").addEventListener("click", async () => 
 
   try {
     msgBox.textContent = "Connecting to Google...";
-    await signInWithPopup(auth, googleProvider);
+    const userCredential = await signInWithPopup(auth, googleProvider);
     msgBox.textContent = "Signed in with Google! Redirecting...";
-    window.location.href = "explore.html";
+    window.location.href = getPostLoginRedirectPath(userCredential.user);
   } catch (err) {
     console.error("Google login failed:", err.code, err.message);
 
