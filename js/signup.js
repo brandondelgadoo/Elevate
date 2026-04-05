@@ -46,6 +46,9 @@ function getSignupFormValues() {
     username: document.getElementById("username").value.trim(),
     firstName: document.getElementById("firstName").value.trim(),
     lastName: document.getElementById("lastName").value.trim(),
+    accountGoal: document.getElementById("accountGoal").value,
+    city: document.getElementById("city").value.trim(),
+    bio: document.getElementById("bio").value.trim(),
     email: document.getElementById("email").value.trim(),
     password: document.getElementById("password").value,
     confirmPassword: document.getElementById("confirmPassword").value,
@@ -78,7 +81,13 @@ function validateCredentialsStep(values, { emailRequired = true } = {}) {
 }
 
 function validateProfileStep(values) {
-  if (!values.username || !values.firstName || !values.lastName) {
+  if (
+    !values.username ||
+    !values.firstName ||
+    !values.lastName ||
+    !values.accountGoal ||
+    !values.city
+  ) {
     return "Please fill in all required fields.";
   }
 
@@ -94,6 +103,18 @@ function validateProfileStep(values) {
     return "Choose at least one category you're interested in.";
   }
 
+  if (!["learn", "teach", "both"].includes(values.accountGoal)) {
+    return "Choose how you plan to use Elevate.";
+  }
+
+  if (values.city.length < 2 || values.city.length > 80) {
+    return "Please enter a valid city.";
+  }
+
+  if (values.bio.length > 240) {
+    return "Your bio must be 240 characters or fewer.";
+  }
+
   return "";
 }
 
@@ -104,6 +125,9 @@ function buildProfileFromValues(user, values) {
     username: values.username.toLowerCase(),
     firstName: values.firstName,
     lastName: values.lastName,
+    accountGoal: values.accountGoal,
+    city: values.city,
+    bio: values.bio,
     interests: values.interests,
     authProvider: user.providerData?.[0]?.providerId || "password"
   };
