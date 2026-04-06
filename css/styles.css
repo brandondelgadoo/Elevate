@@ -1,3 +1,19 @@
+@font-face {
+  font-family: "Nunito Sans";
+  src: url("../fonts/NunitoSans.ttf") format("truetype");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Nunito Sans";
+  src: url("../fonts/NunitoSans-Italic.ttf") format("truetype");
+  font-weight: 100 900;
+  font-style: italic;
+  font-display: swap;
+}
+
 :root {
   --font-size: 16px;
   --background: #0f0f1a;
@@ -39,7 +55,9 @@ body {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  font-family: "DM Sans", sans-serif;
+  font-family: "Nunito Sans", sans-serif;
+  font-size: 18px;
+  font-weight: 700;
   background:
     radial-gradient(circle at top, rgba(95, 122, 199, 0.24), transparent 30%),
     linear-gradient(180deg, #070c18 0%, #0f0f1a 38%, #131427 100%);
@@ -286,16 +304,17 @@ dialog {
 .about-page-shell h1,
 .auth-card h1 {
   margin: 0 0 16px;
-  font-family: "Instrument Serif", serif;
-  font-weight: 400;
+  font-family: "Nunito Sans", sans-serif;
+  font-weight: 700;
+  font-size: 36px;
   letter-spacing: -0.03em;
   line-height: 1.04;
 }
 
 .hero-container h2 {
-  font-family: "Dosis", sans-serif;
-  font-weight: 600;
-  font-size: clamp(3rem, 8vw, 5.5rem);
+  font-family: "Nunito Sans", sans-serif;
+  font-weight: 700;
+  font-size: 36px;
   color: #f5f9ff;
 }
 
@@ -335,7 +354,9 @@ dialog {
 .featured-listings-container h3,
 .explore-results-header h3 {
   margin: 0 0 8px;
-  font-size: 1.9rem;
+  font-family: "Nunito Sans", sans-serif;
+  font-weight: 700;
+  font-size: 36px;
   color: #ffffff;
 }
 
@@ -372,7 +393,9 @@ dialog {
 .skill-card h4,
 .skill-post-title {
   margin: 0;
-  font-size: 1.2rem;
+  font-family: "Nunito Sans", sans-serif;
+  font-weight: 700;
+  font-size: 36px;
   color: #ffffff;
 }
 
@@ -426,7 +449,7 @@ dialog {
 
 .explore-hero h2 {
   max-width: 760px;
-  font-size: clamp(2.4rem, 6vw, 4rem);
+  font-size: 36px;
   color: #f4f8ff;
 }
 
@@ -549,6 +572,9 @@ dialog {
 
 #skillDialog h2 {
   margin: 0 0 12px;
+  font-family: "Nunito Sans", sans-serif;
+  font-weight: 700;
+  font-size: 36px;
   color: #ffffff;
 }
 
@@ -613,7 +639,7 @@ dialog {
 }
 
 .auth-card h1 {
-  font-size: clamp(2.4rem, 5vw, 3.6rem);
+  font-size: 36px;
   color: #ffffff;
 }
 
@@ -638,7 +664,7 @@ dialog {
 }
 
 .about-card h1 {
-  font-size: clamp(2.3rem, 5vw, 3.6rem);
+  font-size: 36px;
   color: #ffffff;
 }
 
