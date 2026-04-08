@@ -19,10 +19,12 @@ document.addEventListener("DOMContentLoaded", () => {
     return skillPosts.filter((skillPost) => {
       const title = (skillPost.title || "").toLowerCase();
       const createdBy = (skillPost.createdBy || "").toLowerCase();
+      const description = (skillPost.description || "").toLowerCase();
 
       return (
         title.includes(normalizedSearchTerm) ||
-        createdBy.includes(normalizedSearchTerm)
+        createdBy.includes(normalizedSearchTerm) ||
+        description.includes(normalizedSearchTerm)
       );
     });
   }
