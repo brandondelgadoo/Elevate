@@ -1,6 +1,7 @@
-// Wait until the page's HTML has loaded before looking for elements
+import { getCurrentUser, waitForAuthReady } from "./auth-state.js";
+import { buildProfileDisplayName, getUserProfile } from "./user-profile.js";
+
 document.addEventListener("DOMContentLoaded", () => {
-  // This is the container in teach.html where we inject the content
   const teachContent = document.getElementById("teach-content");
   const categoryOptions = [
     { value: "tech", label: "Technology" },
@@ -9,39 +10,131 @@ document.addEventListener("DOMContentLoaded", () => {
     { value: "art", label: "Art" }
   ];
 
-  // Stop the script if the container is missing so we avoid errors
   if (!teachContent) return;
 
-  // Temporary placeholder for auth state which will be replaced with real authentication logic in the future
-  // This starts as logged out and only changes when the test button is clicked
-  let isLoggedIn = false;
-  
+  let isLoggedIn = Boolean(getCurrentUser());
+
   let skillDraft = {
     title: "",
-    instructor: "",
     category: "",
-    description: ""
+    description: "",
+    maxPeoplePerSession: "",
+    sessionLengthMinutes: "",
+    availableDates: [""],
+    cardImageUrl: ""
   };
 
-  // const submissionDelayMs = 2000; // Use this variable to adjust the simulated delay for form submission to mimic real-world network latency and processing time
-  // Rebuild the teach page content whenever the login state changes
+  function escapeHtml(value = "") {
+    return String(value)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#39;");
+  }
+
+  function getCurrentProfile() {
+    const user = getCurrentUser();
+
+    if (!user) {
+      return null;
+    }
+
+    return getUserProfile(user.uid);
+  }
+
+  function getDefaultInstructorName() {
+    const user = getCurrentUser();
+    const profile = getCurrentProfile();
+
+    return buildProfileDisplayName(user, profile);
+  }
+
+  function getDateFieldValues() {
+    const dateInputs = document.querySelectorAll(".teach-availability-input");
+
+    return Array.from(dateInputs, (input) => input.value);
+  }
+
+  function ensureInstructorDraft() {
+    if (!isLoggedIn) {
+      return;
+    }
+  }
+
+  function ensureDateDraft() {
+    if (!Array.isArray(skillDraft.availableDates) || !skillDraft.availableDates.length) {
+      skillDraft.availableDates = [""];
+    }
+  }
+
+  function renderDateFields() {
+    ensureDateDraft();
+
+    return skillDraft.availableDates
+      .map((dateValue, index) => {
+        return `
+          <div class="teach-availability-row">
+            <input
+              type="datetime-local"
+              class="teach-availability-input"
+              data-index="${index}"
+              value="${escapeHtml(dateValue)}"
+            >
+            <button
+              type="button"
+              class="teach-secondary-button teach-remove-date-button"
+              data-index="${index}"
+              ${skillDraft.availableDates.length === 1 ? "disabled" : ""}
+            >
+              Remove
+            </button>
+          </div>
+        `;
+      })
+      .join("");
+  }
+
+  function syncDraft() {
+    const titleInput = document.getElementById("skill-title");
+    const categoryInput = document.getElementById("skill-category");
+    const descriptionInput = document.getElementById("skill-description");
+    const peopleInput = document.getElementById("skill-max-people");
+    const sessionLengthInput = document.getElementById("skill-session-length");
+    const cardImageInput = document.getElementById("skill-card-image");
+
+    skillDraft = {
+      title: titleInput?.value || "",
+      category: categoryInput?.value || "",
+      description: descriptionInput?.value || "",
+      maxPeoplePerSession: peopleInput?.value || "",
+      sessionLengthMinutes: sessionLengthInput?.value || "",
+      availableDates: getDateFieldValues(),
+      cardImageUrl: cardImageInput?.value || ""
+    };
+  }
+
   function renderTeachContent() {
+    ensureInstructorDraft();
+    ensureDateDraft();
+
     if (isLoggedIn) {
-      // Logged-in version of the section
+      const accountLabel = escapeHtml(getDefaultInstructorName());
+
       teachContent.innerHTML = `
-        <h1>Welcome back</h1>
-        <p>You're logged in and ready to offer a new skill to the Elevate community.</p>
+        <h1>Share a session</h1>
+        <p>Create a teach post with the details learners need before they reach out.</p>
         <form class="teach-form" id="teach-form">
           <label class="teach-form-field" for="skill-title">
             <span>Title</span>
-            <input type="text" id="skill-title" name="title" placeholder="Intro to Public Speaking" value="${skillDraft.title}">
+            <input type="text" id="skill-title" name="title" placeholder="Intro to Public Speaking" value="${escapeHtml(skillDraft.title)}">
             <span class="teach-form-message" id="title-error"></span>
           </label>
-          <label class="teach-form-field" for="skill-instructor">
-            <span>Instructor / Offered By</span>
-            <input type="text" id="skill-instructor" name="instructor" placeholder="Brandon Delgado" value="${skillDraft.instructor}">
-            <span class="teach-form-message" id="instructor-error"></span>
-          </label>
+          <div class="teach-form-field">
+            <span>Offered By</span>
+            <div class="teach-account-name">@${accountLabel}</div>
+            <small class="teach-form-hint">This is pulled from the username saved on your account.</small>
+          </div>
           <label class="teach-form-field" for="skill-category">
             <span>Category</span>
             <select id="skill-category" name="category">
@@ -57,67 +150,190 @@ document.addEventListener("DOMContentLoaded", () => {
           </label>
           <label class="teach-form-field" for="skill-description">
             <span>Description</span>
-            <textarea id="skill-description" name="description" rows="5" placeholder="Write a short summary of what learners will get from this skill.">${skillDraft.description}</textarea>
+            <textarea id="skill-description" name="description" rows="5" placeholder="Write a short summary of what learners will get from this skill.">${escapeHtml(skillDraft.description)}</textarea>
             <span class="teach-form-message" id="description-error"></span>
+          </label>
+          <div class="teach-form-grid">
+            <label class="teach-form-field" for="skill-max-people">
+              <span>People Per Session</span>
+              <input type="number" id="skill-max-people" name="maxPeoplePerSession" min="1" max="100" placeholder="6" value="${escapeHtml(skillDraft.maxPeoplePerSession)}">
+              <span class="teach-form-message" id="people-error"></span>
+            </label>
+            <label class="teach-form-field" for="skill-session-length">
+              <span>Session Length (minutes)</span>
+              <input type="number" id="skill-session-length" name="sessionLengthMinutes" min="15" max="480" step="15" placeholder="60" value="${escapeHtml(skillDraft.sessionLengthMinutes)}">
+              <span class="teach-form-message" id="session-length-error"></span>
+            </label>
+          </div>
+          <div class="teach-form-field">
+            <span>Available Dates</span>
+            <div class="teach-availability-list" id="teach-availability-list">
+              ${renderDateFields()}
+            </div>
+            <button type="button" class="teach-secondary-button" id="add-available-date">Add Another Date</button>
+            <span class="teach-form-message" id="dates-error"></span>
+          </div>
+          <label class="teach-form-field" for="skill-card-image">
+            <span>Optional Card Image URL</span>
+            <input type="url" id="skill-card-image" name="cardImageUrl" placeholder="https://example.com/session-cover.jpg" value="${escapeHtml(skillDraft.cardImageUrl)}">
+            <small class="teach-form-hint">Add an image link if you want your skill card to show a top preview image.</small>
+            <span class="teach-form-message" id="card-image-error"></span>
           </label>
           <div class="teach-form-actions">
             <button type="submit" class="cta-button">Post Skill</button>
-            <button type="button" class="cta-button" id="teach-test-toggle">Test Logout</button>
           </div>
           <p class="teach-form-message" id="teach-form-error"></p>
         </form>
       `;
     } else {
-      // Logged-out version of the section
       teachContent.innerHTML = `
         <h1>Teach with Elevate</h1>
         <p>Join our community and share your knowledge with learners around the world. Whether you're an expert in a specific field or passionate about teaching, Elevate provides the platform and tools you need to create engaging sessions and reach a global audience.</p>
-        <a href="login.html" class="cta-button">Get Started</a>
-        <button type="button" class="cta-button" id="teach-test-toggle">Test Login</button>
+        <button type="button" class="cta-button" id="teachGetStartedButton">Get Started</button>
       `;
     }
 
-    // After rendering the section, grab the elements we need for the form and test button
-    const toggleButton = document.getElementById("teach-test-toggle");
+    attachTeachContentListeners();
+  }
+
+  function validateCardImageUrl(url) {
+    if (!url) {
+      return "";
+    }
+
+    try {
+      const parsedUrl = new URL(url);
+
+      if (!["http:", "https:"].includes(parsedUrl.protocol)) {
+        return "Please use an http or https image URL.";
+      }
+    } catch (error) {
+      return "Please enter a valid image URL.";
+    }
+
+    return "";
+  }
+
+  function formatSessionLength(minutes) {
+    if (!minutes) {
+      return "";
+    }
+
+    const hours = Math.floor(minutes / 60);
+    const remainingMinutes = minutes % 60;
+
+    if (!hours) {
+      return `${minutes} minutes`;
+    }
+
+    if (!remainingMinutes) {
+      return hours === 1 ? "1 hour" : `${hours} hours`;
+    }
+
+    return `${hours}h ${remainingMinutes}m`;
+  }
+
+  function formatAvailableDate(dateValue) {
+    if (!dateValue) {
+      return "";
+    }
+
+    const date = new Date(dateValue);
+
+    if (Number.isNaN(date.getTime())) {
+      return dateValue;
+    }
+
+    return new Intl.DateTimeFormat(undefined, {
+      dateStyle: "medium",
+      timeStyle: "short"
+    }).format(date);
+  }
+
+  function attachTeachContentListeners() {
     const teachForm = document.getElementById("teach-form");
     const postAnotherButton = document.getElementById("post-another-skill");
+    const teachGetStartedButton = document.getElementById("teachGetStartedButton");
+    const addAvailableDateButton = document.getElementById("add-available-date");
 
     if (teachForm) {
-      const syncDraft = () => {
-        skillDraft = {
-          title: document.getElementById("skill-title").value,
-          instructor: document.getElementById("skill-instructor").value,
-          category: document.getElementById("skill-category").value,
-          description: document.getElementById("skill-description").value
-        };
-      };
-
       teachForm.addEventListener("input", syncDraft);
       teachForm.addEventListener("change", syncDraft);
 
+      teachForm.addEventListener("click", (event) => {
+        const removeButton = event.target.closest(".teach-remove-date-button");
+
+        if (!removeButton) {
+          return;
+        }
+
+        syncDraft();
+        const indexToRemove = Number(removeButton.dataset.index);
+
+        skillDraft.availableDates = skillDraft.availableDates.filter((_, index) => {
+          return index !== indexToRemove;
+        });
+
+        if (!skillDraft.availableDates.length) {
+          skillDraft.availableDates = [""];
+        }
+
+        renderTeachContent();
+      });
+
+      if (addAvailableDateButton) {
+        addAvailableDateButton.addEventListener("click", () => {
+          syncDraft();
+          skillDraft.availableDates.push("");
+          renderTeachContent();
+        });
+      }
+
       teachForm.addEventListener("submit", (event) => {
-      // teachForm.addEventListener("submit", async (event) => { // Use this version of the event listener if you want to simulate a delay for form submission to mimic real-world network latency and processing time
         event.preventDefault();
+
+        syncDraft();
+
         const submitButton = teachForm.querySelector('button[type="submit"]');
-        const title = document.getElementById("skill-title").value.trim();
-        const instructor = document.getElementById("skill-instructor").value.trim();
-        const category = document.getElementById("skill-category").value;
-        const description = document.getElementById("skill-description").value.trim();
+        const title = skillDraft.title.trim();
+        const instructor = getDefaultInstructorName().trim();
+        const category = skillDraft.category;
+        const description = skillDraft.description.trim();
+        const maxPeoplePerSession = Number(skillDraft.maxPeoplePerSession);
+        const sessionLengthMinutes = Number(skillDraft.sessionLengthMinutes);
+        const availableDates = skillDraft.availableDates
+          .map((dateValue) => dateValue.trim())
+          .filter(Boolean);
+        const cardImageUrl = skillDraft.cardImageUrl.trim();
+
         const titleError = document.getElementById("title-error");
-        const instructorError = document.getElementById("instructor-error");
         const categoryError = document.getElementById("category-error");
         const descriptionError = document.getElementById("description-error");
+        const peopleError = document.getElementById("people-error");
+        const sessionLengthError = document.getElementById("session-length-error");
+        const datesError = document.getElementById("dates-error");
+        const cardImageError = document.getElementById("card-image-error");
         const formError = document.getElementById("teach-form-error");
-        const allowedCategories = [
-          ...categoryOptions.map(({ value }) => value)
-        ];
+        const allowedCategories = categoryOptions.map(({ value }) => value);
 
-        skillDraft = { title, instructor, category, description };
+        skillDraft = {
+          ...skillDraft,
+          title,
+          category,
+          description,
+          maxPeoplePerSession: skillDraft.maxPeoplePerSession,
+          sessionLengthMinutes: skillDraft.sessionLengthMinutes,
+          availableDates,
+          cardImageUrl
+        };
 
         titleError.textContent = "";
-        instructorError.textContent = "";
         categoryError.textContent = "";
         descriptionError.textContent = "";
+        peopleError.textContent = "";
+        sessionLengthError.textContent = "";
+        datesError.textContent = "";
+        cardImageError.textContent = "";
         formError.textContent = "";
 
         if (submitButton) {
@@ -127,7 +343,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
         let hasErrors = false;
 
-        // Basic validation checks for title field with error messages
         if (!title) {
           titleError.textContent = "Please enter a title.";
           hasErrors = true;
@@ -139,13 +354,6 @@ document.addEventListener("DOMContentLoaded", () => {
           hasErrors = true;
         }
 
-        // Basic validation checks for instructor field with error messages
-        if (!instructor) {
-          instructorError.textContent = "Please enter the instructor name.";
-          hasErrors = true;
-        }
-
-        // Basic validation checks for category field with error messages
         if (!category) {
           categoryError.textContent = "Please select a category.";
           hasErrors = true;
@@ -154,7 +362,6 @@ document.addEventListener("DOMContentLoaded", () => {
           hasErrors = true;
         }
 
-        // Basic validation checks for description field with error messages
         if (!description) {
           descriptionError.textContent = "Please enter a description.";
           hasErrors = true;
@@ -166,7 +373,41 @@ document.addEventListener("DOMContentLoaded", () => {
           hasErrors = true;
         }
 
-        // If there are any validation errors, we stop here and show the messages. Otherwise, we proceed to "post" the skill.
+        if (!Number.isInteger(maxPeoplePerSession) || maxPeoplePerSession < 1 || maxPeoplePerSession > 100) {
+          peopleError.textContent = "Enter how many learners can join each session (1-100).";
+          hasErrors = true;
+        }
+
+        if (
+          !Number.isInteger(sessionLengthMinutes) ||
+          sessionLengthMinutes < 15 ||
+          sessionLengthMinutes > 480
+        ) {
+          sessionLengthError.textContent = "Enter a session length between 15 and 480 minutes.";
+          hasErrors = true;
+        }
+
+        if (!availableDates.length) {
+          datesError.textContent = "Add at least one available date.";
+          hasErrors = true;
+        } else {
+          const hasInvalidDate = availableDates.some((dateValue) => {
+            return Number.isNaN(new Date(dateValue).getTime());
+          });
+
+          if (hasInvalidDate) {
+            datesError.textContent = "Each available date must be a valid date and time.";
+            hasErrors = true;
+          }
+        }
+
+        const cardImageValidationMessage = validateCardImageUrl(cardImageUrl);
+
+        if (cardImageValidationMessage) {
+          cardImageError.textContent = cardImageValidationMessage;
+          hasErrors = true;
+        }
+
         if (hasErrors) {
           if (submitButton) {
             submitButton.disabled = false;
@@ -187,14 +428,23 @@ document.addEventListener("DOMContentLoaded", () => {
             title,
             description,
             category,
-            createdBy: instructor
+            createdBy: instructor,
+            maxPeoplePerSession,
+            sessionLengthMinutes,
+            availableDates,
+            cardImageUrl
           });
+
+          const formattedDates = availableDates.map(formatAvailableDate);
 
           skillDraft = {
             title: "",
-            instructor: "",
             category: "",
-            description: ""
+            description: "",
+            maxPeoplePerSession: "",
+            sessionLengthMinutes: "",
+            availableDates: [""],
+            cardImageUrl: ""
           };
 
           teachContent.innerHTML = `
@@ -203,26 +453,45 @@ document.addEventListener("DOMContentLoaded", () => {
             <div class="teach-form-actions">
               <button type="button" class="cta-button" id="post-another-skill">Post Another Skill</button>
               <a href="explore.html" class="cta-button">Explore Skills</a>
-              <button type="button" class="cta-button" id="teach-test-toggle">Test Logout</button>
             </div>
 
             <div class="teach-posted-skill">
+              ${cardImageUrl ? `
+                <div class="teach-posted-skill-media">
+                  <img
+                    class="teach-posted-skill-image"
+                    src="${escapeHtml(cardImageUrl)}"
+                    alt="${escapeHtml(title)} preview"
+                  >
+                </div>
+              ` : ""}
+              <div class="teach-posted-skill-content">
               <div id="posted-skill-title">
-                Title: ${title}
+                Title: ${escapeHtml(title)}
               </div>
               <div id="posted-skill-instructor">
-                Instructor: ${instructor}
+                Instructor: ${escapeHtml(instructor)}
               </div>
               <div id="posted-skill-category">
                 Category: ${window.ElevateSkills.formatCategory(category)}
               </div>
+              <div id="posted-skill-session-size">
+                People Per Session: ${maxPeoplePerSession}
+              </div>
+              <div id="posted-skill-session-length">
+                Session Length: ${formatSessionLength(sessionLengthMinutes)}
+              </div>
               <div id="posted-skill-description">
-                Description: ${description}
+                Description: ${escapeHtml(description)}
+              </div>
+              <div id="posted-skill-dates">
+                Available Dates: ${formattedDates.map(escapeHtml).join(", ")}
+              </div>
               </div>
             </div>
           `;
 
-          renderTeachContentListeners();
+          attachTeachContentListeners();
         } catch (error) {
           console.error("There was a problem posting the skill.", error);
           formError.textContent = "We couldn't post your skill right now. Please try again.";
@@ -241,33 +510,25 @@ document.addEventListener("DOMContentLoaded", () => {
       });
     }
 
-    if (toggleButton) {
-      // Flip the fake login state and render the section again when the button is clicked
-      toggleButton.addEventListener("click", () => {
-        isLoggedIn = !isLoggedIn;
-        renderTeachContent();
+    if (teachGetStartedButton) {
+      teachGetStartedButton.addEventListener("click", async () => {
+        await waitForAuthReady();
+
+        if (getCurrentUser()) {
+          renderTeachContent();
+          return;
+        }
+
+        window.location.href = "login.html";
       });
     }
   }
 
-  function renderTeachContentListeners() {
-    const toggleButton = document.getElementById("teach-test-toggle");
-    const postAnotherButton = document.getElementById("post-another-skill");
-
-    if (postAnotherButton) {
-      postAnotherButton.addEventListener("click", () => {
-        renderTeachContent();
-      });
-    }
-
-    if (toggleButton) {
-      toggleButton.addEventListener("click", () => {
-        isLoggedIn = !isLoggedIn;
-        renderTeachContent();
-      });
-    }
-  }
-
-  // Show the default logged-out version when the page first loads
   renderTeachContent();
+
+  waitForAuthReady().then(() => {
+    isLoggedIn = Boolean(getCurrentUser());
+    ensureInstructorDraft();
+    renderTeachContent();
+  });
 });

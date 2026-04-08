@@ -1,0 +1,40 @@
+.auth-dialog {
+  border: none;
+  border-radius: 16px;
+  padding: 0;
+  width: min(90vw, 420px);
+}
+
+.auth-dialog::backdrop {
+  background: rgba(0, 0, 0, 0.45);
+}
+
+.auth-dialog__panel {
+  display: flex;
+  justify-content: flex-end;
+  padding: 12px 12px 0;
+}
+
+.auth-dialog__close {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: 1rem;
+}
+
+.auth-dialog__content {
+  display: grid;
+  gap: 12px;
+  padding: 0 24px 24px;
+}
+
+.auth-dialog__message {
+  min-height: 1.5em;
+  margin: 0;
+}
+
+.auth-dialog__actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+}

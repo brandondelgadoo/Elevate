@@ -3,16 +3,35 @@ const skills = [];
 
 let nextId = 0;
 
-function Skill(title, description, category, createdBy = "Elevate Community", id = null) {
+function Skill(
+  title,
+  description,
+  category,
+  createdBy = "Elevate Community",
+  id = null,
+  options = {}
+) {
   this.id = id ?? nextId++;
   this.createdBy = createdBy;
   this.title = title;
   this.description = description;
   this.category = category;
+  this.maxPeoplePerSession = options.maxPeoplePerSession ?? null;
+  this.sessionLengthMinutes = options.sessionLengthMinutes ?? null;
+  this.availableDates = Array.isArray(options.availableDates)
+    ? options.availableDates
+    : [];
+  this.cardImageUrl = options.cardImageUrl || "";
 }
 
-function createSkill(title, description, category, createdBy = "Elevate Community") {
-  return new Skill(title, description, category, createdBy);
+function createSkill(
+  title,
+  description,
+  category,
+  createdBy = "Elevate Community",
+  options = {}
+) {
+  return new Skill(title, description, category, createdBy, null, options);
 }
 
 function formatCategory(category) {
@@ -29,7 +48,23 @@ function normalizeSkill(rawSkill) {
     rawSkill.description,
     rawSkill.category,
     rawSkill.createdBy || "Elevate Community",
-    Number(rawSkill.id)
+    Number(rawSkill.id),
+    {
+      maxPeoplePerSession:
+        rawSkill.maxPeoplePerSession === null ||
+        rawSkill.maxPeoplePerSession === undefined
+          ? null
+          : Number(rawSkill.maxPeoplePerSession),
+      sessionLengthMinutes:
+        rawSkill.sessionLengthMinutes === null ||
+        rawSkill.sessionLengthMinutes === undefined
+          ? null
+          : Number(rawSkill.sessionLengthMinutes),
+      availableDates: Array.isArray(rawSkill.availableDates)
+        ? rawSkill.availableDates
+        : [],
+      cardImageUrl: rawSkill.cardImageUrl || rawSkill.backgroundImageUrl || ""
+    }
   );
 }
 
@@ -63,8 +98,22 @@ function persistCustomSkills() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(customSkills));
 }
 
-function addSkill({ title, description, category, createdBy = "Elevate Community" }) {
-  const newSkill = createSkill(title, description, category, createdBy);
+function addSkill({
+  title,
+  description,
+  category,
+  createdBy = "Elevate Community",
+  maxPeoplePerSession = null,
+  sessionLengthMinutes = null,
+  availableDates = [],
+  cardImageUrl = ""
+}) {
+  const newSkill = createSkill(title, description, category, createdBy, {
+    maxPeoplePerSession,
+    sessionLengthMinutes,
+    availableDates,
+    cardImageUrl
+  });
   newSkill.isCustom = true;
   skills.push(newSkill);
   persistCustomSkills();
