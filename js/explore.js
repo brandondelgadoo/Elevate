@@ -11,6 +11,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const dialogSessionDetails = document.getElementById("dialogSessionDetails");
   const dialogAvailableDates = document.getElementById("dialogAvailableDates");
   const dialogDescription = document.getElementById("dialogDescription");
+  const dialogImage = document.getElementById("dialogImage");
   const closeDialog = document.getElementById("closeDialog");
 
   if (
@@ -25,6 +26,7 @@ document.addEventListener("DOMContentLoaded", () => {
     !dialogSessionDetails ||
     !dialogAvailableDates ||
     !dialogDescription ||
+    !dialogImage ||
     !closeDialog
   ) {
     return;
@@ -79,10 +81,22 @@ document.addEventListener("DOMContentLoaded", () => {
     const card = document.createElement("div");
     card.className = "skill-card";
     card.dataset.id = skillPost.id;
-    if (skillPost.backgroundImageUrl) {
-      card.classList.add("skill-card-with-image");
-      card.style.backgroundImage = `linear-gradient(rgba(15, 23, 42, 0.7), rgba(15, 23, 42, 0.85)), url("${skillPost.backgroundImageUrl}")`;
+
+    if (skillPost.cardImageUrl) {
+      const imageWrapper = document.createElement("div");
+      imageWrapper.className = "skill-card-media";
+
+      const image = document.createElement("img");
+      image.className = "skill-card-image";
+      image.src = skillPost.cardImageUrl;
+      image.alt = `${skillPost.title || "Skill"} preview`;
+
+      imageWrapper.appendChild(image);
+      card.appendChild(imageWrapper);
     }
+
+    const content = document.createElement("div");
+    content.className = "skill-card-content";
 
     const title = document.createElement("h4");
     title.className = "skill-post-title";
@@ -115,7 +129,8 @@ document.addEventListener("DOMContentLoaded", () => {
       ? `Next date: ${formatAvailableDate(skillPost.availableDates[0])}`
       : "Dates coming soon";
 
-    card.append(title, createdBy, category, description, sessionMeta, nextAvailableDate);
+    content.append(title, createdBy, category, description, sessionMeta, nextAvailableDate);
+    card.appendChild(content);
     return card;
   }
 
@@ -196,20 +211,24 @@ document.addEventListener("DOMContentLoaded", () => {
       dialogAvailableDates.appendChild(emptyDatesMessage);
     }
     dialogDescription.textContent = selectedSkill.description;
-    if (selectedSkill.backgroundImageUrl) {
-      dialog.style.backgroundImage = `linear-gradient(rgba(248, 250, 252, 0.94), rgba(248, 250, 252, 0.97)), url("${selectedSkill.backgroundImageUrl}")`;
-      dialog.classList.add("skill-dialog-with-image");
+
+    if (selectedSkill.cardImageUrl) {
+      dialogImage.src = selectedSkill.cardImageUrl;
+      dialogImage.alt = `${selectedSkill.title || "Skill"} preview`;
+      dialogImage.hidden = false;
     } else {
-      dialog.style.backgroundImage = "";
-      dialog.classList.remove("skill-dialog-with-image");
+      dialogImage.removeAttribute("src");
+      dialogImage.alt = "";
+      dialogImage.hidden = true;
     }
 
     dialog.showModal();
   });
 
   closeDialog.addEventListener("click", () => {
-    dialog.style.backgroundImage = "";
-    dialog.classList.remove("skill-dialog-with-image");
+    dialogImage.removeAttribute("src");
+    dialogImage.alt = "";
+    dialogImage.hidden = true;
     dialog.close();
   });
 
@@ -222,8 +241,9 @@ document.addEventListener("DOMContentLoaded", () => {
       e.clientY <= rect.bottom;
 
     if (!clickedInsideDialog) {
-      dialog.style.backgroundImage = "";
-      dialog.classList.remove("skill-dialog-with-image");
+      dialogImage.removeAttribute("src");
+      dialogImage.alt = "";
+      dialogImage.hidden = true;
       dialog.close();
     }
   });

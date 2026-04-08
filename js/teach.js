@@ -21,7 +21,7 @@ document.addEventListener("DOMContentLoaded", () => {
     maxPeoplePerSession: "",
     sessionLengthMinutes: "",
     availableDates: [""],
-    backgroundImageUrl: ""
+    cardImageUrl: ""
   };
 
   function escapeHtml(value = "") {
@@ -101,7 +101,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const descriptionInput = document.getElementById("skill-description");
     const peopleInput = document.getElementById("skill-max-people");
     const sessionLengthInput = document.getElementById("skill-session-length");
-    const backgroundImageInput = document.getElementById("skill-background-image");
+    const cardImageInput = document.getElementById("skill-card-image");
 
     skillDraft = {
       title: titleInput?.value || "",
@@ -110,7 +110,7 @@ document.addEventListener("DOMContentLoaded", () => {
       maxPeoplePerSession: peopleInput?.value || "",
       sessionLengthMinutes: sessionLengthInput?.value || "",
       availableDates: getDateFieldValues(),
-      backgroundImageUrl: backgroundImageInput?.value || ""
+      cardImageUrl: cardImageInput?.value || ""
     };
   }
 
@@ -173,11 +173,11 @@ document.addEventListener("DOMContentLoaded", () => {
             <button type="button" class="teach-secondary-button" id="add-available-date">Add Another Date</button>
             <span class="teach-form-message" id="dates-error"></span>
           </div>
-          <label class="teach-form-field" for="skill-background-image">
-            <span>Optional Background Image URL</span>
-            <input type="url" id="skill-background-image" name="backgroundImageUrl" placeholder="https://example.com/session-cover.jpg" value="${escapeHtml(skillDraft.backgroundImageUrl)}">
-            <small class="teach-form-hint">Add an image link if you want your skill card to have a custom background.</small>
-            <span class="teach-form-message" id="background-image-error"></span>
+          <label class="teach-form-field" for="skill-card-image">
+            <span>Optional Card Image URL</span>
+            <input type="url" id="skill-card-image" name="cardImageUrl" placeholder="https://example.com/session-cover.jpg" value="${escapeHtml(skillDraft.cardImageUrl)}">
+            <small class="teach-form-hint">Add an image link if you want your skill card to show a top preview image.</small>
+            <span class="teach-form-message" id="card-image-error"></span>
           </label>
           <div class="teach-form-actions">
             <button type="submit" class="cta-button">Post Skill</button>
@@ -196,7 +196,7 @@ document.addEventListener("DOMContentLoaded", () => {
     attachTeachContentListeners();
   }
 
-  function validateBackgroundImageUrl(url) {
+  function validateCardImageUrl(url) {
     if (!url) {
       return "";
     }
@@ -304,7 +304,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const availableDates = skillDraft.availableDates
           .map((dateValue) => dateValue.trim())
           .filter(Boolean);
-        const backgroundImageUrl = skillDraft.backgroundImageUrl.trim();
+        const cardImageUrl = skillDraft.cardImageUrl.trim();
 
         const titleError = document.getElementById("title-error");
         const categoryError = document.getElementById("category-error");
@@ -312,7 +312,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const peopleError = document.getElementById("people-error");
         const sessionLengthError = document.getElementById("session-length-error");
         const datesError = document.getElementById("dates-error");
-        const backgroundImageError = document.getElementById("background-image-error");
+        const cardImageError = document.getElementById("card-image-error");
         const formError = document.getElementById("teach-form-error");
         const allowedCategories = categoryOptions.map(({ value }) => value);
 
@@ -324,7 +324,7 @@ document.addEventListener("DOMContentLoaded", () => {
           maxPeoplePerSession: skillDraft.maxPeoplePerSession,
           sessionLengthMinutes: skillDraft.sessionLengthMinutes,
           availableDates,
-          backgroundImageUrl
+          cardImageUrl
         };
 
         titleError.textContent = "";
@@ -333,7 +333,7 @@ document.addEventListener("DOMContentLoaded", () => {
         peopleError.textContent = "";
         sessionLengthError.textContent = "";
         datesError.textContent = "";
-        backgroundImageError.textContent = "";
+        cardImageError.textContent = "";
         formError.textContent = "";
 
         if (submitButton) {
@@ -401,10 +401,10 @@ document.addEventListener("DOMContentLoaded", () => {
           }
         }
 
-        const backgroundImageValidationMessage = validateBackgroundImageUrl(backgroundImageUrl);
+        const cardImageValidationMessage = validateCardImageUrl(cardImageUrl);
 
-        if (backgroundImageValidationMessage) {
-          backgroundImageError.textContent = backgroundImageValidationMessage;
+        if (cardImageValidationMessage) {
+          cardImageError.textContent = cardImageValidationMessage;
           hasErrors = true;
         }
 
@@ -432,7 +432,7 @@ document.addEventListener("DOMContentLoaded", () => {
             maxPeoplePerSession,
             sessionLengthMinutes,
             availableDates,
-            backgroundImageUrl
+            cardImageUrl
           });
 
           const formattedDates = availableDates.map(formatAvailableDate);
@@ -444,7 +444,7 @@ document.addEventListener("DOMContentLoaded", () => {
             maxPeoplePerSession: "",
             sessionLengthMinutes: "",
             availableDates: [""],
-            backgroundImageUrl: ""
+            cardImageUrl: ""
           };
 
           teachContent.innerHTML = `
@@ -455,7 +455,17 @@ document.addEventListener("DOMContentLoaded", () => {
               <a href="explore.html" class="cta-button">Explore Skills</a>
             </div>
 
-            <div class="teach-posted-skill${backgroundImageUrl ? " teach-posted-skill-with-image" : ""}" ${backgroundImageUrl ? `style="background-image: linear-gradient(rgba(15, 23, 42, 0.68), rgba(15, 23, 42, 0.82)), url('${escapeHtml(backgroundImageUrl)}');"` : ""}>
+            <div class="teach-posted-skill">
+              ${cardImageUrl ? `
+                <div class="teach-posted-skill-media">
+                  <img
+                    class="teach-posted-skill-image"
+                    src="${escapeHtml(cardImageUrl)}"
+                    alt="${escapeHtml(title)} preview"
+                  >
+                </div>
+              ` : ""}
+              <div class="teach-posted-skill-content">
               <div id="posted-skill-title">
                 Title: ${escapeHtml(title)}
               </div>
@@ -476,6 +486,7 @@ document.addEventListener("DOMContentLoaded", () => {
               </div>
               <div id="posted-skill-dates">
                 Available Dates: ${formattedDates.map(escapeHtml).join(", ")}
+              </div>
               </div>
             </div>
           `;

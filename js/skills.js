@@ -21,7 +21,7 @@ function Skill(
   this.availableDates = Array.isArray(options.availableDates)
     ? options.availableDates
     : [];
-  this.backgroundImageUrl = options.backgroundImageUrl || "";
+  this.cardImageUrl = options.cardImageUrl || "";
 }
 
 function createSkill(
@@ -63,7 +63,7 @@ function normalizeSkill(rawSkill) {
       availableDates: Array.isArray(rawSkill.availableDates)
         ? rawSkill.availableDates
         : [],
-      backgroundImageUrl: rawSkill.backgroundImageUrl || ""
+      cardImageUrl: rawSkill.cardImageUrl || rawSkill.backgroundImageUrl || ""
     }
   );
 }
@@ -106,13 +106,13 @@ function addSkill({
   maxPeoplePerSession = null,
   sessionLengthMinutes = null,
   availableDates = [],
-  backgroundImageUrl = ""
+  cardImageUrl = ""
 }) {
   const newSkill = createSkill(title, description, category, createdBy, {
     maxPeoplePerSession,
     sessionLengthMinutes,
     availableDates,
-    backgroundImageUrl
+    cardImageUrl
   });
   newSkill.isCustom = true;
   skills.push(newSkill);
