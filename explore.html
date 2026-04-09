@@ -107,13 +107,19 @@
     <p id="dialogSessionDetails"></p>
     <div id="dialogAvailableDates"></div>
     <p id="dialogDescription"></p>
+    <div id="dialogBookingSection">
+      <label for="bookingDateSelect">Choose a session date</label>
+      <select id="bookingDateSelect"></select>
+      <p id="bookingStatusMessage" aria-live="polite"></p>
+      <button id="bookSessionButton" type="button">Book Session</button>
+    </div>
     <button id="closeDialog">Close</button>
   </dialog>
 
   <!-- ================= JAVASCRIPT ================= -->
   <script type="module" src="js/navigation.js"></script>
   <script src="js/skills.js" defer></script>
-  <script src="js/explore.js" defer></script>
+  <script type="module" src="js/explore.js"></script>
   <script src="js/explore-filters.js" defer></script>
 </body>
 

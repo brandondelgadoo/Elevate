@@ -1,3 +1,8 @@
+import { getCurrentUser, waitForAuthReady } from "./auth-state.js";
+import { buildProfileDisplayName, getUserProfile } from "./user-profile.js";
+
+const BOOKINGS_STORAGE_KEY = "elevateSessionBookings";
+
 document.addEventListener("DOMContentLoaded", () => {
   const cardGrid = document.getElementById("cardGrid");
   const resultsCount = document.getElementById("exploreResultsCount");
@@ -12,7 +17,12 @@ document.addEventListener("DOMContentLoaded", () => {
   const dialogAvailableDates = document.getElementById("dialogAvailableDates");
   const dialogDescription = document.getElementById("dialogDescription");
   const dialogImage = document.getElementById("dialogImage");
+  const bookingDateSelect = document.getElementById("bookingDateSelect");
+  const bookingStatusMessage = document.getElementById("bookingStatusMessage");
+  const bookSessionButton = document.getElementById("bookSessionButton");
   const closeDialog = document.getElementById("closeDialog");
+
+  let activeSkill = null;
 
   if (
     !categoryFilter ||
@@ -27,6 +37,9 @@ document.addEventListener("DOMContentLoaded", () => {
     !dialogAvailableDates ||
     !dialogDescription ||
     !dialogImage ||
+    !bookingDateSelect ||
+    !bookingStatusMessage ||
+    !bookSessionButton ||
     !closeDialog
   ) {
     return;
@@ -75,6 +88,175 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     return [];
+  }
+
+  function loadBookings() {
+    try {
+      const storedBookings = localStorage.getItem(BOOKINGS_STORAGE_KEY);
+
+      if (!storedBookings) {
+        return [];
+      }
+
+      const parsedBookings = JSON.parse(storedBookings);
+      return Array.isArray(parsedBookings) ? parsedBookings : [];
+    } catch (error) {
+      console.error("Unable to load session bookings.", error);
+      return [];
+    }
+  }
+
+  function persistBookings(bookings) {
+    localStorage.setItem(BOOKINGS_STORAGE_KEY, JSON.stringify(bookings));
+  }
+
+  function getBookingsForSkillDate(skillId, dateValue) {
+    return loadBookings().filter((booking) => {
+      return booking.skillId === skillId && booking.dateValue === dateValue;
+    });
+  }
+
+  function getSeatLimit(skillPost) {
+    const seatLimit = Number(skillPost.maxPeoplePerSession);
+    return Number.isInteger(seatLimit) && seatLimit > 0 ? seatLimit : null;
+  }
+
+  function getRemainingSeats(skillPost, dateValue) {
+    const seatLimit = getSeatLimit(skillPost);
+
+    if (!seatLimit) {
+      return null;
+    }
+
+    return Math.max(seatLimit - getBookingsForSkillDate(skillPost.id, dateValue).length, 0);
+  }
+
+  function getCurrentBookingForUser(skillId, userId) {
+    if (!userId) {
+      return null;
+    }
+
+    return loadBookings().find((booking) => {
+      return booking.skillId === skillId && booking.userId === userId;
+    }) || null;
+  }
+
+  function buildBookingOptionLabel(skillPost, dateValue) {
+    const remainingSeats = getRemainingSeats(skillPost, dateValue);
+
+    if (remainingSeats === null) {
+      return `${formatAvailableDate(dateValue)} - Open session`;
+    }
+
+    const seatLabel = remainingSeats === 1 ? "1 seat left" : `${remainingSeats} seats left`;
+    return `${formatAvailableDate(dateValue)} - ${seatLabel}`;
+  }
+
+  function updateBookingStatus(message, tone = "") {
+    bookingStatusMessage.textContent = message;
+    bookingStatusMessage.dataset.tone = tone;
+  }
+
+  function resetDialogState() {
+    activeSkill = null;
+    bookingDateSelect.innerHTML = "";
+    bookingDateSelect.disabled = true;
+    bookSessionButton.disabled = true;
+    updateBookingStatus("");
+    dialogImage.removeAttribute("src");
+    dialogImage.alt = "";
+    dialogImage.hidden = true;
+  }
+
+  function syncBookingControls(skillPost) {
+    const currentUser = getCurrentUser();
+    const existingBooking = currentUser
+      ? getCurrentBookingForUser(skillPost.id, currentUser.uid)
+      : null;
+
+    bookingDateSelect.innerHTML = "";
+
+    if (!skillPost.availableDates?.length) {
+      bookingDateSelect.disabled = true;
+      bookSessionButton.disabled = true;
+      bookSessionButton.textContent = currentUser ? "Book Session" : "Log In to Book";
+      updateBookingStatus("This instructor has not shared booking dates yet.", "info");
+      return;
+    }
+
+    skillPost.availableDates.forEach((dateValue) => {
+      const option = document.createElement("option");
+      option.value = dateValue;
+      option.textContent = buildBookingOptionLabel(skillPost, dateValue);
+      bookingDateSelect.appendChild(option);
+    });
+
+    if (existingBooking && skillPost.availableDates.includes(existingBooking.dateValue)) {
+      bookingDateSelect.value = existingBooking.dateValue;
+    }
+
+    bookingDateSelect.disabled = false;
+    bookSessionButton.textContent = currentUser ? "Book Session" : "Log In to Book";
+    updateBookingAvailabilityMessage(skillPost);
+  }
+
+  function updateBookingAvailabilityMessage(skillPost) {
+    const selectedDate = bookingDateSelect.value;
+    const currentUser = getCurrentUser();
+
+    if (!selectedDate) {
+      bookSessionButton.disabled = true;
+      updateBookingStatus("Choose a date to continue.", "info");
+      return;
+    }
+
+    const existingBooking = currentUser
+      ? getCurrentBookingForUser(skillPost.id, currentUser.uid)
+      : null;
+
+    if (!currentUser) {
+      bookSessionButton.disabled = false;
+      updateBookingStatus("Choose a date, then continue to login or signup to book.", "info");
+      return;
+    }
+
+    if (existingBooking && existingBooking.dateValue === selectedDate) {
+      bookSessionButton.disabled = true;
+      updateBookingStatus(
+        `You're already booked for ${formatAvailableDate(selectedDate)}.`,
+        "success"
+      );
+      return;
+    }
+
+    if (existingBooking && existingBooking.dateValue !== selectedDate) {
+      bookSessionButton.disabled = false;
+      updateBookingStatus(
+        `You already booked ${formatAvailableDate(existingBooking.dateValue)}. Booking a new date will replace it.`,
+        "info"
+      );
+      return;
+    }
+
+    const remainingSeats = getRemainingSeats(skillPost, selectedDate);
+
+    if (remainingSeats === 0) {
+      bookSessionButton.disabled = true;
+      updateBookingStatus("That session is full. Please choose another date.", "error");
+      return;
+    }
+
+    bookSessionButton.disabled = false;
+
+    if (remainingSeats === null) {
+      updateBookingStatus("This session is open for booking.", "info");
+      return;
+    }
+
+    updateBookingStatus(
+      remainingSeats === 1 ? "1 seat is still available." : `${remainingSeats} seats are still available.`,
+      "info"
+    );
   }
 
   function createSkillCard(skillPost) {
@@ -129,7 +311,20 @@ document.addEventListener("DOMContentLoaded", () => {
       ? `Next date: ${formatAvailableDate(skillPost.availableDates[0])}`
       : "Dates coming soon";
 
-    content.append(title, createdBy, category, description, sessionMeta, nextAvailableDate);
+    const viewButton = document.createElement("button");
+    viewButton.type = "button";
+    viewButton.className = "skill-card-button";
+    viewButton.textContent = "View Session";
+
+    content.append(
+      title,
+      createdBy,
+      category,
+      description,
+      sessionMeta,
+      nextAvailableDate,
+      viewButton
+    );
     card.appendChild(content);
     return card;
   }
@@ -166,17 +361,19 @@ document.addEventListener("DOMContentLoaded", () => {
     getSkillPosts() {
       return [...skillPosts];
     },
-    renderSkillPosts,
+    renderSkillPosts
   };
 
-  document.addEventListener("click", (e) => {
-    const card = e.target.closest(".skill-card");
+  document.addEventListener("click", (event) => {
+    const card = event.target.closest(".skill-card");
     if (!card) return;
 
     const id = Number(card.dataset.id);
-    const selectedSkill = skillPosts.find((s) => s.id === id);
+    const selectedSkill = skillPosts.find((skillPost) => skillPost.id === id);
 
     if (!selectedSkill) return;
+
+    activeSkill = selectedSkill;
 
     dialogTitle.textContent = selectedSkill.title;
     dialogCreatedBy.textContent = `Instructor: ${selectedSkill.createdBy || "Elevate Community"}`;
@@ -200,7 +397,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       selectedSkill.availableDates.forEach((dateValue) => {
         const item = document.createElement("li");
-        item.textContent = formatAvailableDate(dateValue);
+        item.textContent = buildBookingOptionLabel(selectedSkill, dateValue);
         datesList.appendChild(item);
       });
 
@@ -210,6 +407,7 @@ document.addEventListener("DOMContentLoaded", () => {
       emptyDatesMessage.textContent = "Dates will be shared later.";
       dialogAvailableDates.appendChild(emptyDatesMessage);
     }
+
     dialogDescription.textContent = selectedSkill.description;
 
     if (selectedSkill.cardImageUrl) {
@@ -222,28 +420,86 @@ document.addEventListener("DOMContentLoaded", () => {
       dialogImage.hidden = true;
     }
 
+    syncBookingControls(selectedSkill);
     dialog.showModal();
   });
 
+  bookingDateSelect.addEventListener("change", () => {
+    if (!activeSkill) {
+      return;
+    }
+
+    updateBookingAvailabilityMessage(activeSkill);
+  });
+
+  bookSessionButton.addEventListener("click", async () => {
+    if (!activeSkill) {
+      return;
+    }
+
+    await waitForAuthReady();
+
+    const user = getCurrentUser();
+
+    if (!user) {
+      updateBookingStatus("Redirecting you to login so you can finish booking.", "info");
+      window.location.href = "login.html";
+      return;
+    }
+
+    const selectedDate = bookingDateSelect.value;
+
+    if (!selectedDate) {
+      updateBookingStatus("Choose a session date before booking.", "error");
+      return;
+    }
+
+    const remainingSeats = getRemainingSeats(activeSkill, selectedDate);
+
+    if (remainingSeats === 0) {
+      updateBookingStatus("That session is already full.", "error");
+      syncBookingControls(activeSkill);
+      return;
+    }
+
+    const profile = getUserProfile(user.uid);
+    const learnerName = buildProfileDisplayName(user, profile);
+    const bookings = loadBookings().filter((booking) => {
+      return !(booking.skillId === activeSkill.id && booking.userId === user.uid);
+    });
+
+    bookings.push({
+      id: `booking-${Date.now()}`,
+      skillId: activeSkill.id,
+      userId: user.uid,
+      learnerName,
+      dateValue: selectedDate,
+      bookedAt: new Date().toISOString()
+    });
+
+    persistBookings(bookings);
+    syncBookingControls(activeSkill);
+    updateBookingStatus(
+      `Booked for ${formatAvailableDate(selectedDate)}. You're all set.`,
+      "success"
+    );
+  });
+
   closeDialog.addEventListener("click", () => {
-    dialogImage.removeAttribute("src");
-    dialogImage.alt = "";
-    dialogImage.hidden = true;
+    resetDialogState();
     dialog.close();
   });
 
-  dialog.addEventListener("click", (e) => {
+  dialog.addEventListener("click", (event) => {
     const rect = dialog.getBoundingClientRect();
     const clickedInsideDialog =
-      e.clientX >= rect.left &&
-      e.clientX <= rect.right &&
-      e.clientY >= rect.top &&
-      e.clientY <= rect.bottom;
+      event.clientX >= rect.left &&
+      event.clientX <= rect.right &&
+      event.clientY >= rect.top &&
+      event.clientY <= rect.bottom;
 
     if (!clickedInsideDialog) {
-      dialogImage.removeAttribute("src");
-      dialogImage.alt = "";
-      dialogImage.hidden = true;
+      resetDialogState();
       dialog.close();
     }
   });
