@@ -5,7 +5,7 @@ import {
   shouldCompleteProfile,
   waitForAuthReady
 } from "./auth-state.js";
-import { buildProfileDisplayName, getUserProfile } from "./user-profile.js";
+import { buildProfileDisplayName, getUserProfile, ready as waitForProfilesReady } from "./user-profile.js";
 
 function renderNavbar(user) {
   const navbarMount = document.getElementById("site-navbar");
@@ -69,11 +69,15 @@ function renderNavbar(user) {
 
 document.addEventListener("DOMContentLoaded", async () => {
   await enforceProfileCompletion();
+  await waitForProfilesReady();
   renderNavbar(getCurrentUser());
   await waitForAuthReady();
+  await waitForProfilesReady();
   renderNavbar(getCurrentUser());
 });
 
 window.addEventListener("auth-state-changed", (event) => {
-  renderNavbar(event.detail.user);
+  waitForProfilesReady().then(() => {
+    renderNavbar(event.detail.user);
+  });
 });

@@ -9,6 +9,7 @@ import {
   getUserProfile,
   isUsernameTaken,
   isUserProfileComplete,
+  ready as waitForProfilesReady,
   saveUserProfile
 } from "./user-profile.js";
 
@@ -161,7 +162,7 @@ function buildProfileFromValues(user, values) {
   return {
     uid: user.uid,
     email: user.email || values.email,
-    username: values.username.toLowerCase(),
+    username: values.username,
     firstName: values.firstName,
     lastName: values.lastName,
     accountGoal: values.accountGoal,
@@ -190,6 +191,7 @@ backToCredentialsBtn.addEventListener("click", () => {
 });
 
 signupBtn.addEventListener("click", async () => {
+  await waitForProfilesReady();
   const formValues = getSignupFormValues();
   const profileValidationMessage = validateProfileStep(
     formValues,
@@ -203,7 +205,7 @@ signupBtn.addEventListener("click", async () => {
     }
 
     try {
-      saveUserProfile(buildProfileFromValues(pendingGoogleUser, formValues));
+      await saveUserProfile(buildProfileFromValues(pendingGoogleUser, formValues));
       msgBox.textContent = "Profile saved! Redirecting...";
       window.location.href = "explore.html";
     } catch (error) {
@@ -233,7 +235,7 @@ signupBtn.addEventListener("click", async () => {
       formValues.password
     );
 
-    saveUserProfile(buildProfileFromValues(userCredential.user, formValues));
+    await saveUserProfile(buildProfileFromValues(userCredential.user, formValues));
     msgBox.textContent = "Account created and profile saved! Redirecting...";
     window.location.href = "explore.html";
   } catch (err) {
@@ -252,6 +254,7 @@ signupBtn.addEventListener("click", async () => {
 
 googleSignupBtn.addEventListener("click", async () => {
   try {
+    await waitForProfilesReady();
     msgBox.textContent = "Connecting to Google...";
     const userCredential = await signInWithPopup(auth, googleProvider);
     pendingGoogleUser = userCredential.user;
@@ -283,6 +286,8 @@ googleSignupBtn.addEventListener("click", async () => {
 });
 
 waitForAuthReady().then(() => {
+  return waitForProfilesReady();
+}).then(() => {
   const currentUser = getCurrentUser();
 
   if (!currentUser) {

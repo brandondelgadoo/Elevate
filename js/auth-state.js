@@ -4,7 +4,7 @@ import {
   onAuthStateChanged,
   setPersistence
 } from "../firebase/config.js";
-import { getUserProfile, isUserProfileComplete } from "./user-profile.js";
+import { getUserProfile, isUserProfileComplete, ready as waitForProfilesReady } from "./user-profile.js";
 
 let currentUser = auth.currentUser;
 let authReadyPromise;
@@ -47,6 +47,7 @@ export function waitForAuthReady() {
 
 export async function redirectIfAuthenticated(path = "index.html") {
   const user = await waitForAuthReady();
+  await waitForProfilesReady();
 
   if (user) {
     window.location.href = path;
@@ -64,6 +65,7 @@ export function shouldCompleteProfile(user = currentUser) {
 
 export async function enforceProfileCompletion() {
   const user = await waitForAuthReady();
+  await waitForProfilesReady();
 
   if (!user || !shouldCompleteProfile(user)) {
     return;
