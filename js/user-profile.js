@@ -1,3 +1,5 @@
+import { auth, onAuthStateChanged } from "../firebase/config.js";
+
 let profilesMapCache = {};
 let resolveProfilesReady;
 const profilesReadyPromise = new Promise((resolve) => {
@@ -107,6 +109,19 @@ export function ready() {
 }
 
 async function initializeProfiles() {
+  const currentUser = auth.currentUser || await new Promise((resolve) => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      unsubscribe();
+      resolve(user);
+    });
+  });
+
+  if (!currentUser) {
+    profilesMapCache = {};
+    resolveProfilesReady();
+    return;
+  }
+
   try {
     const { listUserProfilesFromDb } = await import("./profiles-store.js");
     const profiles = await listUserProfilesFromDb();
