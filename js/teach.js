@@ -1,8 +1,6 @@
 import { getCurrentUser, waitForAuthReady } from "./auth-state.js";
 import { buildProfileDisplayName, getUserProfile } from "./user-profile.js";
 
-const REQUESTS_STORAGE_KEY = "elevateSkillRequests";
-
 document.addEventListener("DOMContentLoaded", () => {
   const teachContent = document.getElementById("teach-content");
   const categoryOptions = [
@@ -46,30 +44,42 @@ document.addEventListener("DOMContentLoaded", () => {
     return getUserProfile(user.uid);
   }
 
-  function loadSkillRequests() {
-    try {
-      const storedRequests = localStorage.getItem(REQUESTS_STORAGE_KEY);
-
-      if (!storedRequests) {
-        return [];
-      }
-
-      const parsedRequests = JSON.parse(storedRequests);
-      return Array.isArray(parsedRequests) ? parsedRequests : [];
-    } catch (error) {
-      console.error("Unable to load skill requests.", error);
-      return [];
-    }
-  }
-
-  function loadPrefillRequest() {
+  async function loadPrefillRequest() {
     const requestId = new URLSearchParams(window.location.search).get("requestId");
 
     if (!requestId) {
       return null;
     }
 
-    return loadSkillRequests().find((request) => request.id === requestId) || null;
+    try {
+      const requestsStore = await import("./requests-store.js");
+      const request = await requestsStore.getRequestByIdFromDb(requestId);
+
+      if (request) {
+        return request;
+      }
+    } catch (error) {
+      console.error("Unable to load prefill request from Firestore. Falling back to local storage.", error);
+    }
+
+    try {
+      const storedRequests = localStorage.getItem("elevateSkillRequests");
+
+      if (!storedRequests) {
+        return null;
+      }
+
+      const parsedRequests = JSON.parse(storedRequests);
+
+      if (!Array.isArray(parsedRequests)) {
+        return null;
+      }
+
+      return parsedRequests.find((request) => request.id === requestId) || null;
+    } catch (error) {
+      console.error("Unable to load skill requests from local storage.", error);
+      return null;
+    }
   }
 
   function initializeDraftFromRequest() {
@@ -375,7 +385,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
       }
 
-      teachForm.addEventListener("submit", (event) => {
+      teachForm.addEventListener("submit", async (event) => {
         event.preventDefault();
 
         syncDraft();
@@ -510,7 +520,7 @@ document.addEventListener("DOMContentLoaded", () => {
             throw new Error("Shared skills store is unavailable.");
           }
 
-          window.ElevateSkills.addSkill({
+          await window.ElevateSkills.addSkill({
             title,
             description,
             category,
@@ -610,10 +620,11 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  prefillRequest = loadPrefillRequest();
-  renderTeachContent();
-
-  waitForAuthReady().then(() => {
+  Promise.all([
+    waitForAuthReady(),
+    window.ElevateSkills?.ready ? window.ElevateSkills.ready() : Promise.resolve()
+  ]).then(async () => {
+    prefillRequest = await loadPrefillRequest();
     isLoggedIn = Boolean(getCurrentUser());
     ensureInstructorDraft();
     renderTeachContent();

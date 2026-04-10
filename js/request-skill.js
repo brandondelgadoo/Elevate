@@ -19,6 +19,7 @@ document.addEventListener("DOMContentLoaded", () => {
   ];
 
   let isLoggedIn = Boolean(getCurrentUser());
+  let requests = [];
   let requestDraft = {
     title: "",
     category: "",
@@ -38,7 +39,7 @@ document.addEventListener("DOMContentLoaded", () => {
       .replace(/'/g, "&#39;");
   }
 
-  function loadRequests() {
+  function loadRequestsFromStorage() {
     try {
       const storedRequests = localStorage.getItem(STORAGE_KEY);
 
@@ -54,8 +55,8 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  function persistRequests(requests) {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(requests));
+  function persistRequests(requestsToPersist) {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(requestsToPersist));
   }
 
   function getCurrentDisplayName() {
@@ -137,9 +138,13 @@ document.addEventListener("DOMContentLoaded", () => {
       `;
     }
 
-    return requests
-      .slice()
-      .reverse()
+    const sortedRequests = requests.slice().sort((left, right) => {
+      const leftTime = Number(left.createdAtMs) || Date.parse(left.createdAt) || 0;
+      const rightTime = Number(right.createdAtMs) || Date.parse(right.createdAt) || 0;
+      return rightTime - leftTime;
+    });
+
+    return sortedRequests
       .map((request) => {
         return `
           <article class="request-card">
@@ -184,8 +189,6 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function renderRequestContent() {
-    const requests = loadRequests();
-
     if (isLoggedIn) {
       requestContent.innerHTML = `
         <section class="request-hero">
@@ -321,7 +324,7 @@ document.addEventListener("DOMContentLoaded", () => {
       requestForm.addEventListener("input", syncDraft);
       requestForm.addEventListener("change", syncDraft);
 
-      requestForm.addEventListener("submit", (event) => {
+      requestForm.addEventListener("submit", async (event) => {
         event.preventDefault();
         syncDraft();
 
@@ -431,9 +434,7 @@ document.addEventListener("DOMContentLoaded", () => {
             throw new Error("You must be logged in to post a request.");
           }
 
-          const requests = loadRequests();
           const newRequest = {
-            id: `request-${Date.now()}`,
             userId: user.uid,
             requestedBy: getCurrentDisplayName(),
             title,
@@ -446,8 +447,22 @@ document.addEventListener("DOMContentLoaded", () => {
             createdAt: new Date().toISOString()
           };
 
-          requests.push(newRequest);
-          persistRequests(requests);
+          let savedRequest;
+
+          try {
+            const requestsStore = await import("./requests-store.js");
+            savedRequest = await requestsStore.createRequestInDb(newRequest);
+            requests = [savedRequest, ...requests.filter((request) => request.id !== savedRequest.id)];
+            persistRequests(requests);
+          } catch (dbError) {
+            console.error("Unable to save request to Firestore, using local storage.", dbError);
+            savedRequest = {
+              id: `request-${Date.now()}`,
+              ...newRequest
+            };
+            requests = [savedRequest, ...requests.filter((request) => request.id !== savedRequest.id)];
+            persistRequests(requests);
+          }
 
           requestDraft = {
             title: "",
@@ -481,7 +496,7 @@ document.addEventListener("DOMContentLoaded", () => {
                   <span>Session Length: ${escapeHtml(formatSessionLength(sessionLengthMinutes))}</span>
                 </div>
                 <div class="request-card-actions">
-                  <a class="btn-primary request-card-action" href="${REQUESTS_TEACH_PATH}?requestId=${encodeURIComponent(newRequest.id)}">Teach This Skill</a>
+                  <a class="btn-primary request-card-action" href="${REQUESTS_TEACH_PATH}?requestId=${encodeURIComponent(savedRequest.id)}">Teach This Skill</a>
                 </div>
               </article>
             </section>
@@ -521,9 +536,21 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  renderRequestContent();
+  async function initializeRequests() {
+    const storedRequests = loadRequestsFromStorage();
 
-  waitForAuthReady().then(() => {
+    try {
+      const requestsStore = await import("./requests-store.js");
+      const dbRequests = await requestsStore.listRequestsFromDb();
+      requests = dbRequests;
+      persistRequests(dbRequests);
+    } catch (error) {
+      console.error("Unable to load requests from Firestore. Falling back to local data.", error);
+      requests = storedRequests;
+    }
+  }
+
+  Promise.all([initializeRequests(), waitForAuthReady()]).then(() => {
     isLoggedIn = Boolean(getCurrentUser());
     renderRequestContent();
   });

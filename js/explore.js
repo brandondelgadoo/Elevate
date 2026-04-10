@@ -23,6 +23,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const closeDialog = document.getElementById("closeDialog");
 
   let activeSkill = null;
+  let skillPosts = [];
+  let bookings = [];
 
   if (
     !categoryFilter ||
@@ -90,7 +92,7 @@ document.addEventListener("DOMContentLoaded", () => {
     return [];
   }
 
-  function loadBookings() {
+  function loadBookingsFromStorage() {
     try {
       const storedBookings = localStorage.getItem(BOOKINGS_STORAGE_KEY);
 
@@ -106,12 +108,12 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  function persistBookings(bookings) {
-    localStorage.setItem(BOOKINGS_STORAGE_KEY, JSON.stringify(bookings));
+  function persistBookings(bookingsToPersist) {
+    localStorage.setItem(BOOKINGS_STORAGE_KEY, JSON.stringify(bookingsToPersist));
   }
 
   function getBookingsForSkillDate(skillId, dateValue) {
-    return loadBookings().filter((booking) => {
+    return bookings.filter((booking) => {
       return booking.skillId === skillId && booking.dateValue === dateValue;
     });
   }
@@ -136,7 +138,7 @@ document.addEventListener("DOMContentLoaded", () => {
       return null;
     }
 
-    return loadBookings().find((booking) => {
+    return bookings.find((booking) => {
       return booking.skillId === skillId && booking.userId === userId;
     }) || null;
   }
@@ -354,9 +356,6 @@ document.addEventListener("DOMContentLoaded", () => {
     } available`;
   }
 
-  const skillPosts = loadSkillPosts();
-  renderSkillPosts(skillPosts);
-
   window.ExploreSkills = {
     getSkillPosts() {
       return [...skillPosts];
@@ -368,8 +367,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const card = event.target.closest(".skill-card");
     if (!card) return;
 
-    const id = Number(card.dataset.id);
-    const selectedSkill = skillPosts.find((skillPost) => skillPost.id === id);
+    const id = card.dataset.id;
+    const selectedSkill = skillPosts.find((skillPost) => String(skillPost.id) === id);
 
     if (!selectedSkill) return;
 
@@ -464,25 +463,48 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const profile = getUserProfile(user.uid);
     const learnerName = buildProfileDisplayName(user, profile);
-    const bookings = loadBookings().filter((booking) => {
+    const existingBookingsForUserSkill = bookings.filter((booking) => {
       return !(booking.skillId === activeSkill.id && booking.userId === user.uid);
     });
 
-    bookings.push({
-      id: `booking-${Date.now()}`,
+    const existingUserBookings = bookings.filter((booking) => {
+      return booking.skillId === activeSkill.id && booking.userId === user.uid;
+    });
+
+    const newBooking = {
       skillId: activeSkill.id,
       userId: user.uid,
       learnerName,
-      dateValue: selectedDate,
-      bookedAt: new Date().toISOString()
-    });
+      dateValue: selectedDate
+    };
 
-    persistBookings(bookings);
-    syncBookingControls(activeSkill);
-    updateBookingStatus(
-      `Booked for ${formatAvailableDate(selectedDate)}. You're all set.`,
-      "success"
-    );
+    try {
+      const { replaceBookingInDb } = await import("./bookings-store.js");
+      const savedBooking = await replaceBookingInDb(existingUserBookings, newBooking);
+      bookings = [savedBooking, ...existingBookingsForUserSkill];
+      persistBookings(bookings);
+      syncBookingControls(activeSkill);
+      updateBookingStatus(
+        `Booked for ${formatAvailableDate(selectedDate)}. You're all set.`,
+        "success"
+      );
+    } catch (error) {
+      console.error("Unable to save booking to Firestore. Falling back to local storage.", error);
+      bookings = [
+        {
+          id: `booking-${Date.now()}`,
+          ...newBooking,
+          bookedAt: new Date().toISOString()
+        },
+        ...existingBookingsForUserSkill
+      ];
+      persistBookings(bookings);
+      syncBookingControls(activeSkill);
+      updateBookingStatus(
+        `Booked for ${formatAvailableDate(selectedDate)}. You're all set.`,
+        "success"
+      );
+    }
   });
 
   closeDialog.addEventListener("click", () => {
@@ -502,5 +524,27 @@ document.addEventListener("DOMContentLoaded", () => {
       resetDialogState();
       dialog.close();
     }
+  });
+
+  async function initializeBookings() {
+    const storedBookings = loadBookingsFromStorage();
+
+    try {
+      const { listBookingsFromDb } = await import("./bookings-store.js");
+      const dbBookings = await listBookingsFromDb();
+      bookings = dbBookings;
+      persistBookings(dbBookings);
+    } catch (error) {
+      console.error("Unable to load bookings from Firestore. Falling back to local data.", error);
+      bookings = storedBookings;
+    }
+  }
+
+  Promise.all([
+    window.ElevateSkills?.ready ? window.ElevateSkills.ready() : Promise.resolve(),
+    initializeBookings()
+  ]).then(() => {
+    skillPosts = loadSkillPosts();
+    renderSkillPosts(skillPosts);
   });
 });
