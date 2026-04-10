@@ -2,6 +2,7 @@ import { getCurrentUser, waitForAuthReady } from "./auth-state.js";
 import { buildProfileDisplayName, getUserProfile } from "./user-profile.js";
 
 const STORAGE_KEY = "elevateSkillRequests";
+const REQUESTS_TEACH_PATH = "teach.html";
 
 document.addEventListener("DOMContentLoaded", () => {
   const requestContent = document.getElementById("request-content");
@@ -23,7 +24,9 @@ document.addEventListener("DOMContentLoaded", () => {
     category: "",
     description: "",
     preferredFormat: "",
-    timeline: ""
+    timeline: "",
+    sessionLengthMinutes: "",
+    cardImageUrl: ""
   };
 
   function escapeHtml(value = "") {
@@ -85,6 +88,45 @@ document.addEventListener("DOMContentLoaded", () => {
     return preferredFormat || "Not specified";
   }
 
+  function formatSessionLength(minutes) {
+    const safeMinutes = Number(minutes);
+
+    if (!safeMinutes) {
+      return "Not specified";
+    }
+
+    const hours = Math.floor(safeMinutes / 60);
+    const remainingMinutes = safeMinutes % 60;
+
+    if (!hours) {
+      return `${safeMinutes} minutes`;
+    }
+
+    if (!remainingMinutes) {
+      return hours === 1 ? "1 hour" : `${hours} hours`;
+    }
+
+    return `${hours}h ${remainingMinutes}m`;
+  }
+
+  function validateCardImageUrl(url) {
+    if (!url) {
+      return "";
+    }
+
+    try {
+      const parsedUrl = new URL(url);
+
+      if (!["http:", "https:"].includes(parsedUrl.protocol)) {
+        return "Please use an http or https image URL.";
+      }
+    } catch (error) {
+      return "Please enter a valid image URL.";
+    }
+
+    return "";
+  }
+
   function buildRequestCards(requests) {
     if (!requests.length) {
       return `
@@ -110,6 +152,10 @@ document.addEventListener("DOMContentLoaded", () => {
             <div class="request-card-details">
               <span>Format: ${escapeHtml(formatPreferredFormat(request.preferredFormat))}</span>
               <span>Timeline: ${escapeHtml(formatTimeline(request.timeline))}</span>
+              <span>Session Length: ${escapeHtml(formatSessionLength(request.sessionLengthMinutes))}</span>
+            </div>
+            <div class="request-card-actions">
+              <a class="btn-primary request-card-action" href="${REQUESTS_TEACH_PATH}?requestId=${encodeURIComponent(request.id)}">Teach This Skill</a>
             </div>
           </article>
         `;
@@ -123,13 +169,17 @@ document.addEventListener("DOMContentLoaded", () => {
     const descriptionInput = document.getElementById("request-description");
     const preferredFormatInput = document.getElementById("request-format");
     const timelineInput = document.getElementById("request-timeline");
+    const sessionLengthInput = document.getElementById("request-session-length");
+    const cardImageInput = document.getElementById("request-card-image");
 
     requestDraft = {
       title: titleInput?.value || "",
       category: categoryInput?.value || "",
       description: descriptionInput?.value || "",
       preferredFormat: preferredFormatInput?.value || "",
-      timeline: timelineInput?.value || ""
+      timeline: timelineInput?.value || "",
+      sessionLengthMinutes: sessionLengthInput?.value || "",
+      cardImageUrl: cardImageInput?.value || ""
     };
   }
 
@@ -198,7 +248,19 @@ document.addEventListener("DOMContentLoaded", () => {
                   </select>
                   <span class="request-form-message" id="request-timeline-error"></span>
                 </label>
+
+                <label class="request-form-field" for="request-session-length">
+                  <span>Preferred Session Length (minutes)</span>
+                  <input type="number" id="request-session-length" name="sessionLengthMinutes" min="15" max="480" step="15" placeholder="60" value="${escapeHtml(requestDraft.sessionLengthMinutes)}">
+                  <span class="request-form-message" id="request-session-length-error"></span>
+                </label>
               </div>
+
+              <label class="request-form-field" for="request-card-image">
+                <span>Optional Card Image URL</span>
+                <input type="url" id="request-card-image" name="cardImageUrl" placeholder="https://example.com/request-cover.jpg" value="${escapeHtml(requestDraft.cardImageUrl)}">
+                <span class="request-form-message" id="request-card-image-error"></span>
+              </label>
 
               <div class="request-form-actions">
                 <button type="submit" class="btn-primary">Post Request</button>
@@ -210,7 +272,7 @@ document.addEventListener("DOMContentLoaded", () => {
           <aside class="request-panel">
             <div class="request-feed-header">
               <h2>Recent Requests</h2>
-              <p>${requests.length} request${requests.length === 1 ? "" : "s"} posted</p>
+              <p>${requests.length} request${requests.length === 1 ? "" : "s"} posted. Click a card to turn one into a teach post.</p>
             </div>
             <div class="request-feed">
               ${buildRequestCards(requests)}
@@ -269,6 +331,8 @@ document.addEventListener("DOMContentLoaded", () => {
         const description = requestDraft.description.trim();
         const preferredFormat = requestDraft.preferredFormat;
         const timeline = requestDraft.timeline;
+        const sessionLengthMinutes = Number(requestDraft.sessionLengthMinutes);
+        const cardImageUrl = requestDraft.cardImageUrl.trim();
         const allowedCategories = categoryOptions.map(({ value }) => value);
 
         const titleError = document.getElementById("request-title-error");
@@ -276,6 +340,8 @@ document.addEventListener("DOMContentLoaded", () => {
         const descriptionError = document.getElementById("request-description-error");
         const formatError = document.getElementById("request-format-error");
         const timelineError = document.getElementById("request-timeline-error");
+        const sessionLengthError = document.getElementById("request-session-length-error");
+        const cardImageError = document.getElementById("request-card-image-error");
         const formError = document.getElementById("request-form-error");
 
         titleError.textContent = "";
@@ -283,6 +349,8 @@ document.addEventListener("DOMContentLoaded", () => {
         descriptionError.textContent = "";
         formatError.textContent = "";
         timelineError.textContent = "";
+        sessionLengthError.textContent = "";
+        cardImageError.textContent = "";
         formError.textContent = "";
 
         if (submitButton) {
@@ -332,6 +400,22 @@ document.addEventListener("DOMContentLoaded", () => {
           hasErrors = true;
         }
 
+        if (
+          !Number.isInteger(sessionLengthMinutes) ||
+          sessionLengthMinutes < 15 ||
+          sessionLengthMinutes > 480
+        ) {
+          sessionLengthError.textContent = "Enter a session length between 15 and 480 minutes.";
+          hasErrors = true;
+        }
+
+        const cardImageValidationMessage = validateCardImageUrl(cardImageUrl);
+
+        if (cardImageValidationMessage) {
+          cardImageError.textContent = cardImageValidationMessage;
+          hasErrors = true;
+        }
+
         if (hasErrors) {
           if (submitButton) {
             submitButton.disabled = false;
@@ -357,6 +441,8 @@ document.addEventListener("DOMContentLoaded", () => {
             description,
             preferredFormat,
             timeline,
+            sessionLengthMinutes,
+            cardImageUrl,
             createdAt: new Date().toISOString()
           };
 
@@ -368,14 +454,16 @@ document.addEventListener("DOMContentLoaded", () => {
             category: "",
             description: "",
             preferredFormat: "",
-            timeline: ""
+            timeline: "",
+            sessionLengthMinutes: "",
+            cardImageUrl: ""
           };
 
           requestContent.innerHTML = `
             <section class="request-success-panel">
               <p class="request-eyebrow">Request Posted</p>
               <h1>Your request is live.</h1>
-              <p>The community can now see what you want help learning next.</p>
+              <p>The community can now see what you want help learning next, and anyone can use it to create a matching skill post.</p>
               <div class="request-form-actions">
                 <button type="button" class="btn-primary" id="post-another-request">Post Another Request</button>
                 <a href="explore.html" class="btn-primary">Browse Skills</a>
@@ -390,6 +478,10 @@ document.addEventListener("DOMContentLoaded", () => {
                 <div class="request-card-details">
                   <span>Format: ${escapeHtml(formatPreferredFormat(preferredFormat))}</span>
                   <span>Timeline: ${escapeHtml(formatTimeline(timeline))}</span>
+                  <span>Session Length: ${escapeHtml(formatSessionLength(sessionLengthMinutes))}</span>
+                </div>
+                <div class="request-card-actions">
+                  <a class="btn-primary request-card-action" href="${REQUESTS_TEACH_PATH}?requestId=${encodeURIComponent(newRequest.id)}">Teach This Skill</a>
                 </div>
               </article>
             </section>

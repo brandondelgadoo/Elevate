@@ -1,6 +1,8 @@
 import { getCurrentUser, waitForAuthReady } from "./auth-state.js";
 import { buildProfileDisplayName, getUserProfile } from "./user-profile.js";
 
+const REQUESTS_STORAGE_KEY = "elevateSkillRequests";
+
 document.addEventListener("DOMContentLoaded", () => {
   const teachContent = document.getElementById("teach-content");
   const categoryOptions = [
@@ -13,6 +15,7 @@ document.addEventListener("DOMContentLoaded", () => {
   if (!teachContent) return;
 
   let isLoggedIn = Boolean(getCurrentUser());
+  let prefillRequest = null;
 
   let skillDraft = {
     title: "",
@@ -41,6 +44,81 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     return getUserProfile(user.uid);
+  }
+
+  function loadSkillRequests() {
+    try {
+      const storedRequests = localStorage.getItem(REQUESTS_STORAGE_KEY);
+
+      if (!storedRequests) {
+        return [];
+      }
+
+      const parsedRequests = JSON.parse(storedRequests);
+      return Array.isArray(parsedRequests) ? parsedRequests : [];
+    } catch (error) {
+      console.error("Unable to load skill requests.", error);
+      return [];
+    }
+  }
+
+  function loadPrefillRequest() {
+    const requestId = new URLSearchParams(window.location.search).get("requestId");
+
+    if (!requestId) {
+      return null;
+    }
+
+    return loadSkillRequests().find((request) => request.id === requestId) || null;
+  }
+
+  function initializeDraftFromRequest() {
+    if (!prefillRequest) {
+      return;
+    }
+
+    if (
+      skillDraft.title ||
+      skillDraft.category ||
+      skillDraft.description ||
+      skillDraft.maxPeoplePerSession ||
+      skillDraft.sessionLengthMinutes ||
+      skillDraft.cardImageUrl ||
+      skillDraft.availableDates.some(Boolean)
+    ) {
+      return;
+    }
+
+    const requesterName = prefillRequest.requestedBy || "a community member";
+    const preferredFormatText =
+      prefillRequest.preferredFormat === "one-on-one"
+        ? "one-on-one"
+        : prefillRequest.preferredFormat === "small-group"
+          ? "small-group"
+          : prefillRequest.preferredFormat === "either"
+            ? "flexible-format"
+            : "flexible-format";
+    const timelineText =
+      prefillRequest.timeline === "asap"
+        ? "ASAP"
+        : prefillRequest.timeline === "week"
+          ? "within a week"
+          : prefillRequest.timeline === "month"
+            ? "within a month"
+            : "on a flexible timeline";
+
+    skillDraft = {
+      ...skillDraft,
+      title: prefillRequest.title || "",
+      category: prefillRequest.category || "",
+      description: prefillRequest.description
+        ? `${prefillRequest.description}\n\nBuilt from a community request by ${requesterName}. Preferred format: ${preferredFormatText}. Requested timeline: ${timelineText}.`
+        : "",
+      maxPeoplePerSession: prefillRequest.preferredFormat === "one-on-one" ? "1" : "",
+      sessionLengthMinutes: prefillRequest.sessionLengthMinutes || "",
+      availableDates: [""],
+      cardImageUrl: prefillRequest.cardImageUrl || ""
+    };
   }
 
   function getDefaultInstructorName() {
@@ -115,16 +193,24 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function renderTeachContent() {
+    initializeDraftFromRequest();
     ensureInstructorDraft();
     ensureDateDraft();
 
     if (isLoggedIn) {
       const accountLabel = escapeHtml(getDefaultInstructorName());
+      const requestContextMessage = prefillRequest
+        ? `<div class="teach-form-field">
+            <span>Request Match</span>
+            <small class="teach-form-hint">You are creating a skill from a community request posted by @${escapeHtml(prefillRequest.requestedBy || "member")}.</small>
+          </div>`
+        : "";
 
       teachContent.innerHTML = `
         <h1>Share a session</h1>
         <p>Create a teach post with the details learners need before they reach out.</p>
         <form class="teach-form" id="teach-form">
+          ${requestContextMessage}
           <label class="teach-form-field" for="skill-title">
             <span>Title</span>
             <input type="text" id="skill-title" name="title" placeholder="Intro to Public Speaking" value="${escapeHtml(skillDraft.title)}">
@@ -524,6 +610,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
+  prefillRequest = loadPrefillRequest();
   renderTeachContent();
 
   waitForAuthReady().then(() => {
