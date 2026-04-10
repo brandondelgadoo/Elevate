@@ -42,6 +42,40 @@ function formatCategory(category) {
   return category;
 }
 
+function formatSessionLength(minutes) {
+  const safeMinutes = Number(minutes);
+
+  if (!safeMinutes) {
+    return "Length not provided";
+  }
+
+  const hours = Math.floor(safeMinutes / 60);
+  const remainingMinutes = safeMinutes % 60;
+
+  if (!hours) {
+    return `${safeMinutes} minutes`;
+  }
+
+  if (!remainingMinutes) {
+    return hours === 1 ? "1 hour" : `${hours} hours`;
+  }
+
+  return `${hours}h ${remainingMinutes}m`;
+}
+
+function formatAvailableDate(dateValue) {
+  const date = new Date(dateValue);
+
+  if (Number.isNaN(date.getTime())) {
+    return dateValue;
+  }
+
+  return new Intl.DateTimeFormat(undefined, {
+    dateStyle: "medium",
+    timeStyle: "short"
+  }).format(date);
+}
+
 function normalizeSkill(rawSkill) {
   return new Skill(
     rawSkill.title,
@@ -124,7 +158,12 @@ function addSkill({
 const skillsContainer = document.querySelector("#skillsContainer");
 const categoryFilter = document.querySelector("#categoryFilter");
 const dialog = document.getElementById("skillDialog");
+const dialogImage = document.getElementById("dialogImage");
 const dialogTitle = document.getElementById("dialogTitle");
+const dialogCreatedBy = document.getElementById("dialogCreatedBy");
+const dialogCategory = document.getElementById("dialogCategory");
+const dialogSessionDetails = document.getElementById("dialogSessionDetails");
+const dialogAvailableDates = document.getElementById("dialogAvailableDates");
 const dialogDescription = document.getElementById("dialogDescription");
 const closeDialog = document.getElementById("closeDialog");
 
@@ -261,7 +300,9 @@ function render(selectedCategory = "") {
     return skill.category === selectedCategory;
   });
 
-  const visibleSkills = filteredSkills.slice(0, 5);
+  const visibleSkills = [...filteredSkills]
+    .sort((firstSkill, secondSkill) => secondSkill.id - firstSkill.id)
+    .slice(0, 5);
 
   visibleSkills.forEach((skill) => {
     const card = document.createElement("div");
@@ -269,9 +310,14 @@ function render(selectedCategory = "") {
     card.dataset.id = skill.id;
 
     card.innerHTML = `
-      <h4>${skill.title}</h4>
-      <p>${skill.description}</p>
+      ${skill.cardImageUrl ? `<img src="${skill.cardImageUrl}" alt="${skill.title || "Skill"} preview">` : ""}
+      <h4>${skill.title || "Untitled Skill"}</h4>
+      <p>Created by ${skill.createdBy || "Elevate Community"}</p>
       <span class="category-tag">${formatCategory(skill.category)}</span>
+      <p>${skill.description || "No description provided yet."}</p>
+      <p>${skill.maxPeoplePerSession || "Open"} people per session - ${formatSessionLength(skill.sessionLengthMinutes)}</p>
+      <p>${skill.availableDates?.length ? `Next date: ${formatAvailableDate(skill.availableDates[0])}` : "Dates coming soon"}</p>
+      <button type="button" class="skill-card-button">View Session</button>
     `;
 
     skillsContainer.appendChild(card);
@@ -286,7 +332,12 @@ if (skillsContainer) {
 if (
   skillsContainer &&
   dialog &&
+  dialogImage &&
   dialogTitle &&
+  dialogCreatedBy &&
+  dialogCategory &&
+  dialogSessionDetails &&
+  dialogAvailableDates &&
   dialogDescription &&
   closeDialog
 ) {
@@ -301,12 +352,52 @@ if (
       return;
     }
 
+    if (selectedSkill.cardImageUrl) {
+      dialogImage.src = selectedSkill.cardImageUrl;
+      dialogImage.alt = `${selectedSkill.title || "Skill"} preview`;
+      dialogImage.hidden = false;
+    } else {
+      dialogImage.removeAttribute("src");
+      dialogImage.alt = "";
+      dialogImage.hidden = true;
+    }
+
     dialogTitle.textContent = selectedSkill.title;
+    dialogCreatedBy.textContent = `Instructor: ${selectedSkill.createdBy || "Elevate Community"}`;
+    dialogCategory.textContent = `Category: ${formatCategory(selectedSkill.category)}`;
+    dialogSessionDetails.textContent = `Session details: ${
+      selectedSkill.maxPeoplePerSession || "Open"
+    } people per session - ${formatSessionLength(selectedSkill.sessionLengthMinutes)}`;
+    dialogAvailableDates.replaceChildren();
+
+    const datesHeading = document.createElement("strong");
+    datesHeading.textContent = "Available Dates";
+    dialogAvailableDates.appendChild(datesHeading);
+
+    if (selectedSkill.availableDates?.length) {
+      const datesList = document.createElement("ul");
+
+      selectedSkill.availableDates.forEach((dateValue) => {
+        const item = document.createElement("li");
+        item.textContent = formatAvailableDate(dateValue);
+        datesList.appendChild(item);
+      });
+
+      dialogAvailableDates.appendChild(datesList);
+    } else {
+      const emptyDatesMessage = document.createElement("p");
+      emptyDatesMessage.textContent = "Dates will be shared later.";
+      dialogAvailableDates.appendChild(emptyDatesMessage);
+    }
+
     dialogDescription.textContent = selectedSkill.description;
     dialog.showModal();
   });
 
   closeDialog.addEventListener("click", () => {
+    dialogImage.removeAttribute("src");
+    dialogImage.alt = "";
+    dialogImage.hidden = true;
     dialog.close();
   });
 
@@ -319,6 +410,9 @@ if (
       event.clientY <= rect.bottom;
 
     if (!clickedInsideDialog) {
+      dialogImage.removeAttribute("src");
+      dialogImage.alt = "";
+      dialogImage.hidden = true;
       dialog.close();
     }
   });
