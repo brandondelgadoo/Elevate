@@ -1,8 +1,6 @@
 import { getCurrentUser, waitForAuthReady } from "./auth-state.js";
 import { buildProfileDisplayName, getUserProfile } from "./user-profile.js";
 
-const BOOKINGS_STORAGE_KEY = "elevateSessionBookings";
-
 document.addEventListener("DOMContentLoaded", () => {
   const cardGrid = document.getElementById("cardGrid");
   const resultsCount = document.getElementById("exploreResultsCount");
@@ -90,26 +88,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     return [];
-  }
-
-  function loadBookingsFromStorage() {
-    try {
-      const storedBookings = localStorage.getItem(BOOKINGS_STORAGE_KEY);
-
-      if (!storedBookings) {
-        return [];
-      }
-
-      const parsedBookings = JSON.parse(storedBookings);
-      return Array.isArray(parsedBookings) ? parsedBookings : [];
-    } catch (error) {
-      console.error("Unable to load session bookings.", error);
-      return [];
-    }
-  }
-
-  function persistBookings(bookingsToPersist) {
-    localStorage.setItem(BOOKINGS_STORAGE_KEY, JSON.stringify(bookingsToPersist));
   }
 
   function getBookingsForSkillDate(skillId, dateValue) {
@@ -478,33 +456,14 @@ document.addEventListener("DOMContentLoaded", () => {
       dateValue: selectedDate
     };
 
-    try {
-      const { replaceBookingInDb } = await import("./bookings-store.js");
-      const savedBooking = await replaceBookingInDb(existingUserBookings, newBooking);
-      bookings = [savedBooking, ...existingBookingsForUserSkill];
-      persistBookings(bookings);
-      syncBookingControls(activeSkill);
-      updateBookingStatus(
-        `Booked for ${formatAvailableDate(selectedDate)}. You're all set.`,
-        "success"
-      );
-    } catch (error) {
-      console.error("Unable to save booking to Firestore. Falling back to local storage.", error);
-      bookings = [
-        {
-          id: `booking-${Date.now()}`,
-          ...newBooking,
-          bookedAt: new Date().toISOString()
-        },
-        ...existingBookingsForUserSkill
-      ];
-      persistBookings(bookings);
-      syncBookingControls(activeSkill);
-      updateBookingStatus(
-        `Booked for ${formatAvailableDate(selectedDate)}. You're all set.`,
-        "success"
-      );
-    }
+    const { replaceBookingInDb } = await import("./bookings-store.js");
+    const savedBooking = await replaceBookingInDb(existingUserBookings, newBooking);
+    bookings = [savedBooking, ...existingBookingsForUserSkill];
+    syncBookingControls(activeSkill);
+    updateBookingStatus(
+      `Booked for ${formatAvailableDate(selectedDate)}. You're all set.`,
+      "success"
+    );
   });
 
   closeDialog.addEventListener("click", () => {
@@ -527,16 +486,12 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   async function initializeBookings() {
-    const storedBookings = loadBookingsFromStorage();
-
     try {
       const { listBookingsFromDb } = await import("./bookings-store.js");
-      const dbBookings = await listBookingsFromDb();
-      bookings = dbBookings;
-      persistBookings(dbBookings);
+      bookings = await listBookingsFromDb();
     } catch (error) {
-      console.error("Unable to load bookings from Firestore. Falling back to local data.", error);
-      bookings = storedBookings;
+      console.error("Unable to load bookings from Firestore.", error);
+      bookings = [];
     }
   }
 

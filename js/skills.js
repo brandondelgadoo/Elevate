@@ -1,4 +1,3 @@
-const STORAGE_KEY = "elevateCustomSkills";
 const skills = [];
 let resolveSkillsReady;
 const skillsReadyPromise = new Promise((resolve) => {
@@ -106,36 +105,6 @@ function normalizeSkill(rawSkill) {
   );
 }
 
-function loadCustomSkills() {
-  try {
-    const storedSkills = localStorage.getItem(STORAGE_KEY);
-
-    if (!storedSkills) {
-      return [];
-    }
-
-    const parsedSkills = JSON.parse(storedSkills);
-
-    if (!Array.isArray(parsedSkills)) {
-      return [];
-    }
-
-    return parsedSkills
-      .filter((skill) => {
-        return skill && skill.title && skill.description && skill.category;
-      })
-      .map(normalizeSkill);
-  } catch (error) {
-    console.error("Unable to load custom skills.", error);
-    return [];
-  }
-}
-
-function persistCustomSkills() {
-  const customSkills = skills.filter((skill) => skill.isCustom);
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(customSkills));
-}
-
 async function addSkill({
   title,
   description,
@@ -153,26 +122,16 @@ async function addSkill({
     cardImageUrl
   });
 
-  try {
-    const { createSkillInDb } = await import("./skills-store.js");
-    const savedSkill = await createSkillInDb({
-      ...newSkill,
-      isCustom: true
-    });
-    const normalizedSkill = normalizeSkill(savedSkill);
-    normalizedSkill.isCustom = true;
-    skills.push(normalizedSkill);
-    persistCustomSkills();
-    render(categoryFilter?.value || "");
-    return normalizedSkill;
-  } catch (error) {
-    console.error("Unable to save skill to Firestore. Falling back to local storage.", error);
-    newSkill.isCustom = true;
-    skills.push(newSkill);
-    persistCustomSkills();
-    render(categoryFilter?.value || "");
-    return newSkill;
-  }
+  const { createSkillInDb } = await import("./skills-store.js");
+  const savedSkill = await createSkillInDb({
+    ...newSkill,
+    isCustom: true
+  });
+  const normalizedSkill = normalizeSkill(savedSkill);
+  normalizedSkill.isCustom = true;
+  skills.push(normalizedSkill);
+  render(categoryFilter?.value || "");
+  return normalizedSkill;
 }
 
 /* ---------------- DOM REFERENCES ---------------- */
@@ -428,11 +387,6 @@ if (
 }
 
 async function initializeSkills() {
-  const customSkills = loadCustomSkills();
-  customSkills.forEach((skill) => {
-    skill.isCustom = true;
-  });
-
   try {
     const { listSkillsFromDb, createSkillInDb } = await import("./skills-store.js");
     let databaseSkills = await listSkillsFromDb();
@@ -442,13 +396,6 @@ async function initializeSkills() {
         await createSkillInDb({
           ...mockSkill,
           isCustom: false
-        });
-      }
-
-      for (const customSkill of customSkills) {
-        await createSkillInDb({
-          ...customSkill,
-          isCustom: true
         });
       }
 
@@ -463,8 +410,7 @@ async function initializeSkills() {
       })
     );
   } catch (error) {
-    console.error("Unable to load skills from Firestore. Falling back to local skills.", error);
-    skills.push(...mockSkills, ...customSkills);
+    console.error("Unable to load skills from Firestore.", error);
   }
 
   nextId =

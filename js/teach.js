@@ -59,25 +59,7 @@ document.addEventListener("DOMContentLoaded", () => {
         return request;
       }
     } catch (error) {
-      console.error("Unable to load prefill request from Firestore. Falling back to local storage.", error);
-    }
-
-    try {
-      const storedRequests = localStorage.getItem("elevateSkillRequests");
-
-      if (!storedRequests) {
-        return null;
-      }
-
-      const parsedRequests = JSON.parse(storedRequests);
-
-      if (!Array.isArray(parsedRequests)) {
-        return null;
-      }
-
-      return parsedRequests.find((request) => request.id === requestId) || null;
-    } catch (error) {
-      console.error("Unable to load skill requests from local storage.", error);
+      console.error("Unable to load prefill request from Firestore.", error);
       return null;
     }
   }

@@ -1,29 +1,8 @@
-const USER_PROFILES_STORAGE_KEY = "elevateUserProfiles";
 let profilesMapCache = {};
 let resolveProfilesReady;
 const profilesReadyPromise = new Promise((resolve) => {
   resolveProfilesReady = resolve;
 });
-
-function loadProfilesMap() {
-  try {
-    const storedProfiles = localStorage.getItem(USER_PROFILES_STORAGE_KEY);
-
-    if (!storedProfiles) {
-      return {};
-    }
-
-    const parsedProfiles = JSON.parse(storedProfiles);
-    return parsedProfiles && typeof parsedProfiles === "object" ? parsedProfiles : {};
-  } catch (error) {
-    console.error("Unable to load user profiles.", error);
-    return {};
-  }
-}
-
-function persistProfilesMap(profilesMap) {
-  localStorage.setItem(USER_PROFILES_STORAGE_KEY, JSON.stringify(profilesMap));
-}
 
 function normalizeProfilesMap(profiles) {
   return profiles.reduce((profilesMap, profile) => {
@@ -50,18 +29,10 @@ export async function saveUserProfile(profile) {
     updatedProfile.createdAt = updatedProfile.updatedAt;
   }
 
-  try {
-    const { saveUserProfileToDb } = await import("./profiles-store.js");
-    const savedProfile = await saveUserProfileToDb(updatedProfile, existingProfile);
-    profilesMapCache[profile.uid] = savedProfile;
-    persistProfilesMap(profilesMapCache);
-    return savedProfile;
-  } catch (error) {
-    console.error("Unable to save user profile to Firestore. Falling back to local storage.", error);
-    profilesMapCache[profile.uid] = updatedProfile;
-    persistProfilesMap(profilesMapCache);
-    return updatedProfile;
-  }
+  const { saveUserProfileToDb } = await import("./profiles-store.js");
+  const savedProfile = await saveUserProfileToDb(updatedProfile, existingProfile);
+  profilesMapCache[profile.uid] = savedProfile;
+  return savedProfile;
 }
 
 export function getUserProfile(uid) {
@@ -136,16 +107,13 @@ export function ready() {
 }
 
 async function initializeProfiles() {
-  const storedProfilesMap = loadProfilesMap();
-  profilesMapCache = storedProfilesMap;
-
   try {
     const { listUserProfilesFromDb } = await import("./profiles-store.js");
     const profiles = await listUserProfilesFromDb();
     profilesMapCache = normalizeProfilesMap(profiles);
-    persistProfilesMap(profilesMapCache);
   } catch (error) {
-    console.error("Unable to load user profiles from Firestore. Falling back to local data.", error);
+    console.error("Unable to load user profiles from Firestore.", error);
+    profilesMapCache = {};
   }
 
   resolveProfilesReady();

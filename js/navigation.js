@@ -68,9 +68,8 @@ function renderNavbar(user) {
 }
 
 document.addEventListener("DOMContentLoaded", async () => {
-  await enforceProfileCompletion();
-  await waitForProfilesReady();
   renderNavbar(getCurrentUser());
+  await enforceProfileCompletion();
   await waitForAuthReady();
   await waitForProfilesReady();
   renderNavbar(getCurrentUser());

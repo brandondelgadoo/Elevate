@@ -1,7 +1,6 @@
 import { getCurrentUser, waitForAuthReady } from "./auth-state.js";
 import { buildProfileDisplayName, getUserProfile } from "./user-profile.js";
 
-const STORAGE_KEY = "elevateSkillRequests";
 const REQUESTS_TEACH_PATH = "teach.html";
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -37,26 +36,6 @@ document.addEventListener("DOMContentLoaded", () => {
       .replace(/>/g, "&gt;")
       .replace(/"/g, "&quot;")
       .replace(/'/g, "&#39;");
-  }
-
-  function loadRequestsFromStorage() {
-    try {
-      const storedRequests = localStorage.getItem(STORAGE_KEY);
-
-      if (!storedRequests) {
-        return [];
-      }
-
-      const parsedRequests = JSON.parse(storedRequests);
-      return Array.isArray(parsedRequests) ? parsedRequests : [];
-    } catch (error) {
-      console.error("Unable to load skill requests.", error);
-      return [];
-    }
-  }
-
-  function persistRequests(requestsToPersist) {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(requestsToPersist));
   }
 
   function getCurrentDisplayName() {
@@ -447,22 +426,9 @@ document.addEventListener("DOMContentLoaded", () => {
             createdAt: new Date().toISOString()
           };
 
-          let savedRequest;
-
-          try {
-            const requestsStore = await import("./requests-store.js");
-            savedRequest = await requestsStore.createRequestInDb(newRequest);
-            requests = [savedRequest, ...requests.filter((request) => request.id !== savedRequest.id)];
-            persistRequests(requests);
-          } catch (dbError) {
-            console.error("Unable to save request to Firestore, using local storage.", dbError);
-            savedRequest = {
-              id: `request-${Date.now()}`,
-              ...newRequest
-            };
-            requests = [savedRequest, ...requests.filter((request) => request.id !== savedRequest.id)];
-            persistRequests(requests);
-          }
+          const requestsStore = await import("./requests-store.js");
+          const savedRequest = await requestsStore.createRequestInDb(newRequest);
+          requests = [savedRequest, ...requests.filter((request) => request.id !== savedRequest.id)];
 
           requestDraft = {
             title: "",
@@ -537,16 +503,12 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   async function initializeRequests() {
-    const storedRequests = loadRequestsFromStorage();
-
     try {
       const requestsStore = await import("./requests-store.js");
-      const dbRequests = await requestsStore.listRequestsFromDb();
-      requests = dbRequests;
-      persistRequests(dbRequests);
+      requests = await requestsStore.listRequestsFromDb();
     } catch (error) {
-      console.error("Unable to load requests from Firestore. Falling back to local data.", error);
-      requests = storedRequests;
+      console.error("Unable to load requests from Firestore.", error);
+      requests = [];
     }
   }
 
