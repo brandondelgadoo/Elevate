@@ -41,7 +41,7 @@ function renderNavbar(user) {
 
   navbarMount.innerHTML = `
     <div class="navbar">
-      <h1 class="logo"><a href="index.html">Elevate</a></h1>
+      <h1 class="logo"><a href="index.html">Elevate 🌎</a></h1>
       <nav>
         <ul class="nav-links">
           ${aboutLink}
