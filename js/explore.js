@@ -23,6 +23,8 @@ document.addEventListener("DOMContentLoaded", () => {
   let activeSkill = null;
   let skillPosts = [];
   let bookings = [];
+  let exploreLoadError = "";
+  let bookingsLoadError = "";
 
   if (
     !categoryFilter ||
@@ -200,6 +202,12 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
+    if (bookingsLoadError) {
+      bookSessionButton.disabled = true;
+      updateBookingStatus(bookingsLoadError, "error");
+      return;
+    }
+
     if (existingBooking && existingBooking.dateValue === selectedDate) {
       bookSessionButton.disabled = true;
       updateBookingStatus(
@@ -311,6 +319,19 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function renderSkillPosts(skillPosts) {
     cardGrid.innerHTML = "";
+
+    if (exploreLoadError && !skillPosts.length) {
+      const emptyState = document.createElement("div");
+      emptyState.className = "skill-post-card skill-post-card-empty";
+      emptyState.innerHTML = `
+        <h4>Skills unavailable</h4>
+        <p>${exploreLoadError}</p>
+      `;
+
+      cardGrid.appendChild(emptyState);
+      resultsCount.textContent = "Unable to load skills";
+      return;
+    }
 
     if (!skillPosts.length) {
       const emptyState = document.createElement("div");
@@ -486,12 +507,15 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   async function initializeBookings() {
+    bookingsLoadError = "";
+
     try {
       const { listBookingsFromDb } = await import("./bookings-store.js");
       bookings = await listBookingsFromDb();
     } catch (error) {
       console.error("Unable to load bookings from Firestore.", error);
       bookings = [];
+      bookingsLoadError = "We couldn't load booking availability right now.";
     }
   }
 
@@ -500,6 +524,7 @@ document.addEventListener("DOMContentLoaded", () => {
     initializeBookings()
   ]).then(() => {
     skillPosts = loadSkillPosts();
+    exploreLoadError = skillPosts.length ? "" : "We couldn't load skill posts right now. Please refresh and try again.";
     renderSkillPosts(skillPosts);
   });
 });

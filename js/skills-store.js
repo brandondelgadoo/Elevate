@@ -26,6 +26,7 @@ export async function listSkillsFromDb() {
 export async function createSkillInDb(skill) {
   const now = Date.now();
   const payload = {
+    creatorUserId: skill.creatorUserId || "",
     ...skill,
     createdAt: serverTimestamp(),
     updatedAt: serverTimestamp(),

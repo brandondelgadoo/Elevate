@@ -19,6 +19,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   let isLoggedIn = Boolean(getCurrentUser());
   let requests = [];
+  let requestsLoadError = "";
   let requestDraft = {
     title: "",
     category: "",
@@ -168,6 +169,17 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function renderRequestContent() {
+    if (requestsLoadError) {
+      requestContent.innerHTML = `
+        <section class="request-panel request-preview-panel">
+          <h2>Requests Unavailable</h2>
+          <p>${escapeHtml(requestsLoadError)}</p>
+        </section>
+      `;
+      attachRequestListeners();
+      return;
+    }
+
     if (isLoggedIn) {
       requestContent.innerHTML = `
         <section class="request-hero">
@@ -503,12 +515,15 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   async function initializeRequests() {
+    requestsLoadError = "";
+
     try {
       const requestsStore = await import("./requests-store.js");
       requests = await requestsStore.listRequestsFromDb();
     } catch (error) {
       console.error("Unable to load requests from Firestore.", error);
       requests = [];
+      requestsLoadError = "We couldn't load skill requests right now. Please refresh and try again.";
     }
   }
 

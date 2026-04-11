@@ -3,6 +3,7 @@ let resolveSkillsReady;
 const skillsReadyPromise = new Promise((resolve) => {
   resolveSkillsReady = resolve;
 });
+let skillsLoadError = "";
 
 let nextId = 0;
 
@@ -16,6 +17,7 @@ function Skill(
 ) {
   this.id = id ?? nextId++;
   this.createdBy = createdBy;
+  this.creatorUserId = options.creatorUserId || "";
   this.title = title;
   this.description = description;
   this.category = category;
@@ -87,6 +89,7 @@ function normalizeSkill(rawSkill) {
     rawSkill.createdBy || "Elevate Community",
     Number(rawSkill.id),
     {
+      creatorUserId: rawSkill.creatorUserId || "",
       maxPeoplePerSession:
         rawSkill.maxPeoplePerSession === null ||
         rawSkill.maxPeoplePerSession === undefined
@@ -110,12 +113,14 @@ async function addSkill({
   description,
   category,
   createdBy = "Elevate Community",
+  creatorUserId = "",
   maxPeoplePerSession = null,
   sessionLengthMinutes = null,
   availableDates = [],
   cardImageUrl = ""
 }) {
   const newSkill = createSkill(title, description, category, createdBy, {
+    creatorUserId,
     maxPeoplePerSession,
     sessionLengthMinutes,
     availableDates,
@@ -273,9 +278,31 @@ function render(selectedCategory = "") {
     return skill.category === selectedCategory;
   });
 
+  if (skillsLoadError && !filteredSkills.length) {
+    const emptyState = document.createElement("div");
+    emptyState.className = "skill-post-card skill-post-card-empty";
+    emptyState.innerHTML = `
+      <h4>Featured skills unavailable</h4>
+      <p>${skillsLoadError}</p>
+    `;
+    skillsContainer.appendChild(emptyState);
+    return;
+  }
+
   const visibleSkills = [...filteredSkills]
     .sort((firstSkill, secondSkill) => secondSkill.id - firstSkill.id)
     .slice(0, 5);
+
+  if (!visibleSkills.length) {
+    const emptyState = document.createElement("div");
+    emptyState.className = "skill-post-card skill-post-card-empty";
+    emptyState.innerHTML = `
+      <h4>No featured skills yet</h4>
+      <p>Check back soon for new community sessions.</p>
+    `;
+    skillsContainer.appendChild(emptyState);
+    return;
+  }
 
   visibleSkills.forEach((skill) => {
     const card = document.createElement("div");
@@ -387,6 +414,8 @@ if (
 }
 
 async function initializeSkills() {
+  skillsLoadError = "";
+
   try {
     const { listSkillsFromDb, createSkillInDb } = await import("./skills-store.js");
     let databaseSkills = await listSkillsFromDb();
@@ -411,6 +440,7 @@ async function initializeSkills() {
     );
   } catch (error) {
     console.error("Unable to load skills from Firestore.", error);
+    skillsLoadError = "We couldn't load featured skills right now. Please refresh and try again.";
   }
 
   nextId =

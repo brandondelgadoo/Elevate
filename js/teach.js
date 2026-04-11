@@ -507,6 +507,7 @@ document.addEventListener("DOMContentLoaded", () => {
             description,
             category,
             createdBy: instructor,
+            creatorUserId: getCurrentUser()?.uid || "",
             maxPeoplePerSession,
             sessionLengthMinutes,
             availableDates,
