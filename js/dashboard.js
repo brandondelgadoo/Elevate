@@ -12,6 +12,17 @@ function getSkillPosts() {
   return [];
 }
 
+function getResolvedSkillImage(skillPost) {
+  if (
+    window.ElevateSkills &&
+    typeof window.ElevateSkills.getResolvedSkillImage === "function"
+  ) {
+    return window.ElevateSkills.getResolvedSkillImage(skillPost);
+  }
+
+  return skillPost?.cardImageUrl || "";
+}
+
 function formatCategory(category) {
   if (
     window.ElevateSkills &&
@@ -115,7 +126,9 @@ function buildBookingCard(booking, skillPost) {
 
 function buildSkillPostCard(skillPost) {
   const card = buildCardShell();
+  const resolvedImageUrl = getResolvedSkillImage(skillPost);
   card.innerHTML = `
+    ${resolvedImageUrl ? `<img class="dashboard-card-image" src="${resolvedImageUrl}" alt="${skillPost?.title || "Skill"} preview">` : ""}
     <p class="dashboard-card-eyebrow">Teach Post</p>
     <h4>${skillPost?.title || "Untitled skill"}</h4>
     <p>Category: ${formatCategory(skillPost?.category)}</p>

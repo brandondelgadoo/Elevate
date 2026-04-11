@@ -93,6 +93,17 @@ document.addEventListener("DOMContentLoaded", () => {
     return [];
   }
 
+  function getSkillImageUrl(skillPost) {
+    if (
+      window.ElevateSkills &&
+      typeof window.ElevateSkills.getResolvedSkillImage === "function"
+    ) {
+      return window.ElevateSkills.getResolvedSkillImage(skillPost);
+    }
+
+    return skillPost?.cardImageUrl || "";
+  }
+
   function getBookingsForSkillDate(skillId, dateValue) {
     return bookings.filter((booking) => {
       return booking.skillId === skillId && booking.dateValue === dateValue;
@@ -255,14 +266,15 @@ document.addEventListener("DOMContentLoaded", () => {
     const card = document.createElement("div");
     card.className = "skill-card";
     card.dataset.id = skillPost.id;
+    const resolvedImageUrl = getSkillImageUrl(skillPost);
 
-    if (skillPost.cardImageUrl) {
+    if (resolvedImageUrl) {
       const imageWrapper = document.createElement("div");
       imageWrapper.className = "skill-card-media";
 
       const image = document.createElement("img");
       image.className = "skill-card-image";
-      image.src = skillPost.cardImageUrl;
+      image.src = resolvedImageUrl;
       image.alt = `${skillPost.title || "Skill"} preview`;
 
       imageWrapper.appendChild(image);
@@ -412,8 +424,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
     dialogDescription.textContent = selectedSkill.description;
 
-    if (selectedSkill.cardImageUrl) {
-      dialogImage.src = selectedSkill.cardImageUrl;
+    const resolvedImageUrl = getSkillImageUrl(selectedSkill);
+
+    if (resolvedImageUrl) {
+      dialogImage.src = resolvedImageUrl;
       dialogImage.alt = `${selectedSkill.title || "Skill"} preview`;
       dialogImage.hidden = false;
     } else {

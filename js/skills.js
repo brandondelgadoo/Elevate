@@ -6,6 +6,12 @@ const skillsReadyPromise = new Promise((resolve) => {
 let skillsLoadError = "";
 
 let nextId = 0;
+const DEFAULT_CATEGORY_IMAGES = {
+  tech: "assets/default-tech.jpg",
+  fitness: "assets/default-fitness.avif",
+  music: "assets/default-music.jpg",
+  art: "assets/default-art.jpg"
+};
 
 function Skill(
   title,
@@ -45,6 +51,18 @@ function formatCategory(category) {
   if (category === "music") return "Music";
   if (category === "art") return "Art";
   return category;
+}
+
+function getDefaultCategoryImage(category) {
+  return DEFAULT_CATEGORY_IMAGES[category] || "";
+}
+
+function getResolvedSkillImage(skill) {
+  if (skill?.cardImageUrl) {
+    return skill.cardImageUrl;
+  }
+
+  return getDefaultCategoryImage(skill?.category);
 }
 
 function formatSessionLength(minutes) {
@@ -255,7 +273,9 @@ window.ElevateSkills = {
     return [...skills];
   },
   addSkill,
-  formatCategory
+  formatCategory,
+  getDefaultCategoryImage,
+  getResolvedSkillImage
 };
 
 /* ---------------- CATEGORY FILTER ---------------- */
@@ -308,6 +328,7 @@ function render(selectedCategory = "") {
     const card = document.createElement("div");
     card.className = "skill-card";
     card.dataset.id = skill.id;
+    const resolvedImageUrl = getResolvedSkillImage(skill);
 
     const authorInitials = (skill.createdBy || "EC")
       .split(/\s+/)
@@ -317,9 +338,9 @@ function render(selectedCategory = "") {
       .toUpperCase();
 
     card.innerHTML = `
-      ${skill.cardImageUrl ? `
+      ${resolvedImageUrl ? `
         <div class="card-img-wrap">
-          <img src="${skill.cardImageUrl}" alt="${skill.title || "Skill"} preview">
+          <img src="${resolvedImageUrl}" alt="${skill.title || "Skill"} preview">
           <div class="card-img-overlay"></div>
           <span class="card-badge">${formatCategory(skill.category)}</span>
         </div>
@@ -371,8 +392,10 @@ if (
       return;
     }
 
-    if (selectedSkill.cardImageUrl) {
-      dialogImage.src = selectedSkill.cardImageUrl;
+    const resolvedImageUrl = getResolvedSkillImage(selectedSkill);
+
+    if (resolvedImageUrl) {
+      dialogImage.src = resolvedImageUrl;
       dialogImage.alt = `${selectedSkill.title || "Skill"} preview`;
       dialogImage.hidden = false;
     } else {

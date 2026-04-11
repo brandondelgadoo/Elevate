@@ -1504,6 +1504,19 @@ ul { list-style: none; }
   gap: 8px;
   transition: border-color 0.2s;
 }
+.request-card-media {
+  width: calc(100% + 36px);
+  margin: -18px -18px 10px;
+  height: 180px;
+  overflow: hidden;
+  border-radius: 14px 14px 0 0;
+}
+.request-card-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
 .request-card:hover { border-color: rgba(94, 234, 212, 0.2); }
 .request-card-highlight {
   border-color: rgba(94, 234, 212, 0.3);
@@ -1739,6 +1752,14 @@ ul { list-style: none; }
   border: 1px solid var(--subtle-border);
   border-radius: 16px;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+}
+
+.dashboard-card-image {
+  width: calc(100% + 44px);
+  margin: -22px -22px 10px;
+  height: 180px;
+  object-fit: cover;
+  border-radius: 16px 16px 0 0;
 }
 
 .dashboard-card h4 {

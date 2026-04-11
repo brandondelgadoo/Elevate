@@ -120,6 +120,21 @@ document.addEventListener("DOMContentLoaded", () => {
     return buildProfileDisplayName(user, profile);
   }
 
+  function getResolvedSkillImageUrl(category, cardImageUrl) {
+    if (cardImageUrl) {
+      return cardImageUrl;
+    }
+
+    if (
+      window.ElevateSkills &&
+      typeof window.ElevateSkills.getDefaultCategoryImage === "function"
+    ) {
+      return window.ElevateSkills.getDefaultCategoryImage(category);
+    }
+
+    return "";
+  }
+
   function getDateFieldValues() {
     const dateInputs = document.querySelectorAll(".teach-availability-input");
 
@@ -515,6 +530,7 @@ document.addEventListener("DOMContentLoaded", () => {
           });
 
           const formattedDates = availableDates.map(formatAvailableDate);
+          const resolvedImageUrl = getResolvedSkillImageUrl(category, cardImageUrl);
 
           skillDraft = {
             title: "",
@@ -535,11 +551,11 @@ document.addEventListener("DOMContentLoaded", () => {
             </div>
 
             <div class="teach-posted-skill">
-              ${cardImageUrl ? `
+              ${resolvedImageUrl ? `
                 <div class="teach-posted-skill-media">
                   <img
                     class="teach-posted-skill-image"
-                    src="${escapeHtml(cardImageUrl)}"
+                    src="${escapeHtml(resolvedImageUrl)}"
                     alt="${escapeHtml(title)} preview"
                   >
                 </div>
