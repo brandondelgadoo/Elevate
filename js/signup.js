@@ -120,7 +120,7 @@ function validateCredentialsStep(values, { emailRequired = true } = {}) {
   return "";
 }
 
-function validateProfileStep(values, excludeUid = "") {
+async function validateProfileStep(values, excludeUid = "") {
   if (
     !values.username ||
     !values.firstName ||
@@ -135,8 +135,12 @@ function validateProfileStep(values, excludeUid = "") {
     return "Username must be 3-20 characters and only use letters, numbers, or underscores.";
   }
 
-  if (isUsernameTaken(values.username, excludeUid)) {
-    return "That username is already taken.";
+  try {
+    if (await isUsernameTaken(values.username, excludeUid)) {
+      return "That username is already taken.";
+    }
+  } catch (error) {
+    return "We couldn't check username availability right now.";
   }
 
   if (!values.interests.length) {
@@ -193,7 +197,7 @@ backToCredentialsBtn.addEventListener("click", () => {
 signupBtn.addEventListener("click", async () => {
   await waitForProfilesReady();
   const formValues = getSignupFormValues();
-  const profileValidationMessage = validateProfileStep(
+  const profileValidationMessage = await validateProfileStep(
     formValues,
     pendingGoogleUser?.uid || ""
   );

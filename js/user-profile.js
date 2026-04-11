@@ -1,9 +1,11 @@
 import { auth, onAuthStateChanged } from "../firebase/config.js";
 
 let profilesMapCache = {};
-let resolveProfilesReady;
-const profilesReadyPromise = new Promise((resolve) => {
-  resolveProfilesReady = resolve;
+let hasResolvedInitialProfiles = false;
+let resolveInitialProfilesReady;
+let currentProfilesLoadPromise = Promise.resolve();
+const initialProfilesReadyPromise = new Promise((resolve) => {
+  resolveInitialProfilesReady = resolve;
 });
 
 function normalizeProfilesMap(profiles) {
@@ -64,26 +66,6 @@ export function isUserProfileComplete(profile) {
   return hasRequiredTextFields && hasValidInterests;
 }
 
-export function isUsernameTaken(username, excludeUid = "") {
-  if (!username) {
-    return false;
-  }
-
-  const normalizedUsername = username.trim().toLowerCase();
-
-  return Object.values(profilesMapCache).some((profile) => {
-    if (!profile || !profile.username) {
-      return false;
-    }
-
-    if (excludeUid && profile.uid === excludeUid) {
-      return false;
-    }
-
-    return profile.username.toLowerCase() === normalizedUsername;
-  });
-}
-
 export function buildProfileDisplayName(user, profile) {
   if (profile?.username) {
     return profile.username;
@@ -105,33 +87,73 @@ export function buildProfileDisplayName(user, profile) {
 }
 
 export function ready() {
-  return profilesReadyPromise;
+  return Promise.all([initialProfilesReadyPromise, currentProfilesLoadPromise]).then(() => {});
 }
 
-async function initializeProfiles() {
-  const currentUser = auth.currentUser || await new Promise((resolve) => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      unsubscribe();
-      resolve(user);
-    });
-  });
-
-  if (!currentUser) {
+async function loadProfilesForUser(user) {
+  if (!user) {
     profilesMapCache = {};
-    resolveProfilesReady();
     return;
   }
 
   try {
-    const { listUserProfilesFromDb } = await import("./profiles-store.js");
-    const profiles = await listUserProfilesFromDb();
-    profilesMapCache = normalizeProfilesMap(profiles);
+    const { ensureUsernameRecordForProfile, getUserProfileFromDb } = await import("./profiles-store.js");
+    const profile = await getUserProfileFromDb(user.uid);
+
+    if (profile) {
+      await ensureUsernameRecordForProfile(profile);
+    }
+
+    profilesMapCache = profile ? normalizeProfilesMap([profile]) : {};
   } catch (error) {
     console.error("Unable to load user profiles from Firestore.", error);
     profilesMapCache = {};
   }
-
-  resolveProfilesReady();
 }
 
-initializeProfiles();
+onAuthStateChanged(auth, (user) => {
+  currentProfilesLoadPromise = loadProfilesForUser(user).finally(() => {
+    if (!hasResolvedInitialProfiles) {
+      hasResolvedInitialProfiles = true;
+      resolveInitialProfilesReady();
+    }
+  });
+});
+
+export async function isUsernameTaken(username, excludeUid = "") {
+  if (!username) {
+    return false;
+  }
+
+  const normalizedUsername = username.trim().toLowerCase();
+
+  const localMatch = Object.values(profilesMapCache).find((profile) => {
+    if (!profile?.username) {
+      return false;
+    }
+
+    if (excludeUid && profile.uid === excludeUid) {
+      return false;
+    }
+
+    return profile.username.toLowerCase() === normalizedUsername;
+  });
+
+  if (localMatch) {
+    return true;
+  }
+
+  try {
+    const { getUsernameRecordFromDb } = await import("./profiles-store.js");
+    const usernameRecord = await getUsernameRecordFromDb(normalizedUsername);
+
+    if (!usernameRecord) {
+      return false;
+    }
+
+    return !(excludeUid && usernameRecord.uid === excludeUid);
+  } catch (error) {
+    console.error("Unable to check username availability.", error);
+    throw error;
+  }
+}

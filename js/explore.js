@@ -23,6 +23,7 @@ document.addEventListener("DOMContentLoaded", () => {
   let activeSkill = null;
   let skillPosts = [];
   let bookings = [];
+  let skillAvailabilityMap = {};
   let exploreLoadError = "";
   let bookingsLoadError = "";
 
@@ -110,7 +111,10 @@ document.addEventListener("DOMContentLoaded", () => {
       return null;
     }
 
-    return Math.max(seatLimit - getBookingsForSkillDate(skillPost.id, dateValue).length, 0);
+    const reservedSeats =
+      Number(skillAvailabilityMap[String(skillPost.id)]?.bookingCounts?.[dateValue]) || 0;
+
+    return Math.max(seatLimit - reservedSeats, 0);
   }
 
   function getCurrentBookingForUser(skillId, userId) {
@@ -462,10 +466,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const profile = getUserProfile(user.uid);
     const learnerName = buildProfileDisplayName(user, profile);
-    const existingBookingsForUserSkill = bookings.filter((booking) => {
-      return !(booking.skillId === activeSkill.id && booking.userId === user.uid);
-    });
-
     const existingUserBookings = bookings.filter((booking) => {
       return booking.skillId === activeSkill.id && booking.userId === user.uid;
     });
@@ -479,7 +479,24 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const { replaceBookingInDb } = await import("./bookings-store.js");
     const savedBooking = await replaceBookingInDb(existingUserBookings, newBooking);
-    bookings = [savedBooking, ...existingBookingsForUserSkill];
+    bookings = [
+      savedBooking,
+      ...bookings.filter((booking) => {
+        return !(booking.skillId === activeSkill.id && booking.userId === user.uid);
+      })
+    ];
+
+    try {
+      const { listSkillAvailabilityFromDb } = await import("./skill-availability-store.js");
+      const availabilityEntries = await listSkillAvailabilityFromDb();
+      skillAvailabilityMap = availabilityEntries.reduce((availabilityMap, entry) => {
+        availabilityMap[String(entry.skillId ?? entry.id)] = entry;
+        return availabilityMap;
+      }, {});
+    } catch (error) {
+      console.error("Unable to refresh booking availability from Firestore.", error);
+    }
+
     syncBookingControls(activeSkill);
     updateBookingStatus(
       `Booked for ${formatAvailableDate(selectedDate)}. You're all set.`,
@@ -508,13 +525,27 @@ document.addEventListener("DOMContentLoaded", () => {
 
   async function initializeBookings() {
     bookingsLoadError = "";
+    const currentUser = getCurrentUser();
 
     try {
-      const { listBookingsFromDb } = await import("./bookings-store.js");
-      bookings = await listBookingsFromDb();
+      const { listSkillAvailabilityFromDb } = await import("./skill-availability-store.js");
+      const availabilityEntries = await listSkillAvailabilityFromDb();
+      skillAvailabilityMap = availabilityEntries.reduce((availabilityMap, entry) => {
+        availabilityMap[String(entry.skillId ?? entry.id)] = entry;
+        return availabilityMap;
+      }, {});
+
+      if (!currentUser) {
+        bookings = [];
+        return;
+      }
+
+      const { listBookingsForUserFromDb } = await import("./bookings-store.js");
+      bookings = await listBookingsForUserFromDb(currentUser.uid);
     } catch (error) {
       console.error("Unable to load bookings from Firestore.", error);
       bookings = [];
+      skillAvailabilityMap = {};
       bookingsLoadError = "We couldn't load booking availability right now.";
     }
   }
@@ -526,5 +557,16 @@ document.addEventListener("DOMContentLoaded", () => {
     skillPosts = loadSkillPosts();
     exploreLoadError = skillPosts.length ? "" : "We couldn't load skill posts right now. Please refresh and try again.";
     renderSkillPosts(skillPosts);
+
+    window.addEventListener("auth-state-changed", () => {
+      initializeBookings().then(() => {
+        skillPosts = loadSkillPosts();
+        renderSkillPosts(skillPosts);
+
+        if (activeSkill && dialog.open) {
+          syncBookingControls(activeSkill);
+        }
+      });
+    });
   });
 });

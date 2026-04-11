@@ -1,27 +1,79 @@
 import { db } from "../firebase/config.js";
 import {
-  collection,
   doc,
-  getDocs,
-  orderBy,
-  query,
+  getDoc,
   serverTimestamp,
-  setDoc
+  setDoc,
+  writeBatch
 } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-firestore.js";
 
 const COLLECTION_NAME = "userProfiles";
+const USERNAMES_COLLECTION_NAME = "usernames";
 
-export async function listUserProfilesFromDb() {
-  const profilesQuery = query(
-    collection(db, COLLECTION_NAME),
-    orderBy("updatedAtMs", "desc")
+function normalizeUsername(username = "") {
+  return username.trim().toLowerCase();
+}
+
+export async function getUserProfileFromDb(uid) {
+  if (!uid) {
+    return null;
+  }
+
+  const profileSnapshot = await getDoc(doc(db, COLLECTION_NAME, uid));
+
+  if (!profileSnapshot.exists()) {
+    return null;
+  }
+
+  return {
+    uid: profileSnapshot.id,
+    ...profileSnapshot.data()
+  };
+}
+
+export async function getUsernameRecordFromDb(username) {
+  const normalizedUsername = normalizeUsername(username);
+
+  if (!normalizedUsername) {
+    return null;
+  }
+
+  const usernameSnapshot = await getDoc(
+    doc(db, USERNAMES_COLLECTION_NAME, normalizedUsername)
   );
-  const snapshot = await getDocs(profilesQuery);
 
-  return snapshot.docs.map((docSnapshot) => ({
-    uid: docSnapshot.id,
-    ...docSnapshot.data()
-  }));
+  if (!usernameSnapshot.exists()) {
+    return null;
+  }
+
+  return {
+    id: usernameSnapshot.id,
+    ...usernameSnapshot.data()
+  };
+}
+
+export async function ensureUsernameRecordForProfile(profile) {
+  if (!profile?.uid || !profile?.username) {
+    return;
+  }
+
+  const normalizedUsername = normalizeUsername(profile.username);
+
+  if (!normalizedUsername) {
+    return;
+  }
+
+  await setDoc(
+    doc(db, USERNAMES_COLLECTION_NAME, normalizedUsername),
+    {
+      uid: profile.uid,
+      username: profile.username,
+      normalizedUsername,
+      updatedAt: serverTimestamp(),
+      updatedAtMs: Date.now()
+    },
+    { merge: true }
+  );
 }
 
 export async function saveUserProfileToDb(profile, existingProfile = null) {
@@ -31,6 +83,8 @@ export async function saveUserProfileToDb(profile, existingProfile = null) {
 
   const now = Date.now();
   const profileRef = doc(db, COLLECTION_NAME, profile.uid);
+  const normalizedUsername = normalizeUsername(profile.username);
+  const previousNormalizedUsername = normalizeUsername(existingProfile?.username);
   const createdAtMs = Number(existingProfile?.createdAtMs) || now;
 
   const payload = {
@@ -42,7 +96,25 @@ export async function saveUserProfileToDb(profile, existingProfile = null) {
     updatedAtMs: now
   };
 
-  await setDoc(profileRef, payload, { merge: true });
+  const batch = writeBatch(db);
+
+  batch.set(profileRef, payload, { merge: true });
+
+  if (previousNormalizedUsername && previousNormalizedUsername !== normalizedUsername) {
+    batch.delete(doc(db, USERNAMES_COLLECTION_NAME, previousNormalizedUsername));
+  }
+
+  if (normalizedUsername) {
+    batch.set(doc(db, USERNAMES_COLLECTION_NAME, normalizedUsername), {
+      uid: profile.uid,
+      username: profile.username,
+      normalizedUsername,
+      updatedAt: serverTimestamp(),
+      updatedAtMs: now
+    });
+  }
+
+  await batch.commit();
 
   return {
     ...payload,

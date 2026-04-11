@@ -28,7 +28,6 @@ authReadyPromise = setPersistence(auth, browserLocalPersistence)
     () =>
       new Promise((resolve) => {
         const unsubscribe = onAuthStateChanged(auth, (user) => {
-          updateAuthState(user);
           unsubscribe();
           resolve(user);
         });

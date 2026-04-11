@@ -5,18 +5,19 @@ import {
   deleteDoc,
   doc,
   getDocs,
-  orderBy,
   query,
-  serverTimestamp
+  serverTimestamp,
+  where
 } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-firestore.js";
 
 const COLLECTION_NAME = "bookings";
 
-export async function listBookingsFromDb() {
-  const bookingsQuery = query(
-    collection(db, COLLECTION_NAME),
-    orderBy("bookedAtMs", "desc")
-  );
+export async function listBookingsForUserFromDb(userId) {
+  if (!userId) {
+    return [];
+  }
+
+  const bookingsQuery = query(collection(db, COLLECTION_NAME), where("userId", "==", userId));
   const snapshot = await getDocs(bookingsQuery);
 
   return snapshot.docs.map((docSnapshot) => ({
@@ -27,6 +28,17 @@ export async function listBookingsFromDb() {
 
 export async function replaceBookingInDb(existingBookings, booking) {
   const bookingsToDelete = Array.isArray(existingBookings) ? existingBookings : [];
+  const countUpdates = {};
+
+  bookingsToDelete.forEach((existingBooking) => {
+    if (
+      existingBooking?.skillId === booking.skillId &&
+      existingBooking?.dateValue
+    ) {
+      countUpdates[existingBooking.dateValue] =
+        (countUpdates[existingBooking.dateValue] || 0) - 1;
+    }
+  });
 
   for (const existingBooking of bookingsToDelete) {
     if (existingBooking?.id) {
@@ -44,6 +56,10 @@ export async function replaceBookingInDb(existingBookings, booking) {
   };
 
   const docRef = await addDoc(collection(db, COLLECTION_NAME), payload);
+  countUpdates[booking.dateValue] = (countUpdates[booking.dateValue] || 0) + 1;
+
+  const { updateSkillAvailabilityCounts } = await import("./skill-availability-store.js");
+  await updateSkillAvailabilityCounts(booking.skillId, countUpdates);
 
   return {
     id: docRef.id,
