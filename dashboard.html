@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Elevate | Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=Instrument+Serif&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+
+<body>
+  <div id="site-navbar"></div>
+
+  <main class="dashboard-page">
+    <section class="dashboard-hero">
+      <p class="dashboard-eyebrow">Your Dashboard</p>
+      <h1 id="dashboardHeading">Welcome back.</h1>
+      <p id="dashboardIntro">
+        View your upcoming bookings, the sessions you posted, and the requests you have shared with the community.
+      </p>
+      <div class="dashboard-quick-links">
+        <a class="btn-primary" href="explore.html">Explore</a>
+        <a class="btn-primary" href="teach.html">Teach</a>
+        <a class="btn-primary" href="request.html">Request</a>
+      </div>
+    </section>
+
+    <section class="dashboard-section" aria-labelledby="bookedSessionsHeading">
+      <div class="dashboard-section-header">
+        <div>
+          <p class="dashboard-section-eyebrow">Bookings</p>
+          <h2 id="bookedSessionsHeading">Your Sessions</h2>
+        </div>
+        <p id="dashboardBookingSummary">Loading your bookings...</p>
+      </div>
+
+      <div class="dashboard-subsection">
+        <h3>Upcoming</h3>
+        <div class="card-grid" id="pendingBookingsContainer" aria-live="polite"></div>
+      </div>
+
+      <div class="dashboard-subsection">
+        <h3>Completed</h3>
+        <div class="card-grid" id="completedBookingsContainer" aria-live="polite"></div>
+      </div>
+    </section>
+
+    <section class="dashboard-section" aria-labelledby="userInfoHeading">
+      <div class="dashboard-section-header">
+        <div>
+          <p class="dashboard-section-eyebrow">Profile</p>
+          <h2 id="userInfoHeading">Your Info</h2>
+        </div>
+      </div>
+      <div class="card-grid" id="dashboardUserInfoContainer" aria-live="polite"></div>
+    </section>
+
+    <section class="dashboard-section" aria-labelledby="userPostsHeading">
+      <div class="dashboard-section-header">
+        <div>
+          <p class="dashboard-section-eyebrow">Teach</p>
+          <h2 id="userPostsHeading">Your Skill Posts</h2>
+        </div>
+        <p id="dashboardUserPostsSummary">Loading your skill posts...</p>
+      </div>
+      <div class="card-grid" id="userPostsContainer" aria-live="polite"></div>
+    </section>
+
+    <section class="dashboard-section" aria-labelledby="userRequestsHeading">
+      <div class="dashboard-section-header">
+        <div>
+          <p class="dashboard-section-eyebrow">Requests</p>
+          <h2 id="userRequestsHeading">Your Requests</h2>
+        </div>
+        <p id="dashboardUserRequestsSummary">Loading your requests...</p>
+      </div>
+      <div class="card-grid" id="userRequestsContainer" aria-live="polite"></div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-inner">
+        <p class="footer-copy">&copy; 2026 Elevate. All rights reserved.</p>
+        <div class="footer-links">
+          <a href="about.html">About</a>
+          <a href="explore.html">Explore</a>
+          <a href="request.html">Request</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script type="module" src="js/navigation.js"></script>
+  <script src="js/skills.js" defer></script>
+  <script type="module" src="js/dashboard.js"></script>
+</body>
+
+</html>

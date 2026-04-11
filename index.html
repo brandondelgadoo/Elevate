@@ -1,72 +1,168 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <title>Elevate | Community Skill Sharing</title>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <!-- SEO Meta -->
-    <meta
-      name="description"
-      content="Elevate is a community skill-sharing platform where people teach and learn from each other."
-    />
+<head>
+  <title>Elevate | Community Skill Sharing</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Elevate is a community skill-sharing platform where people teach and learn from each other." />
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=Instrument+Serif&display=swap" rel="stylesheet">
+  <!-- Styles -->
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
 
-    <!-- Styles -->
-    <link rel="stylesheet" href="css/styles.css" />
-  </head>
+<body>
 
-  <body>
-    <!-- ================= NAVIGATION ================= -->
-    <div id="site-navbar"></div>
+  <!-- ================= HERO SECTION (navbar lives inside) ================= -->
+  <section class="hero">
 
-    <!-- ================= HERO SECTION ================= -->
-    <div class="hero-container">
-      <h2>Learn Something New. Teach What You Know.</h2>
-      <p>
-        Connect with your community through real skills and real experiences.
-      </p>
-      <button class="btn-primary" id="getStartedButton" type="button">Get Started</button>
-      <a class="btn-primary" href="request.html">Request a Skill</a>
+    <!-- Background gradient -->
+    <div class="hero-bg">
+      <svg fill="none" preserveAspectRatio="none" viewBox="0 0 800 680">
+        <path d="M800 0H0V680H800V0Z" fill="url(#hg)" />
+        <defs>
+          <linearGradient gradientUnits="userSpaceOnUse" id="hg" x1="400" x2="400" y1="0" y2="680">
+            <stop offset="0.3125" stop-color="#020817" />
+            <stop offset="1" stop-color="#5F7AC7" />
+          </linearGradient>
+        </defs>
+      </svg>
     </div>
 
-    <!-- ================= FEATURED SKILL LISTINGS ================= -->
-    <div class="featured-listings-container">
-      <h3>Featured Skills</h3>
+    <!-- Aurora glow effects -->
+    <div class="aurora-wrap">
+      <div class="aurora-inner">
+        <svg fill="none" preserveAspectRatio="none" viewBox="0 0 1510 1390">
+          <g filter="url(#af)" opacity="0.4">
+            <circle cx="410" cy="410" r="250" fill="url(#ar1)" />
+            <circle cx="1050" cy="930" r="300" fill="url(#ar2)" />
+            <circle cx="780" cy="690" r="175" fill="url(#ar3)" />
+          </g>
+          <defs>
+            <filter id="af" x="0" y="0" width="1510" height="1390" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+              <feGaussianBlur stdDeviation="80" />
+            </filter>
+            <radialGradient id="ar1" cx="410" cy="410" r="250" gradientUnits="userSpaceOnUse">
+              <stop stop-color="#5EEAD4" />
+              <stop offset="1" stop-color="#5EEAD4" stop-opacity="0" />
+            </radialGradient>
+            <radialGradient id="ar2" cx="1050" cy="930" r="300" gradientUnits="userSpaceOnUse">
+              <stop stop-color="#818CF8" />
+              <stop offset="1" stop-color="#818CF8" stop-opacity="0" />
+            </radialGradient>
+            <radialGradient id="ar3" cx="780" cy="690" r="175" gradientUnits="userSpaceOnUse">
+              <stop stop-color="#F472B6" />
+              <stop offset="1" stop-color="#F472B6" stop-opacity="0" />
+            </radialGradient>
+          </defs>
+        </svg>
+      </div>
+    </div>
 
-      <div class="card-grid" id="skillsContainer">
-        <!-- Skill cards will be inserted here dynamically with JS later -->
+    <!-- ================= NAVIGATION — mounted by navigation.js ================= -->
+    <div id="site-navbar"></div>
 
-        <!-- Example Static Card -->
-        <div class="skill-card">
-          <h4>Intro to Web Development</h4>
-          <p>Learn HTML, CSS, and JavaScript fundamentals.</p>
-          <span class="category-tag">Technology</span>
+    <!-- Hero content -->
+    <div class="hero-container">
+      <div class="eyebrow">
+        <div class="eyebrow-line eyebrow-line-left"></div>
+        <span class="eyebrow-text">Community</span>
+        <div class="eyebrow-line eyebrow-line-right"></div>
+      </div>
+      <h2>Learn Something New. Teach What You Know.</h2>
+      <p>Connect with your community through real skills and real experiences.</p>
+      <div class="hero-actions">
+        <button class="btn-primary btn-hero" id="getStartedButton" type="button">Get Started</button>
+        <a class="btn-primary btn-hero" href="request.html">Request a Skill</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= SEARCH & FILTER ================= -->
+  <div class="search-container">
+    <div class="glass-card">
+      <div class="search-row">
+        <div class="search-field">
+          <span class="search-icon">
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+              <circle cx="6.5" cy="6.5" r="5.5" stroke="#6B6660" stroke-width="2" />
+              <path d="M11 11L15 15" stroke="#6B6660" stroke-width="2" stroke-linecap="round" />
+            </svg>
+          </span>
+          <input type="text" class="search-input" placeholder="Search skills, topics, anything..." id="searchInput" />
+        </div>
+        <a href="explore.html" class="search-submit" aria-label="Go to explore">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+            <path d="M4 10H14" stroke="#0A0A0F" stroke-linecap="round" stroke-width="2.5" />
+            <path d="M9 5L14 10L9 15" stroke="#0A0A0F" stroke-linecap="round" stroke-width="2.5" />
+          </svg>
+        </a>
+      </div>
+      <div>
+        <p class="cat-label">Categories</p>
+        <div class="cat-pills">
+          <span class="cat-pill">Technology</span>
+          <span class="cat-pill">Music</span>
+          <span class="cat-pill">Art</span>
+          <span class="cat-pill">Fitness</span>
         </div>
       </div>
     </div>
+    <div class="kbd-hints">
+      <span>Press</span><span class="kbd">/</span><span>to search</span>
+      <span class="kbd-sep">&middot;</span>
+      <span>or</span><span class="kbd">&#x21B5;</span><span>to explore</span>
+    </div>
+  </div>
 
-    <!-- ================= FOOTER ================= -->
-    <footer>
-      <div class="footer-container">
-        <p>&copy; 2026 Elevate. All rights reserved.</p>
+  <!-- ================= FEATURED SKILL LISTINGS ================= -->
+  <div class="listings-container">
+    <div class="container">
+      <div class="skills-header">
+        <div>
+          <h3>Featured Skills</h3>
+          <p>Explore top-rated skills and start learning today.</p>
+        </div>
       </div>
-    </footer>
+      <div class="card-grid" id="skillsContainer">
+        <!-- Skill cards inserted dynamically by skills.js -->
+      </div>
+    </div>
+  </div>
 
-    <!-- ================= DIALOG ================= -->
-    <dialog id="skillDialog">
-      <img id="dialogImage" alt="" hidden>
-      <h2 id="dialogTitle"></h2>
-      <p id="dialogCreatedBy"></p>
-      <p id="dialogCategory"></p>
-      <p id="dialogSessionDetails"></p>
-      <div id="dialogAvailableDates"></div>
-      <p id="dialogDescription"></p>
-      <button id="closeDialog">Close</button>
-    </dialog>
+  <!-- ================= FOOTER ================= -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-inner">
+        <p class="footer-copy">&copy; 2026 Elevate. All rights reserved.</p>
+        <div class="footer-links">
+          <a href="about.html">About</a>
+          <a href="explore.html">Explore</a>
+          <a href="request.html">Request</a>
+        </div>
+      </div>
+    </div>
+  </footer>
 
-    <!-- ================= JAVASCRIPT ================= -->
-    <script type="module" src="js/navigation.js"></script>
-    <script src="js/skills.js" defer></script>
-    <script type="module" src="js/app.js"></script>
-  </body>
+  <!-- ================= DIALOG ================= -->
+  <dialog id="skillDialog">
+    <img id="dialogImage" alt="" hidden>
+    <h2 id="dialogTitle"></h2>
+    <p id="dialogCreatedBy"></p>
+    <p id="dialogCategory"></p>
+    <p id="dialogSessionDetails"></p>
+    <div id="dialogAvailableDates"></div>
+    <p id="dialogDescription"></p>
+    <button id="closeDialog">Close</button>
+  </dialog>
+
+  <!-- ================= JAVASCRIPT ================= -->
+  <script type="module" src="js/navigation.js"></script>
+  <script src="js/skills.js" defer></script>
+  <script type="module" src="js/app.js"></script>
+
+</body>
 </html>

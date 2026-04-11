@@ -10,6 +10,7 @@ import { buildProfileDisplayName, getUserProfile, ready as waitForProfilesReady 
 function renderNavbar(user) {
   const navbarMount = document.getElementById("site-navbar");
   if (!navbarMount) return;
+  const currentPage = window.location.pathname.split("/").pop() || "index.html";
   const userProfile = user ? getUserProfile(user.uid) : null;
   const navDisplayName = buildProfileDisplayName(user, userProfile);
   const needsProfileCompletion = shouldCompleteProfile(user);
@@ -25,45 +26,94 @@ function renderNavbar(user) {
 
   const exploreLink = needsProfileCompletion
     ? '<li><span class="nav-link-disabled" aria-disabled="true">Explore</span></li>'
-    : '<li><a href="explore.html">Explore</a></li>';
+    : '<li><a href="explore.html" class="navbar-link">Explore</a></li>';
 
   const teachLink = needsProfileCompletion
     ? '<li><span class="nav-link-disabled" aria-disabled="true">Teach</span></li>'
-    : '<li><a href="teach.html">Teach</a></li>';
+    : '<li><a href="teach.html" class="navbar-link">Teach</a></li>';
 
   const requestLink = needsProfileCompletion
     ? '<li><span class="nav-link-disabled" aria-disabled="true">Request</span></li>'
-    : '<li><a href="request.html">Request</a></li>';
+    : '<li><a href="request.html" class="navbar-link">Request</a></li>';
+
+  const dashboardLink = needsProfileCompletion
+    ? '<li><span class="nav-link-disabled" aria-disabled="true">Dashboard</span></li>'
+    : user
+      ? '<li><a href="dashboard.html" class="navbar-link">Dashboard</a></li>'
+      : "";
 
   const aboutLink = needsProfileCompletion
     ? '<li><span class="nav-link-disabled" aria-disabled="true">About</span></li>'
-    : '<li><a href="about.html">About</a></li>';
+    : '<li><a href="about.html" class="navbar-link">About</a></li>';
+
+  const withActiveClass = (markup, path) => {
+    if (!markup || currentPage !== path) {
+      return markup;
+    }
+
+    return markup.replace('class="navbar-link"', 'class="navbar-link active"');
+  };
+
+  const navAboutLink = withActiveClass(aboutLink, "about.html");
+  const navExploreLink = withActiveClass(exploreLink, "explore.html");
+  const navTeachLink = withActiveClass(teachLink, "teach.html");
+  const navRequestLink = withActiveClass(requestLink, "request.html");
+  const navDashboardLink = withActiveClass(dashboardLink, "dashboard.html");
 
   navbarMount.innerHTML = `
     <div class="navbar">
-      <h1 class="logo"><a href="index.html">Elevate 🌎</a></h1>
-      <nav>
-        <ul class="nav-links">
-          ${aboutLink}
-          ${exploreLink}
-          ${teachLink}
-          ${requestLink}
-          ${authLink}
-        </ul>
-      </nav>
+      <div class="container">
+        <div class="navbar-inner">
+          <a href="index.html" class="navbar-logo">
+            <h1 class="logo">Elevate 🌎</h1>
+          </a>
+          <nav>
+            <ul class="nav-links">
+              ${navAboutLink}
+              ${navExploreLink}
+              ${navTeachLink}
+              ${navRequestLink}
+              ${navDashboardLink}
+              ${authLink}
+            </ul>
+          </nav>
+          <button class="mobile-menu-btn" id="navMobileMenuBtn" type="button" aria-label="Toggle menu">
+            <svg width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+    <div class="mobile-menu" id="navMobileMenu">
+      <ul class="nav-links">
+        ${navAboutLink}
+        ${navExploreLink}
+        ${navTeachLink}
+        ${navRequestLink}
+        ${navDashboardLink}
+        ${authLink}
+      </ul>
     </div>
   `;
 
-  const logoutBtn = document.getElementById("logoutBtn");
-  if (!logoutBtn) return;
+  const mobileMenuBtn = navbarMount.querySelector("#navMobileMenuBtn");
+  const mobileMenu = navbarMount.querySelector("#navMobileMenu");
+  if (mobileMenuBtn && mobileMenu) {
+    mobileMenuBtn.addEventListener("click", () => {
+      mobileMenu.classList.toggle("open");
+    });
+  }
 
-  logoutBtn.addEventListener("click", async () => {
-    try {
-      await signOut(auth);
-      window.location.href = "login.html";
-    } catch (error) {
-      console.error("Unable to sign out.", error);
-    }
+  navbarMount.querySelectorAll("#logoutBtn").forEach((logoutButton) => {
+    logoutButton.addEventListener("click", async () => {
+      try {
+        await signOut(auth);
+        window.location.href = "login.html";
+      } catch (error) {
+        console.error("Unable to sign out.", error);
+      }
+    });
   });
 }
 

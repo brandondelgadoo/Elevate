@@ -5,6 +5,11 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Login | Elevate</title>
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=Instrument+Serif&display=swap" rel="stylesheet">
+  <!-- Styles -->
   <link rel="stylesheet" href="css/styles.css">
   <link rel="stylesheet" href="css/auth-dialog.css">
 </head>
@@ -14,28 +19,46 @@
   <!-- ================= NAVIGATION ================= -->
   <div id="site-navbar"></div>
 
-
   <!-- ================= LOGIN FORM ================= -->
-  <h1>Login</h1>
+  <div class="auth-page">
+    <div class="auth-card">
 
-  <input type="email" id="email" placeholder="Email">
-  <input type="password" id="password" placeholder="Password">
-  <button id="loginBtn">Sign In</button>
-  <div class="auth-divider">or</div>
-  <button type="button" id="googleLoginBtn" class="google-auth-btn">
-    <span class="google-auth-btn__icon">G</span>
-    Continue with Google
-  </button>
-  <p id="msgBox"></p>
-  <p>Forgot password? <a href="#" id="forgotPasswordLink">Reset it</a></p>
-  <p>No account? <a href="signup.html">Sign up</a></p>
+      <div class="auth-card-header">
+        <h1>Welcome back</h1>
+      </div>
 
+      <div class="auth-card-body">
+        <div class="auth-field">
+          <input type="email" id="email" placeholder="Email">
+        </div>
+        <div class="auth-field">
+          <input type="password" id="password" placeholder="Password">
+        </div>
+
+        <button id="loginBtn" type="button" class="btn-primary auth-submit">Sign In</button>
+
+        <div class="auth-divider">or</div>
+        <button type="button" id="googleLoginBtn" class="google-auth-btn">
+          <span class="google-auth-btn__icon">G</span>
+          Continue with Google
+        </button>
+
+        <p id="msgBox" class="auth-msg"></p>
+
+        <div class="auth-links">
+          <p>Forgot password? <a href="#" id="forgotPasswordLink">Reset it</a></p>
+          <p>No account? <a href="signup.html">Sign up</a></p>
+        </div>
+      </div>
+
+    </div>
+  </div>
 
   <!-- ================= FORGOT PASSWORD DIALOG ================= -->
   <dialog id="forgotPasswordDialog" class="auth-dialog">
     <div class="auth-dialog__panel">
       <button type="button" id="dismissResetDialogBtn" class="auth-dialog__close"
-        aria-label="Close reset password dialog">x</button>
+        aria-label="Close reset password dialog">&#x2715;</button>
     </div>
     <div class="auth-dialog__content">
       <h2>Reset Password</h2>
@@ -48,13 +71,20 @@
       </div>
     </div>
   </dialog>
+
   <!-- ================= FOOTER ================= -->
-  <footer>
-    <div class="footer-container">
-      <p>&copy; 2026 Elevate. All rights reserved.</p>
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-inner">
+        <p class="footer-copy">&copy; 2026 Elevate. All rights reserved.</p>
+        <div class="footer-links">
+          <a href="about.html">About</a>
+          <a href="explore.html">Explore</a>
+          <a href="request.html">Request</a>
+        </div>
+      </div>
     </div>
   </footer>
-
 
   <!-- ================= JAVASCRIPT ================= -->
   <script type="module" src="js/navigation.js"></script>

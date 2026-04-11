@@ -309,15 +309,39 @@ function render(selectedCategory = "") {
     card.className = "skill-card";
     card.dataset.id = skill.id;
 
+    const authorInitials = (skill.createdBy || "EC")
+      .split(/\s+/)
+      .map((word) => word[0] || "")
+      .join("")
+      .slice(0, 2)
+      .toUpperCase();
+
     card.innerHTML = `
-      ${skill.cardImageUrl ? `<img src="${skill.cardImageUrl}" alt="${skill.title || "Skill"} preview">` : ""}
-      <h4>${skill.title || "Untitled Skill"}</h4>
-      <p>Created by ${skill.createdBy || "Elevate Community"}</p>
-      <span class="category-tag">${formatCategory(skill.category)}</span>
-      <p>${skill.description || "No description provided yet."}</p>
-      <p>${skill.maxPeoplePerSession || "Open"} people per session - ${formatSessionLength(skill.sessionLengthMinutes)}</p>
-      <p>${skill.availableDates?.length ? `Next date: ${formatAvailableDate(skill.availableDates[0])}` : "Dates coming soon"}</p>
-      <button type="button" class="skill-card-button">View Session</button>
+      ${skill.cardImageUrl ? `
+        <div class="card-img-wrap">
+          <img src="${skill.cardImageUrl}" alt="${skill.title || "Skill"} preview">
+          <div class="card-img-overlay"></div>
+          <span class="card-badge">${formatCategory(skill.category)}</span>
+        </div>
+      ` : ""}
+      <div class="card-body">
+        <div class="card-title">${skill.title || "Untitled Skill"}</div>
+        <p class="card-desc">${skill.description || "No description provided yet."}</p>
+        <div class="card-author">
+          <div class="card-avatar">${authorInitials}</div>
+          <span class="card-author-name">${skill.createdBy || "Elevate Community"}</span>
+        </div>
+        <div class="card-footer">
+          <div class="card-session">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"/>
+              <path d="M12 6v6l4 2"/>
+            </svg>
+            ${skill.maxPeoplePerSession ? `${skill.maxPeoplePerSession} per session` : "Open"} &middot; ${formatSessionLength(skill.sessionLengthMinutes)}
+          </div>
+          <button type="button" class="btn-primary">View</button>
+        </div>
+      </div>
     `;
 
     skillsContainer.appendChild(card);
