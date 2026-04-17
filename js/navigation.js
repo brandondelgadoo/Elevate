@@ -35,6 +35,12 @@ function renderNavbar(user) {
     ? '<li><span class="nav-link-disabled" aria-disabled="true">Request</span></li>'
     : '<li><a href="request.html">Request</a></li>';
 
+  const dashboardLink = needsProfileCompletion
+    ? '<li><span class="nav-link-disabled" aria-disabled="true">Dashboard</span></li>'
+    : user
+      ? '<li><a href="dashboard.html">Dashboard</a></li>'
+      : "";
+
   const aboutLink = needsProfileCompletion
     ? '<li><span class="nav-link-disabled" aria-disabled="true">About</span></li>'
     : '<li><a href="about.html">About</a></li>';
@@ -48,6 +54,7 @@ function renderNavbar(user) {
           ${exploreLink}
           ${teachLink}
           ${requestLink}
+          ${dashboardLink}
           ${authLink}
         </ul>
       </nav>

@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Elevate | Dashboard</title>
+    <link rel="stylesheet" href="css/styles.css">
+  </head>
+
+  <body>
+    <!-- ================= NAVIGATION ================= -->
+    <div id="site-navbar"></div>
+
+    <!-- ================= DASHBOARD ================= -->
+    <main class="dashboard-page">
+      <section class="dashboard-hero">
+        <p>Your Dashboard</p>
+        <h1 id="dashboardHeading">Welcome back.</h1>
+        <p id="dashboardIntro">
+          View your upcoming bookings, the sessions you posted, and the requests you have shared with the community.
+        </p>
+        <div>
+          <a class="btn-primary" href="explore.html">Explore</a>
+          <a class="btn-primary" href="teach.html">Teach</a>
+          <a class="btn-primary" href="request.html">Request</a>
+        </div>
+      </section>
+
+      <section aria-labelledby="bookedSessionsHeading">
+        <div>
+          <p>Bookings</p>
+          <h2 id="bookedSessionsHeading">Your Sessions</h2>
+          <p id="dashboardBookingSummary">Loading your bookings...</p>
+        </div>
+
+        <div>
+          <h3>Upcoming</h3>
+          <div class="card-grid" id="pendingBookingsContainer" aria-live="polite"></div>
+        </div>
+
+        <div>
+          <h3>Completed</h3>
+          <div class="card-grid" id="completedBookingsContainer" aria-live="polite"></div>
+        </div>
+      </section>
+
+      <section aria-labelledby="userInfoHeading">
+        <p>Profile</p>
+        <h2 id="userInfoHeading">Your Info</h2>
+        <div class="card-grid" id="dashboardUserInfoContainer" aria-live="polite"></div>
+      </section>
+
+      <section aria-labelledby="userPostsHeading">
+        <p>Teach</p>
+        <h2 id="userPostsHeading">Your Skill Posts</h2>
+        <p id="dashboardUserPostsSummary">Loading your skill posts...</p>
+        <div class="card-grid" id="userPostsContainer" aria-live="polite"></div>
+      </section>
+
+      <section aria-labelledby="userRequestsHeading">
+        <p>Requests</p>
+        <h2 id="userRequestsHeading">Your Requests</h2>
+        <p id="dashboardUserRequestsSummary">Loading your requests...</p>
+        <div class="card-grid" id="userRequestsContainer" aria-live="polite"></div>
+      </section>
+    </main>
+
+    <!-- ================= FOOTER ================= -->
+    <footer>
+      <div class="footer-container">
+        <p>&copy; 2026 Elevate. All rights reserved.</p>
+      </div>
+    </footer>
+
+    <!-- ================= JAVASCRIPT ================= -->
+    <script type="module" src="js/navigation.js"></script>
+    <script src="js/skills.js" defer></script>
+    <script type="module" src="js/dashboard.js"></script>
+  </body>
+</html>
