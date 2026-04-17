@@ -22,6 +22,7 @@ function Skill(
   options = {}
 ) {
   this.id = id ?? nextId++;
+  this.docId = options.docId || "";
   this.createdBy = createdBy;
   this.creatorUserId = options.creatorUserId || "";
   this.title = title;
@@ -108,6 +109,7 @@ function normalizeSkill(rawSkill) {
     Number(rawSkill.id),
     {
       creatorUserId: rawSkill.creatorUserId || "",
+      docId: rawSkill.docId || "",
       maxPeoplePerSession:
         rawSkill.maxPeoplePerSession === null ||
         rawSkill.maxPeoplePerSession === undefined
@@ -273,6 +275,29 @@ window.ElevateSkills = {
     return [...skills];
   },
   addSkill,
+  updateLocalSkill(updatedSkill) {
+    const skillIndex = skills.findIndex((skill) => {
+      return String(skill.docId || skill.id) === String(updatedSkill.docId || updatedSkill.id);
+    });
+
+    if (skillIndex !== -1) {
+      skills[skillIndex] = normalizeSkill({
+        ...skills[skillIndex],
+        ...updatedSkill
+      });
+      render(categoryFilter?.value || "");
+    }
+  },
+  removeLocalSkill(skillIdentifier) {
+    const skillIndex = skills.findIndex((skill) => {
+      return String(skill.docId || skill.id) === String(skillIdentifier);
+    });
+
+    if (skillIndex !== -1) {
+      skills.splice(skillIndex, 1);
+      render(categoryFilter?.value || "");
+    }
+  },
   formatCategory,
   getDefaultCategoryImage,
   getResolvedSkillImage,

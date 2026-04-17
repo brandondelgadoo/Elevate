@@ -1781,3 +1781,92 @@ ul { list-style: none; }
 .dashboard-card-empty h4 {
   margin-bottom: 4px;
 }
+
+.dashboard-card-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.dashboard-card-actions .btn-primary,
+.dashboard-card-actions .btn-secondary {
+  justify-content: center;
+}
+
+.dashboard-danger-button {
+  color: #fecaca;
+  border-color: rgba(248, 113, 113, 0.28);
+}
+
+.dashboard-danger-button:hover {
+  background: rgba(248, 113, 113, 0.1);
+  border-color: rgba(248, 113, 113, 0.4);
+}
+
+.dashboard-edit-card {
+  gap: 14px;
+}
+
+.dashboard-edit-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.dashboard-edit-field > span,
+.dashboard-checkbox-group legend {
+  font-size: 13px;
+  font-weight: 600;
+  color: #d1d5db;
+}
+
+.dashboard-edit-field input,
+.dashboard-edit-field select,
+.dashboard-edit-field textarea {
+  padding: 11px 14px;
+  background: var(--subtle-bg);
+  border: 1px solid var(--subtle-border);
+  border-radius: 10px;
+  color: var(--foreground);
+  font-size: 14px;
+  outline: none;
+  width: 100%;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.dashboard-edit-field input:focus,
+.dashboard-edit-field select:focus,
+.dashboard-edit-field textarea:focus {
+  border-color: rgba(94, 234, 212, 0.35);
+  box-shadow: 0 0 0 2px rgba(94, 234, 212, 0.1);
+}
+
+.dashboard-edit-field textarea {
+  min-height: 110px;
+  resize: vertical;
+}
+
+.dashboard-checkbox-group {
+  border: 1px solid var(--subtle-border);
+  border-radius: 10px;
+  padding: 14px 16px;
+  gap: 8px;
+}
+
+.dashboard-checkbox-group label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #d1d5db;
+  font-size: 14px;
+}
+
+.dashboard-checkbox-group input {
+  width: auto;
+}
+
+.dashboard-form-message {
+  min-height: 18px;
+  color: #f87171 !important;
+}

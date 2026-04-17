@@ -2,12 +2,15 @@ import { db } from "../firebase/config.js";
 import {
   addDoc,
   collection,
+  deleteDoc,
   doc,
+  getDoc,
   getDocs,
   orderBy,
   query,
   serverTimestamp,
-  setDoc
+  setDoc,
+  updateDoc
 } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-firestore.js";
 
 const COLLECTION_NAME = "skills";
@@ -58,4 +61,62 @@ export async function createSkillInDb(skill) {
     createdAtMs: now,
     updatedAtMs: now
   };
+}
+
+export async function updateSkillInDb(skillDocId, updates, currentUserId = "") {
+  if (!skillDocId) {
+    throw new Error("A skill document id is required.");
+  }
+
+  const skillRef = doc(db, COLLECTION_NAME, String(skillDocId));
+  const skillSnapshot = await getDoc(skillRef);
+
+  if (!skillSnapshot.exists()) {
+    throw new Error("That skill post could not be found.");
+  }
+
+  const existingSkill = skillSnapshot.data();
+
+  if (currentUserId && existingSkill.creatorUserId !== currentUserId) {
+    throw new Error("You can only edit your own skill posts.");
+  }
+
+  const now = Date.now();
+  const payload = {
+    ...updates,
+    updatedAt: serverTimestamp(),
+    updatedAtMs: now
+  };
+
+  await updateDoc(skillRef, payload);
+
+  return {
+    id: existingSkill.id ?? skillSnapshot.id,
+    docId: skillSnapshot.id,
+    ...existingSkill,
+    ...updates,
+    updatedAtMs: now
+  };
+}
+
+export async function deleteSkillFromDb(skillDocId, currentUserId = "") {
+  if (!skillDocId) {
+    throw new Error("A skill document id is required.");
+  }
+
+  const skillRef = doc(db, COLLECTION_NAME, String(skillDocId));
+  const skillSnapshot = await getDoc(skillRef);
+
+  if (!skillSnapshot.exists()) {
+    return;
+  }
+
+  const existingSkill = skillSnapshot.data();
+
+  if (currentUserId && existingSkill.creatorUserId !== currentUserId) {
+    throw new Error("You can only delete your own skill posts.");
+  }
+
+  await deleteDoc(skillRef);
+  await deleteDoc(doc(db, AVAILABILITY_COLLECTION_NAME, String(existingSkill.id ?? skillDocId)));
 }

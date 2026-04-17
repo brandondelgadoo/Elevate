@@ -117,3 +117,56 @@ export async function replaceBookingInDb(existingBookings, booking) {
     bookedAt: new Date(now).toISOString()
   };
 }
+
+export async function cancelBookingInDb(booking, currentUserId = "") {
+  if (!booking?.id) {
+    throw new Error("A booking id is required.");
+  }
+
+  if (currentUserId && booking.userId !== currentUserId) {
+    throw new Error("You can only cancel your own bookings.");
+  }
+
+  const bookingRef = doc(db, COLLECTION_NAME, booking.id);
+  const availabilityRef = doc(db, "skillAvailability", String(booking.skillId));
+  const now = Date.now();
+
+  await runTransaction(db, async (transaction) => {
+    const bookingSnapshot = await transaction.get(bookingRef);
+
+    if (!bookingSnapshot.exists()) {
+      return;
+    }
+
+    const existingBooking = bookingSnapshot.data();
+
+    if (currentUserId && existingBooking.userId !== currentUserId) {
+      throw new Error("You can only cancel your own bookings.");
+    }
+
+    const availabilitySnapshot = await transaction.get(availabilityRef);
+    const currentCounts = availabilitySnapshot.exists()
+      ? { ...(availabilitySnapshot.data().bookingCounts || {}) }
+      : {};
+    const dateValue = existingBooking.dateValue;
+    const nextValue = Math.max((Number(currentCounts[dateValue]) || 0) - 1, 0);
+
+    if (nextValue > 0) {
+      currentCounts[dateValue] = nextValue;
+    } else {
+      delete currentCounts[dateValue];
+    }
+
+    transaction.delete(bookingRef);
+    transaction.set(
+      availabilityRef,
+      {
+        skillId: existingBooking.skillId,
+        bookingCounts: currentCounts,
+        updatedAt: serverTimestamp(),
+        updatedAtMs: now
+      },
+      { merge: true }
+    );
+  });
+}

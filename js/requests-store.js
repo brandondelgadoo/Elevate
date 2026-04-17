@@ -2,12 +2,14 @@ import { db } from "../firebase/config.js";
 import {
   addDoc,
   collection,
+  deleteDoc,
   doc,
   getDoc,
   getDocs,
   orderBy,
   query,
-  serverTimestamp
+  serverTimestamp,
+  updateDoc
 } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-firestore.js";
 
 const COLLECTION_NAME = "skillRequests";
@@ -61,4 +63,60 @@ export async function createRequestInDb(request) {
     createdAtMs: now,
     updatedAtMs: now
   };
+}
+
+export async function updateRequestInDb(requestId, updates, currentUserId = "") {
+  if (!requestId) {
+    throw new Error("A request id is required.");
+  }
+
+  const requestRef = doc(db, COLLECTION_NAME, requestId);
+  const requestSnapshot = await getDoc(requestRef);
+
+  if (!requestSnapshot.exists()) {
+    throw new Error("That request could not be found.");
+  }
+
+  const existingRequest = requestSnapshot.data();
+
+  if (currentUserId && existingRequest.userId !== currentUserId) {
+    throw new Error("You can only edit your own requests.");
+  }
+
+  const now = Date.now();
+  const payload = {
+    ...updates,
+    updatedAt: serverTimestamp(),
+    updatedAtMs: now
+  };
+
+  await updateDoc(requestRef, payload);
+
+  return {
+    id: requestSnapshot.id,
+    ...existingRequest,
+    ...updates,
+    updatedAtMs: now
+  };
+}
+
+export async function deleteRequestFromDb(requestId, currentUserId = "") {
+  if (!requestId) {
+    throw new Error("A request id is required.");
+  }
+
+  const requestRef = doc(db, COLLECTION_NAME, requestId);
+  const requestSnapshot = await getDoc(requestRef);
+
+  if (!requestSnapshot.exists()) {
+    return;
+  }
+
+  const existingRequest = requestSnapshot.data();
+
+  if (currentUserId && existingRequest.userId !== currentUserId) {
+    throw new Error("You can only delete your own requests.");
+  }
+
+  await deleteDoc(requestRef);
 }
