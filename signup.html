@@ -5,6 +5,11 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Sign Up | Elevate</title>
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=Instrument+Serif&display=swap" rel="stylesheet">
+  <!-- Styles -->
   <link rel="stylesheet" href="css/styles.css">
 </head>
 
@@ -13,72 +18,117 @@
   <!-- ================= NAVIGATION ================= -->
   <div id="site-navbar"></div>
 
-
   <!-- ================= SIGNUP FORM ================= -->
-  <h1>Create Account</h1>
+  <div class="auth-page">
+    <div class="auth-card">
 
-  <div id="signupCredentialsStep">
-    <input type="email" id="email" placeholder="Email">
-    <input type="password" id="password" placeholder="Password">
-    <input type="password" id="confirmPassword" placeholder="Confirm Password">
-    <button id="continueSignupBtn" type="button">Continue</button>
+      <div class="auth-card-header">
+        <h1>Create Account</h1>
+      </div>
+
+      <div class="auth-card-body">
+
+        <!-- Step 1: Credentials -->
+        <div id="signupCredentialsStep">
+          <div class="auth-field">
+            <input type="email" id="email" placeholder="Email">
+          </div>
+          <div class="auth-field" style="margin-top: 14px;">
+            <input type="password" id="password" placeholder="Password">
+          </div>
+          <div class="auth-field" style="margin-top: 14px;">
+            <input type="password" id="confirmPassword" placeholder="Confirm Password">
+          </div>
+          <div class="auth-form-actions" style="margin-top: 18px;">
+            <button id="continueSignupBtn" type="button" class="btn-primary auth-submit">Continue</button>
+          </div>
+        </div>
+
+        <!-- Step 2: Profile -->
+        <div id="signupProfileStep" hidden>
+          <h2 id="signupProfileHeading" class="auth-step-heading">Tell us about yourself</h2>
+          <div style="display: flex; flex-direction: column; gap: 14px; margin-top: 14px;">
+            <div class="auth-field">
+              <input type="text" id="username" placeholder="Username">
+            </div>
+            <div class="auth-field">
+              <input type="text" id="firstName" placeholder="First Name">
+            </div>
+            <div class="auth-field">
+              <input type="text" id="lastName" placeholder="Last Name">
+            </div>
+            <div class="auth-field">
+              <label for="accountGoal">How do you plan to use Elevate?</label>
+              <select id="accountGoal">
+                <option value="">Select one</option>
+                <option value="learn">Learn</option>
+                <option value="teach">Teach</option>
+                <option value="both">Both</option>
+              </select>
+            </div>
+            <div class="auth-field">
+              <label for="city">City</label>
+              <input type="text" id="city" placeholder="New York">
+            </div>
+            <div class="auth-field">
+              <label for="bio">Short Bio (Optional)</label>
+              <textarea id="bio" rows="4" placeholder="Tell people a little about yourself and what you're interested in."></textarea>
+            </div>
+            <fieldset class="auth-interests">
+              <legend>Categories you're interested in</legend>
+              <label>
+                <input type="checkbox" name="interests" value="tech">
+                Technology
+              </label>
+              <label>
+                <input type="checkbox" name="interests" value="fitness">
+                Fitness
+              </label>
+              <label>
+                <input type="checkbox" name="interests" value="music">
+                Music
+              </label>
+              <label>
+                <input type="checkbox" name="interests" value="art">
+                Art
+              </label>
+            </fieldset>
+          </div>
+          <div class="auth-form-actions" style="margin-top: 18px;">
+            <button id="backToCredentialsBtn" type="button" class="btn-secondary">Back</button>
+            <button id="signupBtn" type="button" class="btn-primary">Create Account</button>
+          </div>
+        </div>
+
+        <div class="auth-divider">or</div>
+        <button type="button" id="googleSignupBtn" class="google-auth-btn">
+          <span class="google-auth-btn__icon">G</span>
+          Continue with Google
+        </button>
+
+        <p id="msgBox" class="auth-msg"></p>
+
+        <div class="auth-links">
+          <p>Already have an account? <a href="login.html">Log in</a></p>
+        </div>
+      </div>
+
+    </div>
   </div>
-
-  <div id="signupProfileStep" hidden>
-    <h2 id="signupProfileHeading">Tell us about yourself</h2>
-    <input type="text" id="username" placeholder="Username">
-    <input type="text" id="firstName" placeholder="First Name">
-    <input type="text" id="lastName" placeholder="Last Name">
-    <label for="accountGoal">How do you plan to use Elevate?</label>
-    <select id="accountGoal">
-      <option value="">Select one</option>
-      <option value="learn">Learn</option>
-      <option value="teach">Teach</option>
-      <option value="both">Both</option>
-    </select>
-    <label for="city">City</label>
-    <input type="text" id="city" placeholder="New York">
-    <label for="bio">Short Bio (Optional)</label>
-    <textarea id="bio" rows="4" placeholder="Tell people a little about yourself and what you're interested in."></textarea>
-    <fieldset>
-      <legend>Categories you're interested in</legend>
-      <label>
-        <input type="checkbox" name="interests" value="tech">
-        Technology
-      </label>
-      <label>
-        <input type="checkbox" name="interests" value="fitness">
-        Fitness
-      </label>
-      <label>
-        <input type="checkbox" name="interests" value="music">
-        Music
-      </label>
-      <label>
-        <input type="checkbox" name="interests" value="art">
-        Art
-      </label>
-    </fieldset>
-    <button id="backToCredentialsBtn" type="button">Back</button>
-    <button id="signupBtn" type="button">Create Account</button>
-  </div>
-
-  <div class="auth-divider">or</div>
-  <button type="button" id="googleSignupBtn" class="google-auth-btn">
-    <span class="google-auth-btn__icon">G</span>
-    Continue with Google
-  </button>
-  <p id="msgBox"></p>
-  <p>Already have an account? <a href="login.html">Log in</a></p>
-
 
   <!-- ================= FOOTER ================= -->
-  <footer>
-    <div class="footer-container">
-      <p>&copy; 2026 Elevate. All rights reserved.</p>
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-inner">
+        <p class="footer-copy">&copy; 2026 Elevate. All rights reserved.</p>
+        <div class="footer-links">
+          <a href="about.html">About</a>
+          <a href="explore.html">Explore</a>
+          <a href="request.html">Request</a>
+        </div>
+      </div>
     </div>
   </footer>
-
 
   <!-- ================= JAVASCRIPT ================= -->
   <script type="module" src="js/navigation.js"></script>

@@ -69,6 +69,21 @@ document.addEventListener("DOMContentLoaded", () => {
     return preferredFormat || "Not specified";
   }
 
+  function getDefaultCategoryImage(category) {
+    if (
+      window.ElevateSkills &&
+      typeof window.ElevateSkills.getDefaultCategoryImage === "function"
+    ) {
+      return window.ElevateSkills.getDefaultCategoryImage(category);
+    }
+
+    return "";
+  }
+
+  function getResolvedRequestImage(request) {
+    return request?.cardImageUrl || getDefaultCategoryImage(request?.category);
+  }
+
   function formatSessionLength(minutes) {
     const safeMinutes = Number(minutes);
 
@@ -126,8 +141,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
     return sortedRequests
       .map((request) => {
+        const resolvedImageUrl = getResolvedRequestImage(request);
+
         return `
           <article class="request-card">
+            ${resolvedImageUrl ? `
+              <div class="request-card-media">
+                <img src="${escapeHtml(resolvedImageUrl)}" alt="${escapeHtml(request.title || "Request")} preview">
+              </div>
+            ` : ""}
             <div class="request-card-header">
               <span class="request-category-tag">${escapeHtml(formatCategory(request.category))}</span>
               <span class="request-meta">Requested by ${escapeHtml(request.requestedBy)}</span>
@@ -441,6 +463,7 @@ document.addEventListener("DOMContentLoaded", () => {
           const requestsStore = await import("./requests-store.js");
           const savedRequest = await requestsStore.createRequestInDb(newRequest);
           requests = [savedRequest, ...requests.filter((request) => request.id !== savedRequest.id)];
+          const resolvedImageUrl = getResolvedRequestImage(savedRequest);
 
           requestDraft = {
             title: "",
@@ -462,6 +485,11 @@ document.addEventListener("DOMContentLoaded", () => {
                 <a href="explore.html" class="btn-primary">Browse Skills</a>
               </div>
               <article class="request-card request-card-highlight">
+                ${resolvedImageUrl ? `
+                  <div class="request-card-media">
+                    <img src="${escapeHtml(resolvedImageUrl)}" alt="${escapeHtml(title)} preview">
+                  </div>
+                ` : ""}
                 <div class="request-card-header">
                   <span class="request-category-tag">${escapeHtml(formatCategory(category))}</span>
                   <span class="request-meta">Requested by ${escapeHtml(getCurrentDisplayName())}</span>

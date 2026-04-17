@@ -95,7 +95,7 @@ function buildUserInfoCard(user, profile, displayName) {
       : "Not set";
 
   const card = buildCardShell();
-  appendText(card, "p", "Account");
+  appendText(card, "p", "Account", "dashboard-card-eyebrow");
   appendText(card, "h4", displayName);
   appendText(card, "p", `Email: ${user.email || "Not provided"}`);
   appendText(card, "p", `Username: ${profile?.username || "Not set"}`);
@@ -108,7 +108,7 @@ function buildUserInfoCard(user, profile, displayName) {
 
 function buildBookingCard(booking, skillPost) {
   const card = buildCardShell();
-  appendText(card, "p", "Booked Session");
+  appendText(card, "p", "Booked Session", "dashboard-card-eyebrow");
   appendText(card, "h4", skillPost?.title || "Booked session");
   appendText(card, "p", `Instructor: ${skillPost?.createdBy || "Elevate Community"}`);
   appendText(card, "p", `Category: ${formatCategory(skillPost?.category)}`);
@@ -129,7 +129,7 @@ function buildSkillPostCard(skillPost) {
     card.appendChild(image);
   }
 
-  appendText(card, "p", "Teach Post");
+  appendText(card, "p", "Teach Post", "dashboard-card-eyebrow");
   appendText(card, "h4", skillPost?.title || "Untitled skill");
   appendText(card, "p", `Category: ${formatCategory(skillPost?.category)}`);
   appendText(card, "p", skillPost?.description || "No description provided yet.");
@@ -147,7 +147,7 @@ function buildSkillPostCard(skillPost) {
 
 function buildRequestCard(request) {
   const card = buildCardShell();
-  appendText(card, "p", "Request");
+  appendText(card, "p", "Request", "dashboard-card-eyebrow");
   appendText(card, "h4", request?.title || "Untitled request");
   appendText(card, "p", `Category: ${formatCategory(request?.category)}`);
   appendText(card, "p", request?.description || "No description provided yet.");

@@ -6,6 +6,12 @@ const skillsReadyPromise = new Promise((resolve) => {
 let skillsLoadError = "";
 
 let nextId = 0;
+const DEFAULT_CATEGORY_IMAGES = {
+  tech: "assets/default-tech.jpg",
+  fitness: "assets/default-fitness.avif",
+  music: "assets/default-music.jpg",
+  art: "assets/default-art.jpg"
+};
 
 function Skill(
   title,
@@ -45,6 +51,18 @@ function formatCategory(category) {
   if (category === "music") return "Music";
   if (category === "art") return "Art";
   return category;
+}
+
+function getDefaultCategoryImage(category) {
+  return DEFAULT_CATEGORY_IMAGES[category] || "";
+}
+
+function getResolvedSkillImage(skill) {
+  if (skill?.cardImageUrl) {
+    return skill.cardImageUrl;
+  }
+
+  return getDefaultCategoryImage(skill?.category);
 }
 
 function formatSessionLength(minutes) {
@@ -256,6 +274,8 @@ window.ElevateSkills = {
   },
   addSkill,
   formatCategory,
+  getDefaultCategoryImage,
+  getResolvedSkillImage,
   getLoadError() {
     return skillsLoadError;
   }
@@ -311,49 +331,95 @@ function render(selectedCategory = "") {
     const card = document.createElement("div");
     card.className = "skill-card";
     card.dataset.id = skill.id;
+    const resolvedImageUrl = getResolvedSkillImage(skill);
+    const authorInitials = (skill.createdBy || "EC")
+      .split(/\s+/)
+      .map((word) => word[0] || "")
+      .join("")
+      .slice(0, 2)
+      .toUpperCase();
 
-    if (skill.cardImageUrl) {
+    if (resolvedImageUrl) {
+      const imageWrapper = document.createElement("div");
+      imageWrapper.className = "card-img-wrap";
+
       const image = document.createElement("img");
-      image.src = skill.cardImageUrl;
+      image.src = resolvedImageUrl;
       image.alt = `${skill.title || "Skill"} preview`;
-      card.appendChild(image);
+
+      const overlay = document.createElement("div");
+      overlay.className = "card-img-overlay";
+
+      const badge = document.createElement("span");
+      badge.className = "card-badge";
+      badge.textContent = formatCategory(skill.category);
+
+      imageWrapper.append(image, overlay, badge);
+      card.appendChild(imageWrapper);
     }
 
-    const title = document.createElement("h4");
+    const body = document.createElement("div");
+    body.className = "card-body";
+
+    const title = document.createElement("div");
+    title.className = "card-title";
     title.textContent = skill.title || "Untitled Skill";
 
-    const createdBy = document.createElement("p");
-    createdBy.textContent = `Created by ${skill.createdBy || "Elevate Community"}`;
-
-    const category = document.createElement("span");
-    category.className = "category-tag";
-    category.textContent = formatCategory(skill.category);
-
     const description = document.createElement("p");
+    description.className = "card-desc";
     description.textContent = skill.description || "No description provided yet.";
 
-    const sessionMeta = document.createElement("p");
-    sessionMeta.textContent = `${skill.maxPeoplePerSession || "Open"} people per session - ${formatSessionLength(skill.sessionLengthMinutes)}`;
+    const author = document.createElement("div");
+    author.className = "card-author";
 
-    const nextDate = document.createElement("p");
-    nextDate.textContent = skill.availableDates?.length
-      ? `Next date: ${formatAvailableDate(skill.availableDates[0])}`
-      : "Dates coming soon";
+    const avatar = document.createElement("div");
+    avatar.className = "card-avatar";
+    avatar.textContent = authorInitials;
+
+    const authorName = document.createElement("span");
+    authorName.className = "card-author-name";
+    authorName.textContent = skill.createdBy || "Elevate Community";
+
+    author.append(avatar, authorName);
+
+    const footer = document.createElement("div");
+    footer.className = "card-footer";
+
+    const sessionMeta = document.createElement("div");
+    sessionMeta.className = "card-session";
+    sessionMeta.textContent = `${skill.maxPeoplePerSession ? `${skill.maxPeoplePerSession} per session` : "Open"} - ${formatSessionLength(skill.sessionLengthMinutes)}`;
+
+    const clockIcon = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    clockIcon.setAttribute("width", "14");
+    clockIcon.setAttribute("height", "14");
+    clockIcon.setAttribute("viewBox", "0 0 24 24");
+    clockIcon.setAttribute("fill", "none");
+    clockIcon.setAttribute("stroke", "currentColor");
+    clockIcon.setAttribute("stroke-width", "2");
+    clockIcon.setAttribute("stroke-linecap", "round");
+    clockIcon.setAttribute("stroke-linejoin", "round");
+    const clockCircle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+    clockCircle.setAttribute("cx", "12");
+    clockCircle.setAttribute("cy", "12");
+    clockCircle.setAttribute("r", "10");
+    const clockPath = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    clockPath.setAttribute("d", "M12 6v6l4 2");
+    clockIcon.append(clockCircle, clockPath);
+    sessionMeta.prepend(clockIcon);
 
     const viewButton = document.createElement("button");
     viewButton.type = "button";
-    viewButton.className = "skill-card-button";
-    viewButton.textContent = "View Session";
+    viewButton.className = "btn-primary";
+    viewButton.textContent = "View";
 
-    card.append(
+    footer.append(sessionMeta, viewButton);
+    body.append(
       title,
-      createdBy,
-      category,
       description,
-      sessionMeta,
-      nextDate,
-      viewButton
+      author,
+      footer
     );
+    card.appendChild(body);
 
     skillsContainer.appendChild(card);
   });
@@ -382,8 +448,10 @@ if (
       return;
     }
 
-    if (selectedSkill.cardImageUrl) {
-      dialogImage.src = selectedSkill.cardImageUrl;
+    const resolvedImageUrl = getResolvedSkillImage(selectedSkill);
+
+    if (resolvedImageUrl) {
+      dialogImage.src = resolvedImageUrl;
       dialogImage.alt = `${selectedSkill.title || "Skill"} preview`;
       dialogImage.hidden = false;
     } else {
