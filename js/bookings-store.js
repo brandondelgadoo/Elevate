@@ -93,12 +93,6 @@ export async function replaceBookingInDb(existingBookings, booking) {
   const availabilityRef = doc(db, "skillAvailability", String(booking.skillId));
 
   await runTransaction(db, async (transaction) => {
-    const existingBookingSnapshot = await transaction.get(docRef);
-
-    if (existingBookingSnapshot.exists()) {
-      throw new Error("You're already booked for this session.");
-    }
-
     const availabilitySnapshot = await transaction.get(availabilityRef);
     const currentCounts = availabilitySnapshot.exists()
       ? { ...(availabilitySnapshot.data().bookingCounts || {}) }

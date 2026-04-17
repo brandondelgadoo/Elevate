@@ -544,11 +544,11 @@ document.addEventListener("DOMContentLoaded", () => {
       );
     } catch (error) {
       console.error("Unable to save booking.", error);
+      syncBookingControls(activeSkill);
       updateBookingStatus(
         error?.message || "We couldn't save your booking right now. Please try again.",
         "error"
       );
-      syncBookingControls(activeSkill);
     }
   });
 
