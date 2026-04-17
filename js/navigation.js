@@ -7,16 +7,26 @@ import {
 } from "./auth-state.js";
 import { buildProfileDisplayName, getUserProfile, ready as waitForProfilesReady } from "./user-profile.js";
 
+function escapeHtml(value = "") {
+  return String(value)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
 function renderNavbar(user) {
   const navbarMount = document.getElementById("site-navbar");
   if (!navbarMount) return;
   const userProfile = user ? getUserProfile(user.uid) : null;
   const navDisplayName = buildProfileDisplayName(user, userProfile);
+  const safeNavDisplayName = escapeHtml(navDisplayName);
   const needsProfileCompletion = shouldCompleteProfile(user);
 
   const authLink = user && !needsProfileCompletion
     ? `
-      <li><span class="nav-user">Hi, ${navDisplayName}</span></li>
+      <li><span class="nav-user">Hi, ${safeNavDisplayName}</span></li>
       <li><button id="logoutBtn" type="button" class="btn-primary">Logout</button></li>
     `
     : user

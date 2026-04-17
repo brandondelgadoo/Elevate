@@ -9,6 +9,12 @@ document.addEventListener("DOMContentLoaded", () => {
     return;
   }
 
+  const initialSearchTerm = new URLSearchParams(window.location.search).get("q") || "";
+
+  if (initialSearchTerm) {
+    searchInput.value = initialSearchTerm;
+  }
+
   function normalizeSearchValue(value) {
     return String(value || "")
       .toLowerCase()
@@ -218,6 +224,7 @@ document.addEventListener("DOMContentLoaded", () => {
   categoryFilter.addEventListener("change", applyExploreFilters);
   sortSelect.addEventListener("change", applyExploreFilters);
   clearFiltersButton.addEventListener("click", clearExploreFilters);
+  window.addEventListener("explore-skills-ready", applyExploreFilters);
 
   searchInput.addEventListener("keydown", (event) => {
     if (event.key === "Enter") {
@@ -225,4 +232,6 @@ document.addEventListener("DOMContentLoaded", () => {
       applyExploreFilters();
     }
   });
+
+  applyExploreFilters();
 });

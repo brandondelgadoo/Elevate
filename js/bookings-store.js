@@ -1,11 +1,10 @@
 import { db } from "../firebase/config.js";
 import {
-  addDoc,
   collection,
-  deleteDoc,
   doc,
   getDocs,
   query,
+  runTransaction,
   serverTimestamp,
   where
 } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-firestore.js";
@@ -29,6 +28,7 @@ export async function listBookingsForUserFromDb(userId) {
 export async function replaceBookingInDb(existingBookings, booking) {
   const bookingsToDelete = Array.isArray(existingBookings) ? existingBookings : [];
   const countUpdates = {};
+  const seatLimit = Number(booking.maxPeoplePerSession);
 
   bookingsToDelete.forEach((existingBooking) => {
     if (
@@ -40,30 +40,78 @@ export async function replaceBookingInDb(existingBookings, booking) {
     }
   });
 
-  for (const existingBooking of bookingsToDelete) {
-    if (existingBooking?.id) {
-      await deleteDoc(doc(db, COLLECTION_NAME, existingBooking.id));
-    }
-  }
-
   const now = Date.now();
   const payload = {
-    ...booking,
+    skillId: booking.skillId,
+    userId: booking.userId,
+    learnerName: booking.learnerName || "Member",
+    dateValue: booking.dateValue,
     bookedAt: serverTimestamp(),
     updatedAt: serverTimestamp(),
     bookedAtMs: now,
     updatedAtMs: now
   };
 
-  const docRef = await addDoc(collection(db, COLLECTION_NAME), payload);
+  const docRef = doc(collection(db, COLLECTION_NAME));
   countUpdates[booking.dateValue] = (countUpdates[booking.dateValue] || 0) + 1;
+  const availabilityRef = doc(db, "skillAvailability", String(booking.skillId));
 
-  const { updateSkillAvailabilityCounts } = await import("./skill-availability-store.js");
-  await updateSkillAvailabilityCounts(booking.skillId, countUpdates);
+  await runTransaction(db, async (transaction) => {
+    const availabilitySnapshot = await transaction.get(availabilityRef);
+    const currentCounts = availabilitySnapshot.exists()
+      ? { ...(availabilitySnapshot.data().bookingCounts || {}) }
+      : {};
+
+    Object.entries(countUpdates).forEach(([dateValue, delta]) => {
+      const normalizedDelta = Number(delta) || 0;
+
+      if (!dateValue || !normalizedDelta) {
+        return;
+      }
+
+      const nextValue = Math.max((Number(currentCounts[dateValue]) || 0) + normalizedDelta, 0);
+
+      if (nextValue > 0) {
+        currentCounts[dateValue] = nextValue;
+        return;
+      }
+
+      delete currentCounts[dateValue];
+    });
+
+    if (
+      Number.isInteger(seatLimit) &&
+      seatLimit > 0 &&
+      Number(currentCounts[booking.dateValue]) > seatLimit
+    ) {
+      throw new Error("That session is already full. Please choose another date.");
+    }
+
+    bookingsToDelete.forEach((existingBooking) => {
+      if (existingBooking?.id) {
+        transaction.delete(doc(db, COLLECTION_NAME, existingBooking.id));
+      }
+    });
+
+    transaction.set(docRef, payload);
+    transaction.set(
+      availabilityRef,
+      {
+        skillId: booking.skillId,
+        bookingCounts: currentCounts,
+        updatedAt: serverTimestamp(),
+        updatedAtMs: now
+      },
+      { merge: true }
+    );
+  });
 
   return {
     id: docRef.id,
-    ...booking,
+    skillId: booking.skillId,
+    userId: booking.userId,
+    learnerName: booking.learnerName || "Member",
+    dateValue: booking.dateValue,
     bookedAtMs: now,
     updatedAtMs: now,
     bookedAt: new Date(now).toISOString()

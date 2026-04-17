@@ -474,34 +474,43 @@ document.addEventListener("DOMContentLoaded", () => {
       skillId: activeSkill.id,
       userId: user.uid,
       learnerName,
-      dateValue: selectedDate
+      dateValue: selectedDate,
+      maxPeoplePerSession: getSeatLimit(activeSkill)
     };
 
-    const { replaceBookingInDb } = await import("./bookings-store.js");
-    const savedBooking = await replaceBookingInDb(existingUserBookings, newBooking);
-    bookings = [
-      savedBooking,
-      ...bookings.filter((booking) => {
-        return !(booking.skillId === activeSkill.id && booking.userId === user.uid);
-      })
-    ];
-
     try {
+      bookSessionButton.disabled = true;
+      updateBookingStatus("Saving your booking...", "info");
+
+      const { replaceBookingInDb } = await import("./bookings-store.js");
+      const savedBooking = await replaceBookingInDb(existingUserBookings, newBooking);
+      bookings = [
+        savedBooking,
+        ...bookings.filter((booking) => {
+          return !(booking.skillId === activeSkill.id && booking.userId === user.uid);
+        })
+      ];
+
       const { listSkillAvailabilityFromDb } = await import("./skill-availability-store.js");
       const availabilityEntries = await listSkillAvailabilityFromDb();
       skillAvailabilityMap = availabilityEntries.reduce((availabilityMap, entry) => {
         availabilityMap[String(entry.skillId ?? entry.id)] = entry;
         return availabilityMap;
       }, {});
-    } catch (error) {
-      console.error("Unable to refresh booking availability from Firestore.", error);
-    }
 
-    syncBookingControls(activeSkill);
-    updateBookingStatus(
-      `Booked for ${formatAvailableDate(selectedDate)}. You're all set.`,
-      "success"
-    );
+      syncBookingControls(activeSkill);
+      updateBookingStatus(
+        `Booked for ${formatAvailableDate(selectedDate)}. You're all set.`,
+        "success"
+      );
+    } catch (error) {
+      console.error("Unable to save booking.", error);
+      updateBookingStatus(
+        error?.message || "We couldn't save your booking right now. Please try again.",
+        "error"
+      );
+      syncBookingControls(activeSkill);
+    }
   });
 
   closeDialog.addEventListener("click", () => {
@@ -555,13 +564,19 @@ document.addEventListener("DOMContentLoaded", () => {
     initializeBookings()
   ]).then(() => {
     skillPosts = loadSkillPosts();
-    exploreLoadError = skillPosts.length ? "" : "We couldn't load skill posts right now. Please refresh and try again.";
+    exploreLoadError =
+      window.ElevateSkills &&
+      typeof window.ElevateSkills.getLoadError === "function"
+        ? window.ElevateSkills.getLoadError()
+        : "";
     renderSkillPosts(skillPosts);
+    window.dispatchEvent(new CustomEvent("explore-skills-ready"));
 
     window.addEventListener("auth-state-changed", () => {
       initializeBookings().then(() => {
         skillPosts = loadSkillPosts();
         renderSkillPosts(skillPosts);
+        window.dispatchEvent(new CustomEvent("explore-skills-ready"));
 
         if (activeSkill && dialog.open) {
           syncBookingControls(activeSkill);

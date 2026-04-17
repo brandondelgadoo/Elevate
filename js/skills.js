@@ -255,7 +255,10 @@ window.ElevateSkills = {
     return [...skills];
   },
   addSkill,
-  formatCategory
+  formatCategory,
+  getLoadError() {
+    return skillsLoadError;
+  }
 };
 
 /* ---------------- CATEGORY FILTER ---------------- */
@@ -309,16 +312,48 @@ function render(selectedCategory = "") {
     card.className = "skill-card";
     card.dataset.id = skill.id;
 
-    card.innerHTML = `
-      ${skill.cardImageUrl ? `<img src="${skill.cardImageUrl}" alt="${skill.title || "Skill"} preview">` : ""}
-      <h4>${skill.title || "Untitled Skill"}</h4>
-      <p>Created by ${skill.createdBy || "Elevate Community"}</p>
-      <span class="category-tag">${formatCategory(skill.category)}</span>
-      <p>${skill.description || "No description provided yet."}</p>
-      <p>${skill.maxPeoplePerSession || "Open"} people per session - ${formatSessionLength(skill.sessionLengthMinutes)}</p>
-      <p>${skill.availableDates?.length ? `Next date: ${formatAvailableDate(skill.availableDates[0])}` : "Dates coming soon"}</p>
-      <button type="button" class="skill-card-button">View Session</button>
-    `;
+    if (skill.cardImageUrl) {
+      const image = document.createElement("img");
+      image.src = skill.cardImageUrl;
+      image.alt = `${skill.title || "Skill"} preview`;
+      card.appendChild(image);
+    }
+
+    const title = document.createElement("h4");
+    title.textContent = skill.title || "Untitled Skill";
+
+    const createdBy = document.createElement("p");
+    createdBy.textContent = `Created by ${skill.createdBy || "Elevate Community"}`;
+
+    const category = document.createElement("span");
+    category.className = "category-tag";
+    category.textContent = formatCategory(skill.category);
+
+    const description = document.createElement("p");
+    description.textContent = skill.description || "No description provided yet.";
+
+    const sessionMeta = document.createElement("p");
+    sessionMeta.textContent = `${skill.maxPeoplePerSession || "Open"} people per session - ${formatSessionLength(skill.sessionLengthMinutes)}`;
+
+    const nextDate = document.createElement("p");
+    nextDate.textContent = skill.availableDates?.length
+      ? `Next date: ${formatAvailableDate(skill.availableDates[0])}`
+      : "Dates coming soon";
+
+    const viewButton = document.createElement("button");
+    viewButton.type = "button";
+    viewButton.className = "skill-card-button";
+    viewButton.textContent = "View Session";
+
+    card.append(
+      title,
+      createdBy,
+      category,
+      description,
+      sessionMeta,
+      nextDate,
+      viewButton
+    );
 
     skillsContainer.appendChild(card);
   });
