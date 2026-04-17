@@ -11,6 +11,28 @@ import {
 
 const COLLECTION_NAME = "bookings";
 
+function buildBookingDocumentId(userId, skillId) {
+  return `${encodeURIComponent(String(userId))}_${encodeURIComponent(String(skillId))}`;
+}
+
+async function listBookingsForUserAndSkill(userId, skillId) {
+  if (!userId || skillId === undefined || skillId === null) {
+    return [];
+  }
+
+  const duplicateQuery = query(
+    collection(db, COLLECTION_NAME),
+    where("userId", "==", userId),
+    where("skillId", "==", skillId)
+  );
+  const snapshot = await getDocs(duplicateQuery);
+
+  return snapshot.docs.map((docSnapshot) => ({
+    id: docSnapshot.id,
+    ...docSnapshot.data()
+  }));
+}
+
 export async function listBookingsForUserFromDb(userId) {
   if (!userId) {
     return [];
@@ -29,6 +51,20 @@ export async function replaceBookingInDb(existingBookings, booking) {
   const bookingsToDelete = Array.isArray(existingBookings) ? existingBookings : [];
   const countUpdates = {};
   const seatLimit = Number(booking.maxPeoplePerSession);
+
+  if (!booking?.userId || booking.skillId === undefined || booking.skillId === null || !booking.dateValue) {
+    throw new Error("A user, skill, and session date are required to book.");
+  }
+
+  if (booking.creatorUserId && booking.creatorUserId === booking.userId) {
+    throw new Error("You can't book your own session.");
+  }
+
+  const matchingExistingBookings = await listBookingsForUserAndSkill(booking.userId, booking.skillId);
+
+  if (matchingExistingBookings.length) {
+    throw new Error("You're already booked for this session.");
+  }
 
   bookingsToDelete.forEach((existingBooking) => {
     if (
@@ -52,11 +88,17 @@ export async function replaceBookingInDb(existingBookings, booking) {
     updatedAtMs: now
   };
 
-  const docRef = doc(collection(db, COLLECTION_NAME));
+  const docRef = doc(db, COLLECTION_NAME, buildBookingDocumentId(booking.userId, booking.skillId));
   countUpdates[booking.dateValue] = (countUpdates[booking.dateValue] || 0) + 1;
   const availabilityRef = doc(db, "skillAvailability", String(booking.skillId));
 
   await runTransaction(db, async (transaction) => {
+    const existingBookingSnapshot = await transaction.get(docRef);
+
+    if (existingBookingSnapshot.exists()) {
+      throw new Error("You're already booked for this session.");
+    }
+
     const availabilitySnapshot = await transaction.get(availabilityRef);
     const currentCounts = availabilitySnapshot.exists()
       ? { ...(availabilitySnapshot.data().bookingCounts || {}) }

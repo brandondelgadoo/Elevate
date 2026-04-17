@@ -138,6 +138,10 @@ document.addEventListener("DOMContentLoaded", () => {
     }) || null;
   }
 
+  function isOwnSkillPost(skillPost, user) {
+    return Boolean(user?.uid && skillPost?.creatorUserId === user.uid);
+  }
+
   function buildBookingOptionLabel(skillPost, dateValue) {
     const remainingSeats = getRemainingSeats(skillPost, dateValue);
 
@@ -172,6 +176,14 @@ document.addEventListener("DOMContentLoaded", () => {
       : null;
 
     bookingDateSelect.innerHTML = "";
+
+    if (isOwnSkillPost(skillPost, currentUser)) {
+      bookingDateSelect.disabled = true;
+      bookSessionButton.disabled = true;
+      bookSessionButton.textContent = "Own Session";
+      updateBookingStatus("You can't book your own session.", "info");
+      return;
+    }
 
     if (!skillPost.availableDates?.length) {
       bookingDateSelect.disabled = true;
@@ -223,20 +235,17 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
-    if (existingBooking && existingBooking.dateValue === selectedDate) {
+    if (isOwnSkillPost(skillPost, currentUser)) {
       bookSessionButton.disabled = true;
-      updateBookingStatus(
-        `You're already booked for ${formatAvailableDate(selectedDate)}.`,
-        "success"
-      );
+      updateBookingStatus("You can't book your own session.", "info");
       return;
     }
 
-    if (existingBooking && existingBooking.dateValue !== selectedDate) {
-      bookSessionButton.disabled = false;
+    if (existingBooking) {
+      bookSessionButton.disabled = true;
       updateBookingStatus(
-        `You already booked ${formatAvailableDate(existingBooking.dateValue)}. Booking a new date will replace it.`,
-        "info"
+        `You're already booked for ${formatAvailableDate(existingBooking.dateValue)}.`,
+        "success"
       );
       return;
     }
@@ -463,6 +472,12 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
+    if (isOwnSkillPost(activeSkill, user)) {
+      updateBookingStatus("You can't book your own session.", "error");
+      syncBookingControls(activeSkill);
+      return;
+    }
+
     const selectedDate = bookingDateSelect.value;
 
     if (!selectedDate) {
@@ -484,12 +499,22 @@ document.addEventListener("DOMContentLoaded", () => {
       return booking.skillId === activeSkill.id && booking.userId === user.uid;
     });
 
+    if (existingUserBookings.length) {
+      updateBookingStatus(
+        `You're already booked for ${formatAvailableDate(existingUserBookings[0].dateValue)}.`,
+        "success"
+      );
+      syncBookingControls(activeSkill);
+      return;
+    }
+
     const newBooking = {
       skillId: activeSkill.id,
       userId: user.uid,
       learnerName,
       dateValue: selectedDate,
-      maxPeoplePerSession: getSeatLimit(activeSkill)
+      maxPeoplePerSession: getSeatLimit(activeSkill),
+      creatorUserId: activeSkill.creatorUserId || ""
     };
 
     try {
